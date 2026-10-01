@@ -43,16 +43,6 @@ body { font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-s
 .header { background: var(--surface-container); border-bottom: 1px solid var(--neutral-95); height: 64px; display: flex; align-items: center; padding: 0 24px; gap: 16px; position: sticky; top: 0; z-index: 50; }
 .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; color: var(--primary-60); text-decoration: none; }
 .logo svg { width: 28px; height: 28px; }
-.nav { display: flex; gap: 4px; margin-left: 16px; }
-.nav a { padding: 6px 12px; font-size: 13px; color: var(--neutral-30); text-decoration: none; border-radius: 6px; transition: background 0.15s; }
-.nav a:hover { background: var(--neutral-95); color: var(--neutral-15); }
-.nav a.active { background: var(--primary-99); color: var(--primary-60); font-weight: 600; }
-.layout { display: flex; min-height: calc(100vh - 64px); }
-.sidebar { width: 64px; background: var(--surface-container); border-right: 1px solid var(--neutral-95); display: flex; flex-direction: column; align-items: center; padding: 16px 0; gap: 4px; flex-shrink: 0; }
-.sidebar-icon { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--neutral-40); cursor: pointer; transition: background 0.15s; text-decoration: none; }
-.sidebar-icon:hover { background: var(--neutral-95); color: var(--neutral-15); }
-.sidebar-icon.active { background: var(--primary-99); color: var(--primary-60); }
-.sidebar-icon svg { width: 20px; height: 20px; }
 .main { flex: 1; padding: 32px; overflow: auto; }
 .page-header { margin-bottom: 28px; }
 .page-title { font-size: 20px; font-weight: 700; color: var(--neutral-15); margin-bottom: 4px; }
@@ -127,108 +117,90 @@ tbody td { padding: 12px 16px; font-size: 13px; vertical-align: middle; }
     <svg viewBox="0 0 40 40" fill="none"><path d="M8 12L20 28L32 12" stroke="#FE6100" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
     voomp
   </a>
-  <nav class="nav">
-    <a href="#">Página Inicial</a>
-    <a href="#">Clientes</a>
-    <a href="#">Antecipações</a>
-    <a href="#">Saques</a>
-    <a href="#">Dashboard KYC</a>
-    <a href="#" class="active">Funil KYC</a>
-  </nav>
 </header>
 
-<div class="layout">
-  <aside class="sidebar">
-    <a class="sidebar-icon" href="#" title="Início"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></a>
-    <a class="sidebar-icon" href="#" title="Clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></a>
-    <a class="sidebar-icon" href="#" title="Antecipações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></a>
-    <a class="sidebar-icon" href="#" title="Saques"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></a>
-    <a class="sidebar-icon active" href="#" title="Funil KYC"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2V12.46L22 3z"/></svg></a>
-  </aside>
+<main class="main">
+  <div class="page-header">
+    <h1 class="page-title">Funil KYC</h1>
+    <p class="page-subtitle">Acompanhamento do progresso dos sellers no processo de verificação</p>
+  </div>
 
-  <main class="main">
-    <div class="page-header">
-      <h1 class="page-title">Funil KYC</h1>
-      <p class="page-subtitle">Acompanhamento do progresso dos sellers no processo de verificação</p>
+  <div class="total-card" id="card-all" onclick="selectStage('all')">
+    <div class="total-card-left">
+      <div class="total-card-label">Total My Account</div>
+      <div class="total-card-value" id="val-all">—</div>
+      <div class="total-card-sub">100% — fonte da verdade</div>
+    </div>
+    <div class="total-card-badge">Ver todos</div>
+  </div>
+
+  <div class="funnel-grid">
+    <div class="funnel-card nao-iniciou" id="card-nao-iniciou" onclick="selectStage('nao-iniciou')">
+      <div class="fc-label">Não Iniciou</div>
+      <div class="fc-value" id="val-nao-iniciou">—</div>
+      <div class="fc-pct" id="pct-nao-iniciou">...</div>
+    </div>
+    <div class="funnel-card" id="card-pagarme" onclick="selectStage('pagarme')">
+      <div class="fc-label">Pagar.me</div>
+      <div class="fc-value" id="val-pagarme">—</div>
+      <div class="fc-pct" id="pct-pagarme">...</div>
+    </div>
+    <div class="funnel-card" id="card-d4sign" onclick="selectStage('d4sign')">
+      <div class="fc-label">D4Sign</div>
+      <div class="fc-value" id="val-d4sign">—</div>
+      <div class="fc-pct" id="pct-d4sign">...</div>
+    </div>
+    <div class="funnel-card" id="card-bdr" onclick="selectStage('bdr')">
+      <div class="fc-label">BDR</div>
+      <div class="fc-value" id="val-bdr">—</div>
+      <div class="fc-pct" id="pct-bdr">...</div>
+    </div>
+    <div class="funnel-card" id="card-celcoin" onclick="selectStage('celcoin')">
+      <div class="fc-label">Celcoin</div>
+      <div class="fc-value" id="val-celcoin">—</div>
+      <div class="fc-pct" id="pct-celcoin">...</div>
+    </div>
+    <div class="funnel-card concluido" id="card-concluido" onclick="selectStage('concluido')">
+      <div class="fc-label">✅ Concluído</div>
+      <div class="fc-value" id="val-concluido">—</div>
+      <div class="fc-pct" id="pct-concluido">...</div>
+    </div>
+  </div>
+
+  <p class="soma-eq" id="soma-eq">Carregando dados...</p>
+
+  <div class="section-card">
+    <div class="table-toolbar">
+      <div class="table-title-wrap">
+        <span class="table-title" id="tbl-title">Sellers</span>
+        <span class="table-badge" id="tbl-count">—</span>
+      </div>
+      <div class="search-wrap">
+        <input class="search-input" type="text" placeholder="Buscar por nome, e-mail ou ID..." id="search-input" oninput="applySearch()" />
+        <button class="btn-search" title="Buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+      </div>
     </div>
 
-    <div class="total-card" id="card-all" onclick="selectStage('all')">
-      <div class="total-card-left">
-        <div class="total-card-label">Total My Account</div>
-        <div class="total-card-value" id="val-all">—</div>
-        <div class="total-card-sub">100% — fonte da verdade</div>
-      </div>
-      <div class="total-card-badge">Ver todos</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Nome</th><th>E-mail</th><th>Telefone</th>
+            <th>Pagar.me</th><th>D4Sign</th><th>BDR</th><th>Celcoin</th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
     </div>
 
-    <div class="funnel-grid">
-      <div class="funnel-card nao-iniciou" id="card-nao-iniciou" onclick="selectStage('nao-iniciou')">
-        <div class="fc-label">Não Iniciou</div>
-        <div class="fc-value" id="val-nao-iniciou">—</div>
-        <div class="fc-pct" id="pct-nao-iniciou">...</div>
-      </div>
-      <div class="funnel-card" id="card-pagarme" onclick="selectStage('pagarme')">
-        <div class="fc-label">Pagar.me</div>
-        <div class="fc-value" id="val-pagarme">—</div>
-        <div class="fc-pct" id="pct-pagarme">...</div>
-      </div>
-      <div class="funnel-card" id="card-d4sign" onclick="selectStage('d4sign')">
-        <div class="fc-label">D4Sign</div>
-        <div class="fc-value" id="val-d4sign">—</div>
-        <div class="fc-pct" id="pct-d4sign">...</div>
-      </div>
-      <div class="funnel-card" id="card-bdr" onclick="selectStage('bdr')">
-        <div class="fc-label">BDR</div>
-        <div class="fc-value" id="val-bdr">—</div>
-        <div class="fc-pct" id="pct-bdr">...</div>
-      </div>
-      <div class="funnel-card" id="card-celcoin" onclick="selectStage('celcoin')">
-        <div class="fc-label">Celcoin</div>
-        <div class="fc-value" id="val-celcoin">—</div>
-        <div class="fc-pct" id="pct-celcoin">...</div>
-      </div>
-      <div class="funnel-card concluido" id="card-concluido" onclick="selectStage('concluido')">
-        <div class="fc-label">✅ Concluído</div>
-        <div class="fc-value" id="val-concluido">—</div>
-        <div class="fc-pct" id="pct-concluido">...</div>
-      </div>
+    <div class="pagination-wrap">
+      <span class="pagination-info" id="pag-info">—</span>
+      <div class="pages" id="pag-pages"></div>
     </div>
-
-    <p class="soma-eq" id="soma-eq">Carregando dados...</p>
-
-    <div class="section-card">
-      <div class="table-toolbar">
-        <div class="table-title-wrap">
-          <span class="table-title" id="tbl-title">Sellers</span>
-          <span class="table-badge" id="tbl-count">—</span>
-        </div>
-        <div class="search-wrap">
-          <input class="search-input" type="text" placeholder="Buscar por nome, e-mail ou ID..." id="search-input" oninput="applySearch()" />
-          <button class="btn-search" title="Buscar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th><th>Nome</th><th>E-mail</th><th>Telefone</th>
-              <th>Pagar.me</th><th>D4Sign</th><th>BDR</th><th>Celcoin</th>
-            </tr>
-          </thead>
-          <tbody id="tbl-body"></tbody>
-        </table>
-      </div>
-
-      <div class="pagination-wrap">
-        <span class="pagination-info" id="pag-info">—</span>
-        <div class="pages" id="pag-pages"></div>
-      </div>
-    </div>
-  </main>
-</div>
+  </div>
+</main>
 
 <script>
 // ════════════════════════════════════════════════════════════════════════════
@@ -389,7 +361,7 @@ function applySearch() {
 }
 
 const style = document.createElement('style');
-style.textContent = `@keyframes spin{to{transform:rotate(360deg)}} @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`;
+style.textContent = `@keyframes spin{to{transform:rotate(360deg)}}`;
 document.head.appendChild(style);
 
 document.addEventListener('DOMContentLoaded', () => {
