@@ -167,7 +167,13 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>ID</th><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Última Receita</th><th>Pagar.me</th><th>D4Sign</th><th>BDR</th><th>Celcoin</th></tr></thead>
+        <thead>
+          <tr>
+            <th>ID</th><th>Nome</th><th>E-mail</th><th>Telefone</th>
+            <th>Última Receita</th><th>Faturamento Total</th>
+            <th>Pagar.me</th><th>D4Sign</th><th>BDR</th><th>Celcoin</th>
+          </tr>
+        </thead>
         <tbody id="tbl-body"></tbody>
       </table>
     </div>
@@ -193,6 +199,7 @@ let totalsData=null,searchTimer=null,abortCtrl=null;
 function fmt(n){return Number(n).toLocaleString('pt-BR');}
 function pct(v,t){return t?((v/t)*100).toFixed(1).replace('.',',')+'%':'0%';}
 function fmtDate(d){if(!d)return'—';const dt=new Date(d+'T12:00:00');return dt.toLocaleDateString('pt-BR');}
+function fmtCurrency(v){if(!v&&v!==0)return'—';return'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
 function statusBadge(val,isDsign){
   if(!val)return'<span class="badge badge-default">—</span>';
@@ -217,7 +224,7 @@ function setCardsLoading(){
 }
 
 function setTableLoading(){
-  document.getElementById('tbl-body').innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--neutral-40)"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin 0.7s linear infinite"></div><div style="margin-top:8px;font-size:12px">Carregando...</div></td></tr>`;
+  document.getElementById('tbl-body').innerHTML=`<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--neutral-40)"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin 0.7s linear infinite"></div><div style="margin-top:8px;font-size:12px">Carregando...</div></td></tr>`;
 }
 
 async function loadTotals(){
@@ -273,7 +280,7 @@ async function loadSellers(){
     renderTable(d.sellers??[],d.total??0,d.totalPages??1);
   }catch(e){
     if(e.name==='AbortError')return;
-    document.getElementById('tbl-body').innerHTML=`<tr class="empty-row"><td colspan="9">⚠️ Erro ao carregar dados</td></tr>`;
+    document.getElementById('tbl-body').innerHTML=`<tr class="empty-row"><td colspan="10">⚠️ Erro ao carregar dados</td></tr>`;
   }
 }
 
@@ -284,13 +291,14 @@ function renderTable(sellers,total,totalPages){
   document.getElementById('tbl-count').textContent=`${fmt(stageTotal)} sellers`;
   document.getElementById('pag-info').textContent=`Exibindo ${sellers.length} de ${fmt(total)}`;
   const tbody=document.getElementById('tbl-body');
-  if(!sellers.length){tbody.innerHTML=`<tr class="empty-row"><td colspan="9">Nenhum seller encontrado.</td></tr>`;}
+  if(!sellers.length){tbody.innerHTML=`<tr class="empty-row"><td colspan="10">Nenhum seller encontrado.</td></tr>`;}
   else{tbody.innerHTML=sellers.map(s=>`<tr>
     <td class="cell-id">${s.id||'—'}</td>
     <td class="cell-name">${s.name||'<span style="color:var(--neutral-40);font-style:italic">Sem nome</span>'}</td>
     <td class="cell-email">${s.email||'—'}</td>
     <td>${waLink(s.phone)}</td>
     <td class="cell-fat">${fmtDate(s.ultimo_faturamento)}</td>
+    <td class="cell-fat">${fmtCurrency(s.faturamento_total)}</td>
     <td>${statusBadge(s.pm,false)}</td>
     <td>${statusBadge(s.d4,true)}</td>
     <td>${statusBadge(s.bdr,false)}</td>
