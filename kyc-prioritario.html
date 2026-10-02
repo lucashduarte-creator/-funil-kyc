@@ -17,10 +17,15 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface-page);color:var(--neutral-15);font-size:14px;line-height:1.5;}
 .header{background:var(--surface-container);border-bottom:1px solid var(--neutral-95);height:64px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50;}
-.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--primary-60);text-decoration:none;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--primary-60);text-decoration:none;flex-shrink:0;}
 .logo svg{width:28px;height:28px;}
-.nav-link{font-size:13px;color:var(--neutral-40);text-decoration:none;padding:6px 12px;border-radius:6px;transition:background 0.15s;}
+.nav{display:flex;gap:4px;margin-left:12px;}
+.nav-link{font-size:13px;color:var(--neutral-40);text-decoration:none;padding:6px 12px;border-radius:6px;transition:background 0.15s;font-weight:500;}
 .nav-link:hover{background:var(--neutral-95);color:var(--neutral-15);}
+.nav-link.active{background:var(--primary-99);color:var(--primary-60);font-weight:600;}
+.header-right{margin-left:auto;}
+.btn-logout{font-size:13px;color:var(--neutral-40);background:none;border:1px solid var(--neutral-90);padding:5px 12px;border-radius:6px;cursor:pointer;transition:all 0.15s;}
+.btn-logout:hover{border-color:var(--neutral-40);color:var(--neutral-15);}
 .main{padding:32px;max-width:1400px;margin:0 auto;}
 .page-header{margin-bottom:24px;}
 .page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
@@ -68,7 +73,6 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .search-input:focus{border-color:var(--primary-60);}
 .search-input::placeholder{color:var(--neutral-50);}
 .page-size-select{border:1px solid var(--neutral-90);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;background:var(--surface-container);color:var(--neutral-15);cursor:pointer;}
-.page-size-select:focus{border-color:var(--primary-60);}
 .btn-search{background:var(--surface-container);border:1px solid var(--neutral-90);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--neutral-40);transition:border-color 0.15s,color 0.15s;flex-shrink:0;}
 .btn-search:hover{border-color:var(--primary-60);color:var(--primary-60);}
 .table-wrap{overflow-x:auto;}
@@ -107,7 +111,13 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     <svg viewBox="0 0 40 40" fill="none"><path d="M8 12L20 28L32 12" stroke="#FE6100" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
     voomp
   </a>
-  <a class="nav-link" href="funil-kyc.html">← Funil KYC</a>
+  <nav class="nav">
+    <a class="nav-link" href="funil-kyc.html">Funil KYC</a>
+    <a class="nav-link active" href="kyc-prioritario.html">KYC Prioritário</a>
+  </nav>
+  <div class="header-right">
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
 </header>
 
 <main class="main">
@@ -168,11 +178,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     <div class="table-wrap">
       <table>
         <thead>
-          <tr>
-            <th>ID</th><th>Nome</th><th>E-mail</th><th>Telefone</th>
-            <th>Última Receita</th><th>Faturamento Total</th>
-            <th>Pagar.me</th><th>D4Sign</th><th>BDR</th><th>Celcoin</th>
-          </tr>
+          <tr><th>ID</th><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Última Receita</th><th>Faturamento Total</th><th>Pagar.me</th><th>D4Sign</th><th>BDR</th><th>Celcoin</th></tr>
         </thead>
         <tbody id="tbl-body"></tbody>
       </table>
@@ -185,156 +191,39 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
 </main>
 
 <script>
+// ── Auth check ───────────────────────────────────────────────────
+if (sessionStorage.getItem('kyc_auth') !== '1') {
+  window.location.replace('index.html');
+}
+function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('index.html'); }
+// ─────────────────────────────────────────────────────────────────
+
 const N8N = {
   TOTAIS:  'https://integration.voompcreators.net.br/webhook/kyc-prioritario-totais',
   SELLERS: 'https://integration.voompcreators.net.br/webhook/kyc-prioritario-sellers',
 };
-
 const STAGE_LABELS = { all:'Todos os Sellers','nao-iniciou':'Não Iniciaram KYC',pagarme:'Em Pagar.me',d4sign:'Em D4Sign',bdr:'Em BDR',celcoin:'Em Celcoin',concluido:'Concluído' };
 const PERIOD_LABELS = { all:'Todos os períodos','30d':'0–30 dias','60d':'31–60 dias','90d':'61–90 dias','120d':'91–120 dias','180d':'121–180 dias','365d':'181–365 dias' };
-
-let currentPeriod='all',currentStage='all',currentPage=1,pageSize=10;
-let totalsData=null,searchTimer=null,abortCtrl=null;
-
+let currentPeriod='all',currentStage='all',currentPage=1,pageSize=10,totalsData=null,searchTimer=null,abortCtrl=null;
 function fmt(n){return Number(n).toLocaleString('pt-BR');}
 function pct(v,t){return t?((v/t)*100).toFixed(1).replace('.',',')+'%':'0%';}
 function fmtDate(d){if(!d)return'—';const dt=new Date(d+'T12:00:00');return dt.toLocaleDateString('pt-BR');}
 function fmtCurrency(v){if(!v&&v!==0)return'—';return'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-
-function statusBadge(val,isDsign){
-  if(!val)return'<span class="badge badge-default">—</span>';
-  if(val==='APPROVED'||val==='FINISHED')return`<span class="badge badge-success">${isDsign&&val==='FINISHED'?'Assinado':'Aprovado'}</span>`;
-  if(val==='PENDING'||val==='CREATED')return'<span class="badge badge-warning">Pendente</span>';
-  if(val==='REJECTED')return'<span class="badge badge-error">Rejeitado</span>';
-  if(val==='IN_ANALISYS')return'<span class="badge badge-info">Em análise</span>';
-  return`<span class="badge badge-default">${val}</span>`;
-}
-
-function waLink(phone){
-  if(!phone)return'<span style="color:var(--neutral-40)">—</span>';
-  const d=phone.replace(/\D/g,'');
-  return`<a class="wa-link" href="https://wa.me/55${d}" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2.006 22l4.932-1.413A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 11.999 2zm.001 18a7.96 7.96 0 01-4.063-1.112l-.292-.173-3.023.867.842-2.953-.19-.302A7.97 7.97 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>${phone}</a>`;
-}
-
-function setCardsLoading(){
-  const sh='<div style="height:26px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;animation:shimmer 1.2s infinite"></div>';
-  ['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{document.getElementById('val-'+s).innerHTML=sh;document.getElementById('pct-'+s).textContent='...';});
-  document.getElementById('val-total').innerHTML=sh;
-  document.getElementById('soma-eq').style.opacity='0.3';
-}
-
-function setTableLoading(){
-  document.getElementById('tbl-body').innerHTML=`<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--neutral-40)"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin 0.7s linear infinite"></div><div style="margin-top:8px;font-size:12px">Carregando...</div></td></tr>`;
-}
-
-async function loadTotals(){
-  setCardsLoading();
-  try{
-    const res=await fetch(N8N.TOTAIS);
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
-    const raw=await res.json();
-    totalsData=Array.isArray(raw)?raw[0]:raw;
-    renderCards();renderPeriodCounts();
-  }catch(e){
-    console.error('Totais error:',e);
-    document.getElementById('val-total').textContent='Erro';
-    document.getElementById('soma-eq').textContent='⚠️ Erro ao carregar dados';
-  }
-}
-
-function renderCards(){
-  if(!totalsData)return;
-  const period=totalsData.periods?.[currentPeriod]||totalsData.periods?.all||{};
-  const total=period.total||0;
-  document.getElementById('val-total').textContent=fmt(totalsData.totalPrioritarios||0);
-  ['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{
-    const v=period[s==='nao-iniciou'?'naoIniciou':s]||0;
-    document.getElementById('val-'+s).textContent=fmt(v);
-    document.getElementById('pct-'+s).textContent=pct(v,total)+' do período';
-  });
-  const p=period;
-  document.getElementById('soma-eq').style.opacity='1';
-  const ni=p.naoIniciou||0,pm=p.pagarme||0,d4=p.d4sign||0,br=p.bdr||0,cc=p.celcoin||0,cn=p.concluido||0;
-  document.getElementById('soma-eq').innerHTML=`${fmt(ni)} + ${fmt(pm)} + ${fmt(d4)} + ${fmt(br)} + ${fmt(cc)} + ${fmt(cn)} = <span class="ok">${fmt(total)} ✓</span>`;
-}
-
-function renderPeriodCounts(){
-  if(!totalsData?.periods)return;
-  ['all','30d','60d','90d','120d','180d','365d'].forEach(k=>{
-    const el=document.getElementById('pcnt-'+k);
-    if(el)el.textContent=fmt(totalsData.periods[k]?.total||0);
-  });
-}
-
-async function loadSellers(){
-  if(abortCtrl)abortCtrl.abort();
-  abortCtrl=new AbortController();
-  setTableLoading();
-  const search=document.getElementById('search-input').value;
-  const url=`${N8N.SELLERS}?period=${currentPeriod}&stage=${currentStage}&page=${currentPage}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`;
-  try{
-    const res=await fetch(url,{signal:abortCtrl.signal});
-    if(!res.ok)throw new Error(`HTTP ${res.status}`);
-    const raw=await res.json();
-    const d=Array.isArray(raw)?raw[0]:raw;
-    renderTable(d.sellers??[],d.total??0,d.totalPages??1);
-  }catch(e){
-    if(e.name==='AbortError')return;
-    document.getElementById('tbl-body').innerHTML=`<tr class="empty-row"><td colspan="10">⚠️ Erro ao carregar dados</td></tr>`;
-  }
-}
-
-function renderTable(sellers,total,totalPages){
-  const period=totalsData?.periods?.[currentPeriod]||{};
-  const stageTotal=(currentStage==='all'?period.total:period[currentStage==='nao-iniciou'?'naoIniciou':currentStage])||total;
-  document.getElementById('tbl-title').textContent=`${STAGE_LABELS[currentStage]} — ${PERIOD_LABELS[currentPeriod]}`;
-  document.getElementById('tbl-count').textContent=`${fmt(stageTotal)} sellers`;
-  document.getElementById('pag-info').textContent=`Exibindo ${sellers.length} de ${fmt(total)}`;
-  const tbody=document.getElementById('tbl-body');
-  if(!sellers.length){tbody.innerHTML=`<tr class="empty-row"><td colspan="10">Nenhum seller encontrado.</td></tr>`;}
-  else{tbody.innerHTML=sellers.map(s=>`<tr>
-    <td class="cell-id">${s.id||'—'}</td>
-    <td class="cell-name">${s.name||'<span style="color:var(--neutral-40);font-style:italic">Sem nome</span>'}</td>
-    <td class="cell-email">${s.email||'—'}</td>
-    <td>${waLink(s.phone)}</td>
-    <td class="cell-fat">${fmtDate(s.ultimo_faturamento)}</td>
-    <td class="cell-fat">${fmtCurrency(s.faturamento_total)}</td>
-    <td>${statusBadge(s.pm,false)}</td>
-    <td>${statusBadge(s.d4,true)}</td>
-    <td>${statusBadge(s.bdr,false)}</td>
-    <td>${statusBadge(s.cel,false)}</td>
-  </tr>`).join('');}
-  const pages=document.getElementById('pag-pages');
-  const max=Math.min(totalPages,999);
-  let html=`<button onclick="gotoPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
-  for(let i=1;i<=max;i++){if(max>7&&i>3&&i<max-1&&Math.abs(i-currentPage)>1){if(i===4||i===max-2)html+=`<span style="padding:0 4px;color:var(--neutral-40)">…</span>`;continue;}html+=`<button class="${i===currentPage?'active':''}" onclick="gotoPage(${i})">${i}</button>`;}
-  html+=`<button onclick="gotoPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
-  pages.innerHTML=html;
-}
-
-function selectPeriod(period){
-  currentPeriod=period;currentPage=1;
-  document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector(`[data-period="${period}"]`)?.classList.add('active');
-  document.getElementById('card-total').classList.toggle('selected',period==='all');
-  renderCards();loadSellers();
-}
-
-function selectStage(stage){
-  currentStage=stage;currentPage=1;
-  document.querySelectorAll('.funnel-card').forEach(c=>c.classList.remove('active'));
-  const el=document.getElementById('card-'+stage);if(el)el.classList.add('active');
-  loadSellers();
-}
-
+function statusBadge(val,isDsign){if(!val)return'<span class="badge badge-default">—</span>';if(val==='APPROVED'||val==='FINISHED')return`<span class="badge badge-success">${isDsign&&val==='FINISHED'?'Assinado':'Aprovado'}</span>`;if(val==='PENDING'||val==='CREATED')return'<span class="badge badge-warning">Pendente</span>';if(val==='REJECTED')return'<span class="badge badge-error">Rejeitado</span>';if(val==='IN_ANALISYS')return'<span class="badge badge-info">Em análise</span>';return`<span class="badge badge-default">${val}</span>`;}
+function waLink(phone){if(!phone)return'<span style="color:var(--neutral-40)">—</span>';const d=phone.replace(/\D/g,'');return`<a class="wa-link" href="https://wa.me/55${d}" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2.006 22l4.932-1.413A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 11.999 2zm.001 18a7.96 7.96 0 01-4.063-1.112l-.292-.173-3.023.867.842-2.953-.19-.302A7.97 7.97 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>${phone}</a>`;}
+function setCardsLoading(){const sh='<div style="height:26px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;animation:shimmer 1.2s infinite"></div>';['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{document.getElementById('val-'+s).innerHTML=sh;document.getElementById('pct-'+s).textContent='...';});document.getElementById('val-total').innerHTML=sh;document.getElementById('soma-eq').style.opacity='0.3';}
+function setTableLoading(){document.getElementById('tbl-body').innerHTML=`<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--neutral-40)"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin 0.7s linear infinite"></div><div style="margin-top:8px;font-size:12px">Carregando...</div></td></tr>`;}
+async function loadTotals(){setCardsLoading();try{const res=await fetch(N8N.TOTAIS);if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw=await res.json();totalsData=Array.isArray(raw)?raw[0]:raw;renderCards();renderPeriodCounts();}catch(e){console.error('Totais error:',e);document.getElementById('val-total').textContent='Erro';document.getElementById('soma-eq').textContent='⚠️ Erro ao carregar dados';}}
+function renderCards(){if(!totalsData)return;const period=totalsData.periods?.[currentPeriod]||totalsData.periods?.all||{};const total=period.total||0;document.getElementById('val-total').textContent=fmt(totalsData.totalPrioritarios||0);['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{const v=period[s==='nao-iniciou'?'naoIniciou':s]||0;document.getElementById('val-'+s).textContent=fmt(v);document.getElementById('pct-'+s).textContent=pct(v,total)+' do período';});const p=period;document.getElementById('soma-eq').style.opacity='1';const ni=p.naoIniciou||0,pm=p.pagarme||0,d4=p.d4sign||0,br=p.bdr||0,cc=p.celcoin||0,cn=p.concluido||0;document.getElementById('soma-eq').innerHTML=`${fmt(ni)} + ${fmt(pm)} + ${fmt(d4)} + ${fmt(br)} + ${fmt(cc)} + ${fmt(cn)} = <span class="ok">${fmt(total)} ✓</span>`;}
+function renderPeriodCounts(){if(!totalsData?.periods)return;['all','30d','60d','90d','120d','180d','365d'].forEach(k=>{const el=document.getElementById('pcnt-'+k);if(el)el.textContent=fmt(totalsData.periods[k]?.total||0);});}
+async function loadSellers(){if(abortCtrl)abortCtrl.abort();abortCtrl=new AbortController();setTableLoading();const search=document.getElementById('search-input').value;const url=`${N8N.SELLERS}?period=${currentPeriod}&stage=${currentStage}&page=${currentPage}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`;try{const res=await fetch(url,{signal:abortCtrl.signal});if(!res.ok)throw new Error(`HTTP ${res.status}`);const raw=await res.json();const d=Array.isArray(raw)?raw[0]:raw;renderTable(d.sellers??[],d.total??0,d.totalPages??1);}catch(e){if(e.name==='AbortError')return;document.getElementById('tbl-body').innerHTML=`<tr class="empty-row"><td colspan="10">⚠️ Erro ao carregar dados</td></tr>`;}}
+function renderTable(sellers,total,totalPages){const period=totalsData?.periods?.[currentPeriod]||{};const stageTotal=(currentStage==='all'?period.total:period[currentStage==='nao-iniciou'?'naoIniciou':currentStage])||total;document.getElementById('tbl-title').textContent=`${STAGE_LABELS[currentStage]} — ${PERIOD_LABELS[currentPeriod]}`;document.getElementById('tbl-count').textContent=`${fmt(stageTotal)} sellers`;document.getElementById('pag-info').textContent=`Exibindo ${sellers.length} de ${fmt(total)}`;const tbody=document.getElementById('tbl-body');if(!sellers.length){tbody.innerHTML=`<tr class="empty-row"><td colspan="10">Nenhum seller encontrado.</td></tr>`;}else{tbody.innerHTML=sellers.map(s=>`<tr><td class="cell-id">${s.id||'—'}</td><td class="cell-name">${s.name||'<span style="color:var(--neutral-40);font-style:italic">Sem nome</span>'}</td><td class="cell-email">${s.email||'—'}</td><td>${waLink(s.phone)}</td><td class="cell-fat">${fmtDate(s.ultimo_faturamento)}</td><td class="cell-fat">${fmtCurrency(s.faturamento_total)}</td><td>${statusBadge(s.pm,false)}</td><td>${statusBadge(s.d4,true)}</td><td>${statusBadge(s.bdr,false)}</td><td>${statusBadge(s.cel,false)}</td></tr>`).join('');}const pages=document.getElementById('pag-pages');const max=Math.min(totalPages,999);let html=`<button onclick="gotoPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;for(let i=1;i<=max;i++){if(max>7&&i>3&&i<max-1&&Math.abs(i-currentPage)>1){if(i===4||i===max-2)html+=`<span style="padding:0 4px;color:var(--neutral-40)">…</span>`;continue;}html+=`<button class="${i===currentPage?'active':''}" onclick="gotoPage(${i})">${i}</button>`;}html+=`<button onclick="gotoPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;pages.innerHTML=html;}
+function selectPeriod(period){currentPeriod=period;currentPage=1;document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`[data-period="${period}"]`)?.classList.add('active');document.getElementById('card-total').classList.toggle('selected',period==='all');renderCards();loadSellers();}
+function selectStage(stage){currentStage=stage;currentPage=1;document.querySelectorAll('.funnel-card').forEach(c=>c.classList.remove('active'));const el=document.getElementById('card-'+stage);if(el)el.classList.add('active');loadSellers();}
 function gotoPage(p){currentPage=p;loadSellers();}
 function changePageSize(){pageSize=parseInt(document.getElementById('page-size').value);currentPage=1;loadSellers();}
 function applySearch(){clearTimeout(searchTimer);searchTimer=setTimeout(()=>{currentPage=1;loadSellers();},400);}
-
-const sty=document.createElement('style');
-sty.textContent='@keyframes spin{to{transform:rotate(360deg)}}@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}';
-document.head.appendChild(sty);
-
+const sty=document.createElement('style');sty.textContent='@keyframes spin{to{transform:rotate(360deg)}}@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}';document.head.appendChild(sty);
 document.addEventListener('DOMContentLoaded',()=>{loadTotals();loadSellers();});
 </script>
 </body>
