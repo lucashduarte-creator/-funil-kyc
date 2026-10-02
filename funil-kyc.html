@@ -16,19 +16,13 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface-page);color:var(--neutral-15);font-size:14px;line-height:1.5;}
-
-/* Header */
 .header{background:var(--surface-container);border-bottom:1px solid var(--neutral-95);height:64px;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:50;}
 .logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--primary-60);text-decoration:none;}
 .logo svg{width:28px;height:28px;}
-
-/* Main */
 .main{padding:32px;max-width:1400px;margin:0 auto;}
 .page-header{margin-bottom:28px;}
 .page-title{font-size:20px;font-weight:700;color:var(--neutral-15);margin-bottom:4px;}
 .page-subtitle{font-size:13px;color:var(--neutral-30);}
-
-/* Total card */
 .total-card{background:var(--primary-60);border-radius:12px;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:3px solid transparent;transition:background 0.15s,border-color 0.15s;margin-bottom:12px;user-select:none;}
 .total-card:hover{background:var(--primary-50);}
 .total-card.selected{border-color:rgba(0,0,0,0.25);}
@@ -36,8 +30,6 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .total-card-value{font-size:36px;font-weight:800;color:#fff;line-height:1;}
 .total-card-sub{font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;}
 .total-card-badge{background:rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;}
-
-/* Funnel cards */
 .funnel-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:8px;}
 .funnel-card{background:var(--surface-container);border:2px solid var(--neutral-90);border-radius:12px;padding:16px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;user-select:none;position:relative;}
 .funnel-card:hover{border-color:var(--primary-60);box-shadow:0 2px 8px rgba(254,97,0,0.12);}
@@ -55,8 +47,6 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .fc-pct{font-size:12px;color:var(--neutral-50);}
 .soma-eq{text-align:center;font-size:12px;color:var(--neutral-40);margin-bottom:28px;margin-top:10px;}
 .soma-eq .ok{color:var(--success-40);font-weight:600;}
-
-/* Table card */
 .section-card{background:var(--surface-container);border:1px solid var(--neutral-90);border-radius:12px;overflow:hidden;}
 .table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--neutral-90);gap:12px;flex-wrap:wrap;}
 .table-title-wrap{display:flex;align-items:center;gap:8px;}
@@ -197,14 +187,10 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
 </main>
 
 <script>
-// ══════════════════════════════════════════════════
-// ⚙️  URLs n8n
-// ══════════════════════════════════════════════════
 const N8N = {
   TOTAIS:  'https://integration.voompcreators.net.br/webhook/kyc-totais',
   SELLERS: 'https://integration.voompcreators.net.br/webhook/kyc-sellers',
 };
-// ══════════════════════════════════════════════════
 
 const LABELS = {
   all:'Todos os Sellers','nao-iniciou':'Não Iniciaram KYC',
@@ -212,129 +198,113 @@ const LABELS = {
   celcoin:'Em Celcoin',concluido:'Concluído',
 };
 
-let currentStage = 'nao-iniciou';
-let currentPage  = 1;
-let pageSize     = 10;
-let totalsData   = null;
-let searchTimer  = null;
-let abortCtrl    = null; // cancela requests anteriores
+let currentStage='nao-iniciou', currentPage=1, pageSize=10;
+let totalsData=null, searchTimer=null, abortCtrl=null;
 
 function fmt(n){return Number(n).toLocaleString('pt-BR');}
 function pct(v,t){return t?((v/t)*100).toFixed(1).replace('.',',')+'%':'0%';}
 
-function statusBadge(val, isDsign) {
-  if (!val) return '<span class="badge badge-default">—</span>';
-  if (val==='APPROVED'||val==='FINISHED')
-    return `<span class="badge badge-success">${isDsign&&val==='FINISHED'?'Assinado':'Aprovado'}</span>`;
-  if (val==='PENDING'||val==='CREATED') return '<span class="badge badge-warning">Pendente</span>';
-  if (val==='REJECTED')  return '<span class="badge badge-error">Rejeitado</span>';
-  if (val==='IN_ANALISYS') return '<span class="badge badge-info">Em análise</span>';
-  if (val==='ERROR')     return '<span class="badge badge-error">Erro</span>';
-  return `<span class="badge badge-default">${val}</span>`;
+function statusBadge(val,isDsign){
+  if(!val)return'<span class="badge badge-default">—</span>';
+  if(val==='APPROVED'||val==='FINISHED')return`<span class="badge badge-success">${isDsign&&val==='FINISHED'?'Assinado':'Aprovado'}</span>`;
+  if(val==='PENDING'||val==='CREATED')return'<span class="badge badge-warning">Pendente</span>';
+  if(val==='REJECTED')return'<span class="badge badge-error">Rejeitado</span>';
+  if(val==='IN_ANALISYS')return'<span class="badge badge-info">Em análise</span>';
+  if(val==='ERROR')return'<span class="badge badge-error">Erro</span>';
+  return`<span class="badge badge-default">${val}</span>`;
 }
 
-function waLink(phone) {
-  if (!phone) return '<span style="color:var(--neutral-40)">—</span>';
-  const d = phone.replace(/\D/g,'');
-  return `<a class="wa-link" href="https://wa.me/55${d}" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2.006 22l4.932-1.413A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 11.999 2zm.001 18a7.96 7.96 0 01-4.063-1.112l-.292-.173-3.023.867.842-2.953-.19-.302A7.97 7.97 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>${phone}</a>`;
+function waLink(phone){
+  if(!phone)return'<span style="color:var(--neutral-40)">—</span>';
+  const d=phone.replace(/\D/g,'');
+  return`<a class="wa-link" href="https://wa.me/55${d}" target="_blank"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2.006 22l4.932-1.413A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 11.999 2zm.001 18a7.96 7.96 0 01-4.063-1.112l-.292-.173-3.023.867.842-2.953-.19-.302A7.97 7.97 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>${phone}</a>`;
 }
 
-// ── Loading states ──────────────────────────────
-function setCardsLoading() {
-  const sh = '<div style="height:26px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;animation:shimmer 1.2s infinite"></div>';
-  ['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s => {
-    document.getElementById('val-'+s).innerHTML = sh;
-    document.getElementById('pct-'+s).textContent = '...';
+function setCardsLoading(){
+  const sh='<div style="height:26px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;animation:shimmer 1.2s infinite"></div>';
+  ['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{
+    document.getElementById('val-'+s).innerHTML=sh;
+    document.getElementById('pct-'+s).textContent='...';
   });
-  document.getElementById('val-all').innerHTML = sh;
-  document.getElementById('soma-eq').style.opacity = '0.3';
+  document.getElementById('val-all').innerHTML=sh;
+  document.getElementById('soma-eq').style.opacity='0.3';
 }
 
-function setTableLoading() {
-  document.getElementById('tbl-body').innerHTML =
-    `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--neutral-40)">
-      <div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin 0.7s linear infinite"></div>
-      <div style="margin-top:8px;font-size:12px">Carregando...</div>
-    </td></tr>`;
+function setTableLoading(){
+  document.getElementById('tbl-body').innerHTML=`<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--neutral-40)"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin 0.7s linear infinite"></div><div style="margin-top:8px;font-size:12px">Carregando...</div></td></tr>`;
 }
 
-// ── Totais ──────────────────────────────────────
-async function loadTotals() {
+async function loadTotals(){
   setCardsLoading();
-  try {
-    const res = await fetch(N8N.TOTAIS);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const d = Array.isArray(data) ? data[0] : data;
-    totalsData = {
+  try{
+    const res=await fetch(N8N.TOTAIS);
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const raw=await res.json();
+    const d=Array.isArray(raw)?raw[0]:raw;
+    totalsData={
       all:Number(d.totalMyAccount),'nao-iniciou':Number(d.naoIniciou),
       pagarme:Number(d.pagarme),d4sign:Number(d.d4sign),
       bdr:Number(d.bdr),celcoin:Number(d.celcoin),concluido:Number(d.concluido),
     };
     renderCards();
-  } catch(e) {
-    console.error('Totais error:', e);
-    document.getElementById('val-all').textContent = 'Erro';
-    document.getElementById('soma-eq').textContent = '⚠️ Erro ao carregar dados';
+  }catch(e){
+    console.error('Totais error:',e);
+    document.getElementById('val-all').textContent='Erro';
+    document.getElementById('soma-eq').textContent='⚠️ Erro ao carregar dados';
   }
 }
 
-function renderCards() {
-  if (!totalsData) return;
-  const total = totalsData.all;
-  document.getElementById('val-all').textContent = fmt(total);
-  ['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s => {
-    const v = totalsData[s];
-    document.getElementById('val-'+s).textContent = fmt(v);
-    document.getElementById('pct-'+s).textContent = pct(v, total) + ' do total';
+function renderCards(){
+  if(!totalsData)return;
+  const total=totalsData.all;
+  document.getElementById('val-all').textContent=fmt(total);
+  ['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{
+    const v=totalsData[s];
+    document.getElementById('val-'+s).textContent=fmt(v);
+    document.getElementById('pct-'+s).textContent=pct(v,total)+' do total';
   });
-  const t = totalsData;
-  document.getElementById('soma-eq').style.opacity = '1';
-  document.getElementById('soma-eq').innerHTML =
-    `${fmt(t['nao-iniciou'])} + ${fmt(t.pagarme)} + ${fmt(t.d4sign)} + ${fmt(t.bdr)} + ${fmt(t.celcoin)} + ${fmt(t.concluido)} = <span class="ok">${fmt(t.all)} ✓</span>`;
+  const t=totalsData;
+  document.getElementById('soma-eq').style.opacity='1';
+  document.getElementById('soma-eq').innerHTML=`${fmt(t['nao-iniciou'])} + ${fmt(t.pagarme)} + ${fmt(t.d4sign)} + ${fmt(t.bdr)} + ${fmt(t.celcoin)} + ${fmt(t.concluido)} = <span class="ok">${fmt(t.all)} ✓</span>`;
 }
 
-// ── Sellers ─────────────────────────────────────
-async function loadSellers() {
-  // Cancela request anterior se ainda estiver em andamento
-  if (abortCtrl) abortCtrl.abort();
-  abortCtrl = new AbortController();
-
+async function loadSellers(){
+  if(abortCtrl)abortCtrl.abort();
+  abortCtrl=new AbortController();
   setTableLoading();
-  const search = document.getElementById('search-input').value;
-  const url = `${N8N.SELLERS}?stage=${currentStage}&page=${currentPage}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`;
+  const search=document.getElementById('search-input').value;
+  const url=`${N8N.SELLERS}?stage=${currentStage}&page=${currentPage}&pageSize=${pageSize}&search=${encodeURIComponent(search)}`;
+  try{
+    const res=await fetch(url,{signal:abortCtrl.signal});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const raw=await res.json();
 
-  try {
-    const res = await fetch(url, { signal: abortCtrl.signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    let sellers, total, totalPages;
-    if (Array.isArray(data)) {
-      sellers = data; total = totalsData?.[currentStage] ?? data.length; totalPages = Math.ceil(total/pageSize);
-    } else {
-      sellers = data.sellers ?? data; total = data.total ?? sellers.length; totalPages = data.totalPages ?? Math.ceil(total/pageSize);
-    }
+    // ── FIX: n8n retorna array de itens, desempacota o primeiro ──
+    const d = Array.isArray(raw) ? raw[0] : raw;
+    const sellers    = d.sellers    ?? (Array.isArray(d) ? d : []);
+    const total      = d.total      ?? sellers.length;
+    const totalPages = d.totalPages ?? Math.ceil(total / pageSize);
+    // ─────────────────────────────────────────────────────────────
+
     renderTable(sellers, total, totalPages);
-  } catch(e) {
-    if (e.name === 'AbortError') return; // ignorar cancelamentos
-    console.error('Sellers error:', e);
-    document.getElementById('tbl-body').innerHTML =
-      `<tr class="empty-row"><td colspan="8">⚠️ Erro ao carregar dados do n8n</td></tr>`;
+  }catch(e){
+    if(e.name==='AbortError')return;
+    console.error('Sellers error:',e);
+    document.getElementById('tbl-body').innerHTML=`<tr class="empty-row"><td colspan="8">⚠️ Erro ao carregar dados do n8n</td></tr>`;
   }
 }
 
-function renderTable(sellers, total, totalPages) {
-  const stageTotal = totalsData?.[currentStage] ?? total;
-  const p = totalsData ? pct(stageTotal, totalsData.all) : '—';
-  document.getElementById('tbl-title').textContent = LABELS[currentStage];
-  document.getElementById('tbl-count').textContent = `${fmt(stageTotal)} sellers · ${p}`;
-  document.getElementById('pag-info').textContent  = `Exibindo ${sellers.length} de ${fmt(total)}`;
-
-  const tbody = document.getElementById('tbl-body');
-  if (!sellers.length) {
-    tbody.innerHTML = `<tr class="empty-row"><td colspan="8">Nenhum seller encontrado.</td></tr>`;
-  } else {
-    tbody.innerHTML = sellers.map(s => `<tr>
+function renderTable(sellers,total,totalPages){
+  const stageTotal=totalsData?.[currentStage]??total;
+  const p=totalsData?pct(stageTotal,totalsData.all):'—';
+  document.getElementById('tbl-title').textContent=LABELS[currentStage];
+  document.getElementById('tbl-count').textContent=`${fmt(stageTotal)} sellers · ${p}`;
+  document.getElementById('pag-info').textContent=`Exibindo ${sellers.length} de ${fmt(total)}`;
+  const tbody=document.getElementById('tbl-body');
+  if(!sellers.length){
+    tbody.innerHTML=`<tr class="empty-row"><td colspan="8">Nenhum seller encontrado.</td></tr>`;
+  }else{
+    tbody.innerHTML=sellers.map(s=>`<tr>
       <td class="cell-id">${s.id??s.sellerId??'—'}</td>
       <td class="cell-name">${s.name||'<span style="color:var(--neutral-40);font-style:italic">Sem nome</span>'}</td>
       <td class="cell-email">${s.email||'—'}</td>
@@ -345,55 +315,35 @@ function renderTable(sellers, total, totalPages) {
       <td>${statusBadge(s.cel??s.celcoinStatus,false)}</td>
     </tr>`).join('');
   }
-
-  // Paginação
-  const pages = document.getElementById('pag-pages');
-  const max = Math.min(totalPages, 999);
-  let html = `<button onclick="gotoPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
-  for (let i=1; i<=max; i++) {
-    if (max>7 && i>3 && i<max-1 && Math.abs(i-currentPage)>1) {
-      if (i===4||i===max-2) html += `<span style="padding:0 4px;color:var(--neutral-40)">…</span>`;
-      continue;
-    }
-    html += `<button class="${i===currentPage?'active':''}" onclick="gotoPage(${i})">${i}</button>`;
+  const pages=document.getElementById('pag-pages');
+  const max=Math.min(totalPages,999);
+  let html=`<button onclick="gotoPage(${currentPage-1})" ${currentPage===1?'disabled':''}>‹</button>`;
+  for(let i=1;i<=max;i++){
+    if(max>7&&i>3&&i<max-1&&Math.abs(i-currentPage)>1){if(i===4||i===max-2)html+=`<span style="padding:0 4px;color:var(--neutral-40)">…</span>`;continue;}
+    html+=`<button class="${i===currentPage?'active':''}" onclick="gotoPage(${i})">${i}</button>`;
   }
-  html += `<button onclick="gotoPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
-  pages.innerHTML = html;
+  html+=`<button onclick="gotoPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''}>›</button>`;
+  pages.innerHTML=html;
 }
 
-// ── Interações ───────────────────────────────────
-function selectStage(stage) {
-  currentStage = stage; currentPage = 1;
-  document.querySelectorAll('.funnel-card').forEach(c => c.classList.remove('active'));
+function selectStage(stage){
+  currentStage=stage;currentPage=1;
+  document.querySelectorAll('.funnel-card').forEach(c=>c.classList.remove('active'));
   document.getElementById('card-all').classList.remove('selected');
-  if (stage === 'all') document.getElementById('card-all').classList.add('selected');
-  else { const el = document.getElementById('card-'+stage); if(el) el.classList.add('active'); }
+  if(stage==='all')document.getElementById('card-all').classList.add('selected');
+  else{const el=document.getElementById('card-'+stage);if(el)el.classList.add('active');}
   loadSellers();
 }
 
-function gotoPage(p) { currentPage = p; loadSellers(); }
+function gotoPage(p){currentPage=p;loadSellers();}
+function changePageSize(){pageSize=parseInt(document.getElementById('page-size').value);currentPage=1;loadSellers();}
+function applySearch(){clearTimeout(searchTimer);searchTimer=setTimeout(()=>{currentPage=1;loadSellers();},400);}
 
-function changePageSize() {
-  pageSize = parseInt(document.getElementById('page-size').value);
-  currentPage = 1;
-  loadSellers();
-}
-
-function applySearch() {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => { currentPage = 1; loadSellers(); }, 400);
-}
-
-// ── Animações ────────────────────────────────────
-const sty = document.createElement('style');
-sty.textContent = `
-  @keyframes spin    { to { transform: rotate(360deg); } }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-`;
+const sty=document.createElement('style');
+sty.textContent='@keyframes spin{to{transform:rotate(360deg)}}@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}';
 document.head.appendChild(sty);
 
-// ── Init ─────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('card-nao-iniciou').classList.add('active');
   loadTotals();
   loadSellers();
