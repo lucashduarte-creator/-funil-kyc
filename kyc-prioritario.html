@@ -151,6 +151,16 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
 .pages button:disabled{opacity:0.3;cursor:not-allowed;}
 .empty-row td{text-align:center;padding:48px;color:var(--neutral-40);}
 .updated-tag{font-size:11px;color:var(--neutral-40);background:var(--neutral-95);padding:3px 8px;border-radius:999px;}
+
+/* Active filters bar */
+.active-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;min-height:0;}
+.filters-label{font-size:11px;font-weight:600;color:var(--neutral-40);text-transform:uppercase;letter-spacing:0.4px;margin-right:2px;}
+.filter-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 8px 4px 10px;border-radius:999px;font-size:12px;font-weight:600;user-select:none;}
+.filter-chip-period{background:var(--primary-99);color:var(--primary-50);border:1.5px solid var(--primary-95);}
+.filter-chip-stage{background:var(--success-95);color:var(--success-30);border:1.5px solid #C1F0CA;}
+.filter-chip-close{cursor:pointer;font-size:13px;opacity:0.5;line-height:1;padding:0 2px;transition:opacity 0.1s;font-weight:400;}
+.filter-chip-close:hover{opacity:1;}
+.filter-join{font-size:12px;font-weight:700;color:var(--neutral-85);padding:0 2px;}
 </style>
 </head>
 <body>
@@ -219,6 +229,9 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
       </button>
     </div>
   </div>
+
+  <!-- Active filters bar -->
+  <div class="active-filters" id="active-filters"></div>
 
   <!-- Funnel cards -->
   <div class="funnel-grid">
@@ -461,11 +474,28 @@ function renderTable(sellers,total,totalPages){
   pages.innerHTML=html;
 }
 
+function updateActiveFilters(){
+  const container=document.getElementById('active-filters');
+  const chips=[];
+  if(currentPeriod!=='all'){
+    chips.push(`<span class="filter-chip filter-chip-period">${PERIOD_LABELS[currentPeriod]}<span class="filter-chip-close" onclick="selectPeriod('all')" title="Limpar período">✕</span></span>`);
+  }
+  if(currentStage!=='all'){
+    chips.push(`<span class="filter-chip filter-chip-stage">${STAGE_LABELS[currentStage]}<span class="filter-chip-close" onclick="selectStage('all')" title="Limpar etapa">✕</span></span>`);
+  }
+  if(!chips.length){container.innerHTML='';return;}
+  const inner=chips.length===2
+    ?chips[0]+`<span class="filter-join">+</span>`+chips[1]
+    :chips[0];
+  container.innerHTML=`<span class="filters-label">Filtros ativos:</span>${inner}`;
+}
+
 function selectPeriod(period){
   currentPeriod=period;currentPage=1;
   document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));
   document.querySelector(`[data-period="${period}"]`)?.classList.add('active');
   document.getElementById('card-total').classList.toggle('selected',period==='all');
+  updateActiveFilters();
   renderCards();
   loadSellers();
 }
@@ -473,8 +503,8 @@ function selectPeriod(period){
 function selectStage(stage){
   currentStage=stage;currentPage=1;
   document.querySelectorAll('.funnel-card').forEach(c=>c.classList.remove('active'));
-  const el=document.getElementById('card-'+stage);
-  if(el)el.classList.add('active');
+  if(stage!=='all'){const el=document.getElementById('card-'+stage);if(el)el.classList.add('active');}
+  updateActiveFilters();
   loadSellers();
 }
 
@@ -487,6 +517,7 @@ sty.textContent='@keyframes spin{to{transform:rotate(360deg)}}@keyframes shimmer
 document.head.appendChild(sty);
 
 document.addEventListener('DOMContentLoaded',()=>{
+  updateActiveFilters();
   loadTotals();
   loadSellers();
 });
