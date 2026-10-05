@@ -1,0 +1,89 @@
+{
+  "name": "Voomp IA · Listar Produtos do Seller",
+  "nodes": [
+    {
+      "id": "n1",
+      "name": "Webhook · GET /produtos",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300],
+      "parameters": {
+        "path": "produtos",
+        "httpMethod": "GET",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      }
+    },
+    {
+      "id": "n2",
+      "name": "Validar seller_id",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 300],
+      "parameters": {
+        "jsCode": "const q = $input.first().json.query || {};\nconst sellerId = q.seller_id;\n\nif (!sellerId) {\n  throw new Error('Parâmetro seller_id é obrigatório');\n}\n\nreturn [{ json: { sellerId: String(sellerId) } }];"
+      }
+    },
+    {
+      "id": "n3",
+      "name": "Buscar Produtos · MySQL",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2,
+      "position": [640, 300],
+      "credentials": {
+        "mySql": {
+          "id": "voomp-prod-db",
+          "name": "Voomp Production DB"
+        }
+      },
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT\n  p.id,\n  p.name,\n  p.status,\n  p.amount,\n  p.method,\n  p.format,\n  p.warranty,\n  p.max_installments,\n  img.path AS thumbnail\nFROM voompcreators_back_prd.products p\nLEFT JOIN voompcreators_back_prd.products_has_images img\n  ON img.product_id = p.id\nWHERE p.seller_id = {{ $json.sellerId }}\n  AND p.status = 'APPROVED'\n  AND p.deleted_at IS NULL\nORDER BY p.name ASC\nLIMIT 100",
+        "options": {}
+      }
+    },
+    {
+      "id": "n4",
+      "name": "Formatar Produtos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [860, 300],
+      "parameters": {
+        "jsCode": "const rows = $input.all();\nif (!rows || rows.length === 0) {\n  return [{ json: { products: [], total: 0 } }];\n}\n\nconst products = rows.map(function(row) {\n  const p = row.json;\n  const amount = parseFloat(p.amount) || 0;\n  return {\n    id:          String(p.id),\n    name:        p.name,\n    status:      p.status,\n    price:       amount > 0 ? 'R$ ' + amount.toLocaleString('pt-BR', { minimumFractionDigits: 0 }) : null,\n    priceRaw:    amount,\n    thumbnail:   p.thumbnail || null,\n    format:      p.format || null,\n    warranty:    p.warranty || null,\n    maxInstallments: p.max_installments || null\n  };\n});\n\nreturn [{ json: { products: products, total: products.length } }];"
+      }
+    },
+    {
+      "id": "n5",
+      "name": "Responder · JSON + CORS",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1080, 300],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              { "name": "Access-Control-Allow-Origin",  "value": "*" },
+              { "name": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
+              { "name": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+              { "name": "Content-Type",                 "value": "application/json" }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook · GET /produtos": { "main": [[{ "node": "Validar seller_id",        "type": "main", "index": 0 }]] },
+    "Validar seller_id":        { "main": [[{ "node": "Buscar Produtos · MySQL",  "type": "main", "index": 0 }]] },
+    "Buscar Produtos · MySQL":  { "main": [[{ "node": "Formatar Produtos",        "type": "main", "index": 0 }]] },
+    "Formatar Produtos":        { "main": [[{ "node": "Responder · JSON + CORS",  "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true },
+  "tags": [{ "name": "Voomp" }, { "name": "Produtos" }, { "name": "MySQL" }]
+}
