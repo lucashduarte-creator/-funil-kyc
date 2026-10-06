@@ -376,9 +376,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
     <div class="ws-line" id="wl2"></div>
     <div class="ws idle" id="ws3" onclick="wGoTo(3)">
       <div class="ws-dot" id="wd3">3</div>
+      <div class="ws-label">Identidade</div>
+    </div>
+    <div class="ws-line" id="wl3"></div>
+    <div class="ws idle" id="ws4" onclick="wGoTo(4)">
+      <div class="ws-dot" id="wd4">4</div>
       <div class="ws-label">Agente</div>
     </div>
-      <div class="ws-label">Agente</div>
+      <div class="ws-label">Salvar e ativar</div>
     </div>
   </div>
 </div>
@@ -638,7 +643,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
           </div>
         </div>
 
-      </div><!-- /wizard-main -->
+        <!-- STEP 4: AGENTE -->
+        <div class="wstep" id="wstep4">
+          <div class="ptitle">Configure o agente</div>
+          <div class="psub">Defina o comportamento, as instruções e as mensagens do assistente.</div>
+
+          <div class="f-group" style="margin-bottom:14px">
+            <label>Persona — nome do agente</label>
+            <input type="text" id="id-persona" placeholder="Ex: Carolinha, Assistente Voomp..." value="Assistente Voomp">
+            <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Como o agente se identifica nas respostas.</div>
+          </div>
+
+          <div class="f-group" style="margin-bottom:14px">
+            <label>Instruções do agente</label>
+            <textarea id="id-instrucoes" rows="4" style="width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;line-height:1.6;background:#fff;transition:border-color .2s" placeholder="Instruções específicas. Ex: Sempre cumprimente pelo nome, nunca mencione concorrentes, destaque os benefícios..."></textarea>
+            <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Complementa o comportamento padrão.</div>
+          </div>
+
+          <div class="f-group" style="margin-bottom:14px">
+            <label>Contato de suporte</label>
+            <input type="text" id="id-suporte" placeholder="https://wa.me/55... ou e-mail de suporte">
+            <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Oferecido pelo agente quando não consegue resolver.</div>
+          </div>
+
+          <div style="border-top:1px solid #f4f4f5;padding-top:14px;margin-top:4px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;margin-bottom:10px">Mensagem de recuperação</div>
+            <div style="font-size:12px;color:#71717a;margin-bottom:10px">Aparece quando o comprador tenta sair sem concluir a compra.</div>
+            <div class="f-group" style="margin-bottom:10px">
+              <label>Título</label>
+              <input type="text" id="id-rec-titulo" value="Conhece as formas de pagamento que facilitam pra você?">
+            </div>
+            <div class="f-group" style="margin-bottom:12px">
+              <label>Subtítulo</label>
+              <input type="text" id="id-rec-sub" value="Pix, cartão parcelado, boleto e muito mais. Antes de sair, veja qual opção encaixa no seu momento.">
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 13px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#16a34a"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <span style="font-size:12px;color:#166534">Agente configurado e pronto para conduzir o cliente até a compra.</span>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-ghost" onclick="wGoTo(3)">
+              <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+              Voltar
+            </button>
+            <button class="btn btn-orange" onclick="saveAndFinish()">
+              Revisar
+              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div><!-- /wizard-main -->
 
       <!-- SIDEBAR -->
       <div class="sb">
@@ -666,9 +721,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
               <span class="sbv" id="sbv2">Pendente</span>
             </div>
             <div class="sbr" id="sbr3" onclick="wGoTo(3)">
-              <div class="sbr-l"><div class="sbd" id="sbd3"></div><span class="sbr-n">Agente</span></div>
+              <div class="sbr-l"><div class="sbd" id="sbd3"></div><span class="sbr-n">Identidade</span></div>
               <span class="sbv" id="sbv3">Pendente</span>
             </div>
+            <div class="sbr" id="sbr4" onclick="wGoTo(4)">
+              <div class="sbr-l"><div class="sbd" id="sbd4"></div><span class="sbr-n">Agente</span></div>
+              <span class="sbv" id="sbv4">Pendente</span>
+            </div>
+        </div>
       </div>
 
     </div><!-- /wizard-layout -->
@@ -738,14 +798,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
     wStep = n;
     document.querySelectorAll('.wstep').forEach(function(s){ s.classList.remove('active'); });
     document.getElementById('wstep' + n).classList.add('active');
-    document.getElementById('step-counter').textContent = n + ' / 3';
+    document.getElementById('step-counter').textContent = n + ' / 4';
     updateWizardUI(n);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function updateWizardUI(n) {
     // progress bar dots
-    for (var i = 1; i <= 3; i++) {
+    for (var i = 1; i <= 4; i++) {
       var ws = document.getElementById('ws' + i);
       var wd = document.getElementById('wd' + i);
       var wl = document.getElementById('wl' + i);
@@ -754,8 +814,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
       if (wl) wl.className = 'ws-line' + (i < n ? ' done' : '');
     }
     // sidebar
-    var fills = { 2:'2 docs', 3:'' };
-    for (var j = 1; j <= 3; j++) {
+    var fills = { 2:'2 docs', 3:'', 4:'' };
+    for (var j = 1; j <= 4; j++) {
       var row = document.getElementById('sbr'+j);
       var dot = document.getElementById('sbd'+j);
       var val = document.getElementById('sbv'+j);
@@ -785,7 +845,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
       }
     }
     // sync review on step 5
-    if (n === 3) {
+    if (n === 4) {
       document.getElementById('rev-prod').textContent = prod.name + ' ' + prod.id;
       var title = document.getElementById('id-title').value || 'Assistente';
       var color = document.getElementById('ctext').value || '#fe8700';
