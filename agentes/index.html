@@ -354,13 +354,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   <div class="wprog">
     <div class="ws active" id="ws1" onclick="wGoTo(1)"><div class="ws-dot" id="wd1">1</div><div class="ws-label">Produto</div></div>
     <div class="ws-line" id="wl1"></div>
-    <div class="ws idle"   id="ws2" onclick="wGoTo(2)"><div class="ws-dot" id="wd2">2</div><div class="ws-label">Treinar IA</div></div>
+    <div class="ws idle"   id="ws2" onclick="wGoTo(2)"><div class="ws-dot" id="wd2">2</div><div class="ws-label">Agente</div></div>
     <div class="ws-line" id="wl2"></div>
-    <div class="ws idle"   id="ws3" onclick="wGoTo(3)"><div class="ws-dot" id="wd3">3</div><div class="ws-label">Identidade</div></div>
+    <div class="ws idle"   id="ws3" onclick="wGoTo(3)"><div class="ws-dot" id="wd3">3</div><div class="ws-label">Treinar Agente</div></div>
     <div class="ws-line" id="wl3"></div>
-    <div class="ws idle"   id="ws4" onclick="wGoTo(4)"><div class="ws-dot" id="wd4">4</div><div class="ws-label">Agente</div></div>
-    <div class="ws-line" id="wl4"></div>
-    <div class="ws idle"   id="ws5" onclick="wGoTo(5)"><div class="ws-dot" id="wd5">5</div><div class="ws-label">Revisar</div></div>
+    <div class="ws idle"   id="ws4" onclick="wGoTo(4)"><div class="ws-dot" id="wd4">4</div><div class="ws-label">Revisar</div></div>
   </div>
 </div>
 
@@ -480,8 +478,75 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
           </div>
         </div>
 
-        <!-- STEP 2: TREINAR -->
+        <!-- STEP 2: AGENTE -->
         <div class="wstep" id="wstep2">
+          <div class="ptitle">Configure o agente</div>
+          <div class="psub">Defina como o assistente vai se apresentar e como deve agir.</div>
+
+          <div class="id-grid">
+            <div class="f-group">
+              <label>Nome do agente</label>
+              <input type="text" id="id-title" value="Assistente Voomp" oninput="syncWidget()" placeholder="Ex: Carolinha, Assistente Voomp...">
+            </div>
+            <div class="f-group">
+              <label>Subtítulo</label>
+              <input type="text" id="id-sub" value="Tire suas dúvidas" oninput="syncWidget()">
+            </div>
+            <div class="f-group">
+              <label>Cor</label>
+              <div class="color-row">
+                <input type="color" id="cpicker" value="#fe8700" oninput="document.getElementById('ctext').value=this.value;syncColor(this.value)">
+                <input type="text" id="ctext" value="#fe8700" oninput="document.getElementById('cpicker').value=this.value;syncColor(this.value)">
+              </div>
+            </div>
+            <div class="f-group">
+              <label>Posição</label>
+              <select>
+                <option selected>Canto inferior direito</option>
+                <option>Canto inferior esquerdo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="wpreview">
+            <div class="wp-bg-text">Checkout do produto</div>
+            <div class="wp-panel">
+              <div class="wp-hd" id="wp-hd">
+                <div class="wp-hd-t" id="wp-hd-t">Assistente Voomp</div>
+                <div class="wp-hd-s" id="wp-hd-s">Tire suas dúvidas</div>
+              </div>
+              <div class="wp-body">👋 Olá! Como posso ajudar?</div>
+            </div>
+            <div class="wp-btn" id="wp-btn">
+              <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </div>
+          </div>
+
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+            <div class="f-group">
+              <label>Instruções do agente <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#a1a1aa">(opcional)</span></label>
+              <textarea id="id-instrucoes" rows="3" style="width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;line-height:1.6;background:#fff;transition:border-color .2s" placeholder="Ex: Nunca mencione concorrentes, destaque os benefícios..."></textarea>
+            </div>
+            <div class="id-grid">
+              <div class="f-group">
+                <label>Contato de suporte</label>
+                <input type="text" id="id-suporte" placeholder="https://wa.me/55... ou e-mail">
+              </div>
+              <div class="f-group">
+                <label>Mensagem de recuperação</label>
+                <input type="text" id="id-rec-titulo" value="Conhece as formas de pagamento que facilitam pra você?">
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn btn-ghost" onclick="wGoTo(1)"><svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:#374151;stroke-width:2.5"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
+            <button class="btn btn-dark" onclick="wGoTo(3)">Próximo <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2.5"><path d="M9 18l6-6-6-6"/></svg></button>
+          </div>
+        </div>
+
+        <!-- STEP 3: TREINAR AGENTE -->
+        <div class="wstep" id="wstep3">
           <div class="ptitle">Alimente a IA</div>
           <div class="psub">Suba os materiais do produto. O agente usa para responder no checkout.</div>
           <div class="upload-zone" id="upload-zone">
@@ -495,86 +560,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
             <textarea id="description" placeholder="Descrição do produto (opcional)..."></textarea>
           </div>
           <div class="actions">
-            <button class="btn btn-ghost" onclick="wGoTo(1)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
-            <button class="btn btn-dark" onclick="wGoTo(3)">Próximo <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
-          </div>
-        </div>
-
-        <!-- STEP 3: IDENTIDADE -->
-        <div class="wstep" id="wstep3">
-          <div class="ptitle">Identidade do widget</div>
-          <div class="psub">Como o assistente vai aparecer no checkout.</div>
-          <div class="id-grid">
-            <div class="f-group"><label>Título</label>
-              <input type="text" id="id-title" value="Assistente Voomp" oninput="syncWidget()"></div>
-            <div class="f-group"><label>Subtítulo</label>
-              <input type="text" id="id-sub" value="Tire suas dúvidas" oninput="syncWidget()"></div>
-            <div class="f-group"><label>Cor</label>
-              <div class="color-row">
-                <input type="color" id="cpicker" value="#fe8700" oninput="ctext.value=this.value;syncWidget()">
-                <input type="text" id="ctext" value="#fe8700" oninput="cpicker.value=this.value;syncWidget()">
-              </div>
-            </div>
-            <div class="f-group"><label>Posição</label>
-              <select id="wp-pos"><option selected>Canto inferior direito</option><option>Canto inferior esquerdo</option></select>
-            </div>
-          </div>
-          <div class="wpreview">
-            <div class="wp-bg">Checkout do produto</div>
-            <div class="wp-panel">
-              <div class="wp-hd" id="wp-hd"><div class="wp-hd-t" id="wp-hd-t">Assistente Voomp</div><div class="wp-hd-s" id="wp-hd-s">Tire suas dúvidas</div></div>
-              <div class="wp-body">👋 Olá! Como posso ajudar?</div>
-            </div>
-            <div class="wp-btn" id="wp-btn"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></div>
-          </div>
-          <div class="actions">
             <button class="btn btn-ghost" onclick="wGoTo(2)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
-            <button class="btn btn-dark" onclick="wGoTo(4)">Revisar <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
+            <button class="btn btn-dark" onclick="wGoTo(4)">Próximo <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
           </div>
         </div>
 
         <!-- STEP 4: REVISAR -->
-
-        <!-- STEP 4: AGENTE -->
         <div class="wstep" id="wstep4">
-          <div class="ptitle">Configure o agente</div>
-          <div class="psub">Persona, instruções e mensagem de recuperação.</div>
-          <div style="display:flex;flex-direction:column;gap:14px">
-            <div class="f-group">
-              <label>Persona — nome do agente</label>
-              <input type="text" id="id-persona" value="Assistente Voomp" placeholder="Ex: Carolinha, Assistente Voomp...">
-              <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Como o agente se identifica nas respostas.</div>
-            </div>
-            <div class="f-group">
-              <label>Instruções do agente <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#a1a1aa">(opcional)</span></label>
-              <textarea id="id-instrucoes" rows="3" style="width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;line-height:1.6;background:#fff;transition:border-color .2s" placeholder="Ex: Nunca mencione concorrentes, destaque os benefícios..."></textarea>
-            </div>
-            <div class="f-group">
-              <label>Contato de suporte</label>
-              <input type="text" id="id-suporte" placeholder="https://wa.me/55... ou e-mail">
-              <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Oferecido quando o agente não consegue resolver.</div>
-            </div>
-            <div style="padding-top:14px;border-top:1px solid #f4f4f5">
-              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;margin-bottom:8px">Mensagem de recuperação</div>
-              <div style="font-size:12px;color:#71717a;margin-bottom:10px">Exibida quando o comprador tenta sair sem concluir a compra.</div>
-              <div class="f-group" style="margin-bottom:10px">
-                <label>Título</label>
-                <input type="text" id="id-rec-titulo" value="Conhece as formas de pagamento que facilitam pra você?">
-              </div>
-              <div class="f-group">
-                <label>Subtítulo</label>
-                <input type="text" id="id-rec-sub" value="Pix, cartão parcelado, boleto e muito mais. Antes de sair, veja qual opção encaixa no seu momento.">
-              </div>
-            </div>
-          </div>
-          <div class="actions">
-            <button class="btn btn-ghost" onclick="wGoTo(3)"><svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:#374151;stroke-width:2.5"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
-            <button class="btn btn-dark" onclick="wGoTo(5)">Revisar <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:#fff;stroke-width:2.5"><path d="M9 18l6-6-6-6"/></svg></button>
-          </div>
-        </div>
-
-        <!-- STEP 5: REVISAR -->
-        <div class="wstep" id="wstep5">
           <div class="ptitle">Revisão</div>
           <div class="psub">Confirme e salve para ativar o agente.</div>
           <div class="rev-card">
@@ -589,7 +581,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
             <p>Após salvar, o agente aparece em Meus agentes. O GTM ID fica disponível no menu da automação.</p>
           </div>
           <div class="actions">
-            <button class="btn btn-ghost" onclick="wGoTo(4)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
+            <button class="btn btn-ghost" onclick="wGoTo(3)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
             <button class="btn btn-orange" id="save-btn" onclick="saveAndFinish()">
               <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>Salvar e ativar
             </button>
@@ -606,10 +598,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
           <div class="sb-trg"><div class="sb-trg-l">Gatilhos</div><div class="sb-trg-v">Checkout · Exit intent</div></div>
           <div class="sb-rows">
             <div class="sbr curr" id="sbr1" onclick="wGoTo(1)"><div class="sbr-l"><div class="sbd curr" id="sbd1"></div><span class="sbr-n">Produto</span></div><span class="sbv curr" id="sbv1">Nenhum</span></div>
-            <div class="sbr" id="sbr2" onclick="wGoTo(2)"><div class="sbr-l"><div class="sbd" id="sbd2"></div><span class="sbr-n">Treinar IA</span></div><span class="sbv" id="sbv2">Pendente</span></div>
-            <div class="sbr" id="sbr3" onclick="wGoTo(3)"><div class="sbr-l"><div class="sbd" id="sbd3"></div><span class="sbr-n">Identidade</span></div><span class="sbv" id="sbv3">Pendente</span></div>
-            <div class="sbr" id="sbr4" onclick="wGoTo(4)"><div class="sbr-l"><div class="sbd" id="sbd4"></div><span class="sbr-n">Agente</span></div><span class="sbv" id="sbv4">Pendente</span></div>
-            <div class="sbr" id="sbr5" onclick="wGoTo(5)"><div class="sbr-l"><div class="sbd" id="sbd5"></div><span class="sbr-n">Revisar</span></div><span class="sbv" id="sbv5">Pendente</span></div>
+            <div class="sbr" id="sbr2" onclick="wGoTo(2)"><div class="sbr-l"><div class="sbd" id="sbd2"></div><span class="sbr-n">Agente</span></div><span class="sbv" id="sbv2">Pendente</span></div>
+            <div class="sbr" id="sbr3" onclick="wGoTo(3)"><div class="sbr-l"><div class="sbd" id="sbd3"></div><span class="sbr-n">Treinar Agente</span></div><span class="sbv" id="sbv3">Pendente</span></div>
+            <div class="sbr" id="sbr4" onclick="wGoTo(4)"><div class="sbr-l"><div class="sbd" id="sbd4"></div><span class="sbr-n">Revisar</span></div><span class="sbv" id="sbv4">Pendente</span></div>
           </div>
         </div>
       </div>
@@ -777,9 +768,9 @@ function wGoTo(n) {
   state.wStep = n;
   document.querySelectorAll('.wstep').forEach(function(s){ s.classList.remove('active'); });
   document.getElementById('wstep'+n).classList.add('active');
-  document.getElementById('t-counter').textContent = n + ' / 5';
+  document.getElementById('t-counter').textContent = n + ' / 4';
   // progress bar
-  for (var i = 1; i <= 5; i++) {
+  for (var i = 1; i <= 4; i++) {
     var ws = document.getElementById('ws'+i);
     var wd = document.getElementById('wd'+i);
     var wl = document.getElementById('wl'+i);
@@ -788,7 +779,7 @@ function wGoTo(n) {
     if (wl) wl.className = 'ws-line' + (i < n ? ' done' : '');
   }
   // sidebar
-  for (var j = 1; j <= 5; j++) {
+  for (var j = 1; j <= 4; j++) {
     var row = document.getElementById('sbr'+j);
     var dot = document.getElementById('sbd'+j);
     var val = document.getElementById('sbv'+j);
@@ -809,7 +800,7 @@ function wGoTo(n) {
     }
   }
   // review sync
-  if (n === 5) {
+  if (n === 4) {
     document.getElementById('rev-prod').textContent = state.prod ? state.prod.name + ' #' + state.prod.id : '—';
     var fc = state.files.length;
     var rd = document.getElementById('rev-docs');
