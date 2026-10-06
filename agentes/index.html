@@ -383,11 +383,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
       <div class="ws-dot" id="wd4">4</div>
       <div class="ws-label">Agente</div>
     </div>
-    <div class="ws-line" id="wl4"></div>
-    <div class="ws idle" id="ws5" onclick="wGoTo(5)">
-      <div class="ws-dot" id="wd5">5</div>
-      <div class="ws-label">Revisar</div>
-    </div>
   </div>
 </div>
 
@@ -639,9 +634,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
               <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
               Voltar
             </button>
-            <button class="btn btn-dark" onclick="wGoTo(4)">
-              Próximo
-              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            <button class="btn btn-orange" onclick="saveAndFinish()">
+              <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
+              Salvar e ativar
             </button>
           </div>
         </div>
@@ -691,39 +686,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
               <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
               Voltar
             </button>
-            <button class="btn btn-dark" onclick="wGoTo(5)">
-              Revisar
-              <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-            </button>
-          </div>
-        </div>
-
-        <!-- STEP 5: REVISAR -->
-        <div class="wstep" id="wstep5">
-          <div class="ptitle">Revisão</div>
-          <div class="psub">Confirme e salve para ativar o agente.</div>
-
-          <div class="rev-card">
-            <div class="rr"><span class="rk">Caso de uso</span><span class="rv">Assistente de checkout</span></div>
-            <div class="rr"><span class="rk">Produto</span><span class="rv orange" id="rev-prod">—</span></div>
-            <div class="rr"><span class="rk">Documentos</span><span class="rv" id="rev-docs">Nenhum arquivo</span></div>
-            <div class="rr"><span class="rk">Widget</span><span class="rv" id="rev-widget">Assistente Voomp · #fe8700</span></div>
-            <div class="rr"><span class="rk">Persona</span><span class="rv orange" id="rev-persona">—</span></div>
-            <div class="rr"><span class="rk">Contato de suporte</span><span class="rv" id="rev-suporte">—</span></div>
-            <div class="rr"><span class="rk">Msg. de recuperação</span><span class="rv" id="rev-recuperacao">—</span></div>
-            <div class="rr"><span class="rk">Gatilhos</span><span class="rv">Checkout iniciado · Exit intent</span></div>
-          </div>
-
-          <div class="note">
-            <svg viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p>Após salvar, o agente entra na listagem de automações. O GTM ID fica disponível no menu da automação.</p>
-          </div>
-
-          <div class="actions">
-            <button class="btn btn-ghost" onclick="wGoTo(4)">
-              <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-              Voltar
-            </button>
             <button class="btn btn-orange" onclick="saveAndFinish()">
               <svg viewBox="0 0 24 24"><path d="M5 12l5 5L20 7"/></svg>
               Salvar e ativar
@@ -766,11 +728,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
               <div class="sbr-l"><div class="sbd" id="sbd4"></div><span class="sbr-n">Agente</span></div>
               <span class="sbv" id="sbv4">Pendente</span>
             </div>
-            <div class="sbr" id="sbr5" onclick="wGoTo(5)">
-              <div class="sbr-l"><div class="sbd" id="sbd5"></div><span class="sbr-n">Revisar</span></div>
-              <span class="sbv" id="sbv5">Pendente</span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -841,14 +798,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
     wStep = n;
     document.querySelectorAll('.wstep').forEach(function(s){ s.classList.remove('active'); });
     document.getElementById('wstep' + n).classList.add('active');
-    document.getElementById('step-counter').textContent = n + ' / 5';
+    document.getElementById('step-counter').textContent = n + ' / 4';
     updateWizardUI(n);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function updateWizardUI(n) {
     // progress bar dots
-    for (var i = 1; i <= 5; i++) {
+    for (var i = 1; i <= 4; i++) {
       var ws = document.getElementById('ws' + i);
       var wd = document.getElementById('wd' + i);
       var wl = document.getElementById('wl' + i);
@@ -857,8 +814,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
       if (wl) wl.className = 'ws-line' + (i < n ? ' done' : '');
     }
     // sidebar
-    var fills = { 2:'2 docs', 3:'', 4:'', 5:'Pronto' };
-    for (var j = 1; j <= 5; j++) {
+    var fills = { 2:'2 docs', 3:'', 4:'' };
+    for (var j = 1; j <= 4; j++) {
       var row = document.getElementById('sbr'+j);
       var dot = document.getElementById('sbd'+j);
       var val = document.getElementById('sbv'+j);
@@ -888,7 +845,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
       }
     }
     // sync review on step 5
-    if (n === 5) {
+    if (n === 4) {
       document.getElementById('rev-prod').textContent = prod.name + ' ' + prod.id;
       var title = document.getElementById('id-title').value || 'Assistente';
       var color = document.getElementById('ctext').value || '#fe8700';
