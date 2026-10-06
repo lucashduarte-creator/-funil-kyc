@@ -475,7 +475,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
           <div class="uc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#fe8700" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg></div>
           <div class="uc-chk"></div>
         </div>
-        <div class="uc-name">Assistente de checkout</div>
+        <div class="uc-name">Agente Exit Intent</div>
         <div class="uc-desc">Entende o comportamento do comprador. Fica disponível durante a visita para tirar dúvidas e, quando detecta intenção de saída, exibe uma mensagem personalizada e abre o chat — conduzindo a conversa para desfazer a objeção e evitar perder o lead interessado.</div>
         <div class="uc-trigger"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Visita ao checkout · Intenção de saída</div>
       </button>
@@ -633,20 +633,88 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
         </div>
 
         <!-- STEP 3: TREINAR AGENTE -->
+        <!-- STEP 3: TREINAR AGENTE -->
         <div class="wstep" id="wstep3">
-          <div class="ptitle">Alimente a IA</div>
-          <div class="psub">Suba os materiais do produto. O agente usa para responder no checkout.</div>
-          <div class="upload-zone" id="upload-zone">
-            <div style="font-size:22px;margin-bottom:6px">📄</div>
-            <h4>Arraste os arquivos aqui</h4>
-            <p>ou <button class="ulink" onclick="triggerFileInput()">selecione</button> &nbsp;·&nbsp; PDF, DOC, TXT · máx 20 MB</p>
-          </div>
+          <div class="ptitle">Instruções para o Agente</div>
+          <div class="psub">Preencha os campos abaixo. O agente usará essas informações para responder no checkout.</div>
+
           <input type="file" id="file-input" multiple accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="onFileInput(this)">
-          <div class="file-list" id="file-list"></div>
+          <input type="file" id="file-instrucoes" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="attachToField(this,'instrucoes')">
+          <input type="file" id="file-objecoes" accept=".pdf,.doc,.docx,.txt" style="display:none" onchange="attachToField(this,'objecoes')">
+
+          <!-- INSTRUÇÕES -->
           <div class="ta-field">
-            <textarea id="description" placeholder="Descrição do produto (opcional)..."></textarea>
+            <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#52525b;margin-bottom:6px">Instruções</label>
+            <textarea id="id-instrucoes" rows="4" style="width:100%;border:1.5px solid #e4e4e7;border-radius:9px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;line-height:1.6;background:#fff;transition:border-color .2s" placeholder="O que o agente deve saber sobre o produto? Ex: O curso tem 8 módulos, certificado incluso, acesso por 12 meses..."></textarea>
+            <div style="margin-top:6px">
+              <button onclick="document.getElementById('file-instrucoes').click()" style="display:flex;align-items:center;gap:5px;background:none;border:1px solid #e4e4e7;border-radius:7px;padding:4px 10px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                Anexar arquivo
+              </button>
+            </div>
+            <div class="file-list" id="file-list-instrucoes" style="margin-top:6px"></div>
           </div>
-          <div class="actions">
+
+          <!-- QUEBRA DE OBJEÇÕES -->
+          <div class="ta-field">
+            <label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#52525b;margin-bottom:6px">Quebra de objeções</label>
+            <textarea id="id-objecoes" rows="4" style="width:100%;border:1.5px solid #e4e4e7;border-radius:9px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;line-height:1.6;background:#fff;transition:border-color .2s" placeholder="Como o agente deve responder às objeções mais comuns? Ex: Se disser que está caro — lembrar do parcelamento e da garantia de 15 dias..."></textarea>
+            <div style="margin-top:6px">
+              <button onclick="document.getElementById('file-objecoes').click()" style="display:flex;align-items:center;gap:5px;background:none;border:1px solid #e4e4e7;border-radius:7px;padding:4px 10px;font-size:12px;font-weight:600;color:#374151;cursor:pointer;font-family:inherit;white-space:nowrap">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                Anexar arquivo
+              </button>
+            </div>
+            <div class="file-list" id="file-list-objecoes" style="margin-top:6px"></div>
+          </div>
+
+          <!-- Recursos adicionais Em breve -->
+          <!-- EM BREVE -->
+          <div style="margin-top:4px;padding:16px;background:#fafafa;border:1px solid #e4e4e7;border-radius:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa">Recursos adicionais</span>
+              <span style="font-size:10px;font-weight:600;background:#f4f4f5;color:#a1a1aa;padding:2px 8px;border-radius:20px">Em breve</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;opacity:.5;pointer-events:none">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e4e4e7;border-radius:8px">
+                <span style="font-size:15px">🏷️</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#18181b">Cupons disponíveis</div>
+                  <div style="font-size:11px;color:#a1a1aa">Ofereça um cupom de desconto no momento de saída.</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e4e4e7;border-radius:8px">
+                <span style="font-size:15px">📦</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#18181b">Outras ofertas do produto</div>
+                  <div style="font-size:11px;color:#a1a1aa">Apresente uma oferta alternativa do mesmo produto.</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e4e4e7;border-radius:8px">
+                <span style="font-size:15px">💳</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#18181b">Modelo de pagamento alternativo</div>
+                  <div style="font-size:11px;color:#a1a1aa">Pagamento único ou assinatura para não comprometer o limite do cartão.</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e4e4e7;border-radius:8px">
+                <span style="font-size:15px">⏳</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#18181b">Estender período de acesso</div>
+                  <div style="font-size:11px;color:#a1a1aa">Ofereça mais tempo de acesso como incentivo para concluir a compra.</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1px solid #e4e4e7;border-radius:8px">
+                <span style="font-size:15px">🎁</span>
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:#18181b">Oferecer outro produto como bônus</div>
+                  <div style="font-size:11px;color:#a1a1aa">Inclua um produto bônus para aumentar o valor percebido e fechar a venda.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+                    <div class="actions">
             <button class="btn btn-ghost" onclick="wGoTo(2)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
             <button class="btn btn-dark" onclick="wGoTo(4)">Próximo <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
           </div>
@@ -894,7 +962,8 @@ function goToWizard() {
   document.getElementById('id-sub').value   = 'Tire suas dúvidas';
   document.getElementById('ctext').value    = '#fe8700';
   document.getElementById('cpicker').value  = '#fe8700';
-  document.getElementById('file-list').innerHTML = '';
+  var fl = document.getElementById('file-list');
+  if (fl) fl.innerHTML = '';
   syncWidget();
   loadProducts().then(function(){
     showScreen('screen-wizard');
@@ -952,6 +1021,16 @@ function wGoTo(n) {
 }
 
 /* ── FILES ── */
+function attachToField(inp, field) {
+  if (!inp.files || !inp.files[0]) return;
+  var f = inp.files[0];
+  var list = document.getElementById('file-list-' + field);
+  if (!list) return;
+  var sz = f.size > 1048576 ? (f.size/1048576).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
+  list.innerHTML = '<div class="file-row"><div class="file-ico"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg></div><div class="file-info"><div class="fname">'+f.name+'</div><div class="fsize">'+sz+'</div></div><button onclick="this.parentNode.remove()" style="background:none;border:none;cursor:pointer;color:#d4d4d8;font-size:16px;padding:2px 6px">×</button></div>';
+  inp.value = '';
+}
+
 function triggerFileInput() { document.getElementById('file-input').click(); }
 function onFileInput(inp) {
   Array.from(inp.files).forEach(addFile);
@@ -984,10 +1063,12 @@ function renderFiles() {
 /* drag & drop */
 document.addEventListener('DOMContentLoaded', function(){
   var z = document.getElementById('upload-zone');
-  z.addEventListener('dragover',  function(e){ e.preventDefault(); z.style.borderColor='#fe8700'; });
-  z.addEventListener('dragleave', function(){ z.style.borderColor=''; });
-  z.addEventListener('drop',      function(e){ e.preventDefault(); z.style.borderColor=''; Array.from(e.dataTransfer.files).forEach(addFile); });
-  z.addEventListener('click',     function(){ triggerFileInput(); });
+  if (z) {
+    z.addEventListener('dragover',  function(e){ e.preventDefault(); z.style.borderColor='#fe8700'; });
+    z.addEventListener('dragleave', function(){ z.style.borderColor=''; });
+    z.addEventListener('drop',      function(e){ e.preventDefault(); z.style.borderColor=''; Array.from(e.dataTransfer.files).forEach(addFile); });
+    z.addEventListener('click',     function(){ triggerFileInput(); });
+  }
 });
 
   function openRecModal() {
@@ -1108,7 +1189,8 @@ function saveAndFinish() {
   var btn = document.getElementById('save-btn');
   var title = document.getElementById('id-title').value || 'Assistente Voomp';
   var color = document.getElementById('ctext').value    || '#fe8700';
-  var desc  = document.getElementById('description').value || '';
+  var descEl = document.getElementById('description');
+  var desc  = descEl ? descEl.value : '';
 
   if (CFG.n8nCriarAgente.includes('SEU-N8N')) {
     // modo local — sem N8N
