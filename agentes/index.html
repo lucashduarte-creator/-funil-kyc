@@ -381,8 +381,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
     <div class="ws-line" id="wl3"></div>
     <div class="ws idle" id="ws4" onclick="wGoTo(4)">
       <div class="ws-dot" id="wd4">4</div>
-      <div class="ws-label">Revisar</div>
+      <div class="ws-label">Agente</div>
     </div>
+
   </div>
 </div>
 
@@ -588,10 +589,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
         <!-- STEP 3: IDENTIDADE -->
         <div class="wstep" id="wstep3">
           <div class="ptitle">Identidade do widget</div>
-          <div class="psub">Configure a aparência e o comportamento do assistente no checkout.</div>
+          <div class="psub">Como o assistente vai aparecer no checkout.</div>
 
-          <!-- APARÊNCIA -->
-          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;margin-bottom:10px">Aparência</div>
           <div class="id-grid">
             <div class="f-group">
               <label>Título</label>
@@ -631,85 +630,56 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
             </div>
           </div>
 
-          <!-- PERSONA -->
-          <div style="margin-top:22px;padding-top:18px;border-top:1px solid #f4f4f5">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;margin-bottom:10px">Persona</div>
-            <div class="f-group" style="margin-bottom:12px">
-              <label>Nome do agente</label>
-              <input type="text" id="id-persona" placeholder="Ex: Carolinha, Assistente Voomp..." value="Assistente Voomp">
-              <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Como o agente se identifica nas respostas.</div>
-            </div>
-          </div>
-
-          <!-- INSTRUÇÕES DO AGENTE -->
-          <div style="margin-top:18px;padding-top:18px;border-top:1px solid #f4f4f5">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;margin-bottom:10px">Instruções do agente</div>
-            <div class="f-group">
-              <label>Instruções específicas</label>
-              <textarea id="id-instrucoes" rows="4" style="width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;line-height:1.6;background:#fff;transition:border-color .2s" placeholder="Digite aqui as instruções específicas para o seu agente. Ex: Sempre cumprimente pelo nome, nunca mencione concorrentes, foque em destacar os benefícios..."></textarea>
-              <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Complementa o comportamento padrão. Digite "/" para adicionar variáveis.</div>
-            </div>
-          </div>
-
-          <!-- CONTATO DE SUPORTE -->
-          <div style="margin-top:18px;padding-top:18px;border-top:1px solid #f4f4f5">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;margin-bottom:10px">Contato de suporte</div>
-            <div class="f-group">
-              <label>Link ou informação de contato</label>
-              <input type="text" id="id-suporte" placeholder="https://wa.me/55... ou e-mail de suporte">
-              <div style="font-size:11px;color:#a1a1aa;margin-top:4px">O agente oferece este contato quando não consegue resolver a dúvida.</div>
-            </div>
-          </div>
-
-          <!-- MENSAGEM DE RECUPERAÇÃO -->
-          <div style="margin-top:18px;padding-top:18px;border-top:1px solid #f4f4f5">
-            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;margin-bottom:6px">Mensagem de recuperação</div>
-            <div style="font-size:12px;color:#71717a;margin-bottom:10px">Aparece quando o comprador tenta sair do checkout sem concluir a compra.</div>
-            <div class="f-group" style="margin-bottom:10px">
-              <label>Título da mensagem</label>
-              <input type="text" id="id-rec-titulo" value="Conhece as formas de pagamento que facilitam pra você?" placeholder="Título do modal de saída">
-            </div>
-            <div class="f-group">
-              <label>Subtítulo</label>
-              <input type="text" id="id-rec-sub" value="Pix, cartão parcelado, boleto e muito mais. Antes de sair, veja qual opção encaixa no seu momento." placeholder="Descrição complementar">
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:10px;background:#f8f9fb;border:1px solid #e4e4e7;border-radius:8px;padding:10px 13px">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#16a34a"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-              <span style="font-size:12px;color:#374151">Etapa configurada. O agente de checkout está configurado e pronto para conduzir o cliente até a compra.</span>
-            </div>
-          </div>
-
           <div class="actions">
             <button class="btn btn-ghost" onclick="wGoTo(2)">
               <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
               Voltar
             </button>
             <button class="btn btn-dark" onclick="wGoTo(4)">
-              Revisar
+              Próximo
               <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
             </button>
           </div>
         </div>
 
-        <!-- STEP 4: REVISAR -->
+        <!-- STEP 4: AGENTE -->
         <div class="wstep" id="wstep4">
-          <div class="ptitle">Revisão</div>
-          <div class="psub">Confirme e salve para ativar o agente.</div>
+          <div class="ptitle">Configure o agente</div>
+          <div class="psub">Defina o comportamento, as instruções e as mensagens do assistente.</div>
 
-          <div class="rev-card">
-            <div class="rr"><span class="rk">Caso de uso</span><span class="rv">Assistente de checkout</span></div>
-            <div class="rr"><span class="rk">Produto</span><span class="rv orange" id="rev-prod">—</span></div>
-            <div class="rr"><span class="rk">Documentos</span><span class="rv" id="rev-docs">Nenhum arquivo</span></div>
-            <div class="rr"><span class="rk">Widget</span><span class="rv" id="rev-widget">Assistente Voomp · #fe8700</span></div>
-            <div class="rr"><span class="rk">Persona</span><span class="rv orange" id="rev-persona">—</span></div>
-            <div class="rr"><span class="rk">Contato de suporte</span><span class="rv" id="rev-suporte">—</span></div>
-            <div class="rr"><span class="rk">Msg. de recuperação</span><span class="rv" id="rev-recuperacao">—</span></div>
-            <div class="rr"><span class="rk">Gatilhos</span><span class="rv">Checkout iniciado · Exit intent</span></div>
+          <div class="f-group" style="margin-bottom:14px">
+            <label>Persona — nome do agente</label>
+            <input type="text" id="id-persona" placeholder="Ex: Carolinha, Assistente Voomp..." value="Assistente Voomp">
+            <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Como o agente se identifica nas respostas.</div>
           </div>
 
-          <div class="note">
-            <svg viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p>Após salvar, o agente entra na listagem de automações. O GTM ID fica disponível no menu da automação.</p>
+          <div class="f-group" style="margin-bottom:14px">
+            <label>Instruções do agente</label>
+            <textarea id="id-instrucoes" rows="4" style="width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;line-height:1.6;background:#fff;transition:border-color .2s" placeholder="Instruções específicas. Ex: Sempre cumprimente pelo nome, nunca mencione concorrentes, destaque os benefícios..."></textarea>
+            <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Complementa o comportamento padrão.</div>
+          </div>
+
+          <div class="f-group" style="margin-bottom:14px">
+            <label>Contato de suporte</label>
+            <input type="text" id="id-suporte" placeholder="https://wa.me/55... ou e-mail de suporte">
+            <div style="font-size:11px;color:#a1a1aa;margin-top:4px">Oferecido pelo agente quando não consegue resolver.</div>
+          </div>
+
+          <div style="border-top:1px solid #f4f4f5;padding-top:14px;margin-top:4px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#a1a1aa;margin-bottom:10px">Mensagem de recuperação</div>
+            <div style="font-size:12px;color:#71717a;margin-bottom:10px">Aparece quando o comprador tenta sair sem concluir a compra.</div>
+            <div class="f-group" style="margin-bottom:10px">
+              <label>Título</label>
+              <input type="text" id="id-rec-titulo" value="Conhece as formas de pagamento que facilitam pra você?">
+            </div>
+            <div class="f-group" style="margin-bottom:12px">
+              <label>Subtítulo</label>
+              <input type="text" id="id-rec-sub" value="Pix, cartão parcelado, boleto e muito mais. Antes de sair, veja qual opção encaixa no seu momento.">
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 13px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#16a34a"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+              <span style="font-size:12px;color:#166534">Agente configurado e pronto para conduzir o cliente até a compra.</span>
+            </div>
           </div>
 
           <div class="actions">
@@ -756,8 +726,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
               <span class="sbv" id="sbv3">Pendente</span>
             </div>
             <div class="sbr" id="sbr4" onclick="wGoTo(4)">
-              <div class="sbr-l"><div class="sbd" id="sbd4"></div><span class="sbr-n">Revisar</span></div>
+              <div class="sbr-l"><div class="sbd" id="sbd4"></div><span class="sbr-n">Agente</span></div>
               <span class="sbv" id="sbv4">Pendente</span>
+            </div>
+
+              <span class="sbv" id="sbv5">Pendente</span>
             </div>
           </div>
         </div>
@@ -846,11 +819,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
       if (wl) wl.className = 'ws-line' + (i < n ? ' done' : '');
     }
     // sidebar
-    var fills = { 2:'2 docs', 3:'', 4:'Pronto' };
+    var fills = { 2:'2 docs', 3:'', 4:'' };
     for (var j = 1; j <= 4; j++) {
       var row = document.getElementById('sbr'+j);
       var dot = document.getElementById('sbd'+j);
       var val = document.getElementById('sbv'+j);
+      if (!row) continue;
       row.classList.remove('curr');
       dot.className = 'sbd';
       if (j === n) {
@@ -864,13 +838,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
           var tname = t ? (t.value||'Identidade') : 'Identidade';
           val.textContent = tname.length > 11 ? tname.slice(0,11)+'…' : tname;
           val.className = 'sbv done';
+        } else if (j === 4) {
+          var p = document.getElementById('id-persona');
+          var pname = p ? (p.value||'Agente') : 'Agente';
+          val.textContent = pname.length > 11 ? pname.slice(0,11)+'…' : pname;
+          val.className = 'sbv done';
         } else if (fills[j]) {
           val.textContent = fills[j];
           val.className = 'sbv done';
         }
       }
     }
-    // sync review on step 4
+    // sync review on step 5
     if (n === 4) {
       document.getElementById('rev-prod').textContent = prod.name + ' ' + prod.id;
       var title = document.getElementById('id-title').value || 'Assistente';
