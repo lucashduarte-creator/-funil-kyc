@@ -329,6 +329,63 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;
   display:none;align-items:center;gap:7px;z-index:999}
 .toast.show{display:flex}
+/* ── PERSONA SELECTOR ── */
+.persona-selector{position:relative}
+.persona-btn{display:flex;align-items:center;gap:8px;width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:8px 12px;background:#fff;cursor:pointer;font-family:inherit;font-size:13px;color:#18181b;transition:border-color .2s;text-align:left}
+.persona-btn:hover{border-color:#fe8700}
+.persona-avatar{width:26px;height:26px;border-radius:50%;background:#fe8700;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.persona-avatar img{width:100%;height:100%;object-fit:cover}
+.persona-btn-name{font-size:13px;font-weight:600;color:#18181b}
+.persona-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid #e4e4e7;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:50;overflow:hidden}
+.persona-dropdown.open{display:block}
+.persona-search-wrap{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid #f4f4f5}
+.persona-search-wrap svg{width:14px;height:14px;stroke:#a1a1aa;fill:none;stroke-width:2;flex-shrink:0}
+.persona-search-wrap input{border:none;outline:none;font-size:13px;color:#111;font-family:inherit;width:100%;background:transparent}
+.persona-list{display:flex;flex-direction:column}
+.persona-item{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;transition:background .15s}
+.persona-item:hover,.persona-item.selected{background:#fff8ee}
+.persona-item-name{font-size:13px;font-weight:600;color:#18181b;flex:1}
+.persona-item-check{color:#fe8700;font-size:14px;font-weight:700}
+.persona-create{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;border-top:1px solid #f4f4f5;font-size:13px;font-weight:600;color:#374151;transition:background .15s}
+.persona-create:hover{background:#fafafa}
+/* ── MODAL NOVO AGENTE ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:16px;padding:32px;max-width:460px;width:calc(100% - 32px);position:relative}
+.modal-title{font-size:20px;font-weight:700;margin-bottom:24px}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;cursor:pointer;font-size:20px;color:#a1a1aa;line-height:1}
+.modal-close:hover{color:#374151}
+.avatar-upload{display:flex;align-items:center;gap:20px;margin-bottom:24px}
+.avatar-circle{width:80px;height:80px;border-radius:50%;background:#f4f4f5;border:2px dashed #d4d4d8;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;overflow:hidden;transition:border-color .15s}
+.avatar-circle:hover{border-color:#fe8700}
+.avatar-circle svg{width:24px;height:24px;stroke:#a1a1aa;fill:none;stroke-width:1.5}
+.avatar-hint{font-size:13px;font-weight:600;color:#18181b;margin-bottom:4px}
+.avatar-sub{font-size:12px;color:#a1a1aa;line-height:1.5}
+.modal-field{margin-bottom:16px}
+.modal-field label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#52525b;margin-bottom:6px}
+.modal-field input{width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:10px 12px;font-size:14px;color:#111;outline:none;font-family:inherit;transition:border-color .2s}
+.modal-field input:focus,.modal-field textarea:focus{border-color:#fe8700;box-shadow:0 0 0 3px #fe870010}
+.modal-field textarea{width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;min-height:100px;line-height:1.6;transition:border-color .2s}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
+.modal-btn-cancel{background:#f4f4f5;color:#374151;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.modal-btn-create{background:#18181b;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.modal-btn-create:hover{background:#27272a}
+/* ── RECOVERY CARD ── */
+.rec-card{background:#fafafa;border:1px solid #e4e4e7;border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.rec-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.rec-card-title{font-size:13px;font-weight:700;color:#18181b;margin-bottom:2px}
+.rec-card-sub{font-size:11px;color:#71717a;line-height:1.5}
+.rec-edit-btn{background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;flex-shrink:0;transition:background .15s}
+.rec-edit-btn:hover{background:#f4f4f5}
+.rec-edit-btn svg{width:15px;height:15px;display:block}
+.rec-preview{background:#fff;border:1px solid #e4e4e7;border-radius:8px;padding:10px 13px;font-size:12px;color:#71717a;line-height:1.5;min-height:36px}
+.rec-toggle-wrap{display:flex;align-items:flex-start;gap:8px;cursor:pointer;margin-top:2px}
+.rec-toggle-wrap input[type=checkbox]{margin-top:2px;accent-color:#fe8700;width:14px;height:14px;flex-shrink:0}
+.rec-toggle-label{font-size:12px;font-weight:600;color:#374151;line-height:1.4}
+.rec-toggle-hint{font-size:11px;color:#a1a1aa;line-height:1.5;padding-left:22px}
+/* ── MODAL RECOVERY ── */
+.rec-modal-char{font-size:11px;color:#a1a1aa;text-align:right;margin-top:4px}
+.rec-modal-hint{font-size:12px;color:#a1a1aa;margin-top:6px}
 @media(max-width:700px){
   .uc-grid,.id-grid{grid-template-columns:1fr}
   .wiz-layout{flex-direction:column}
@@ -485,8 +542,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 
           <div class="id-grid">
             <div class="f-group">
-              <label>Nome do agente</label>
-              <input type="text" id="id-title" value="Assistente Voomp" oninput="syncWidget()" placeholder="Ex: Carolinha, Assistente Voomp...">
+              <label>Agente</label>
+              <!-- PERSONA SELECTOR -->
+              <div class="persona-selector" id="persona-selector">
+                <button class="persona-btn" id="persona-btn" onclick="togglePersonaDropdown(event)" type="button">
+                  <span class="persona-avatar" id="persona-avatar-btn">CA</span>
+                  <span class="persona-btn-name" id="persona-btn-name">Carolina</span>
+                  <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:none;stroke:#6b7280;stroke-width:2;margin-left:auto;flex-shrink:0"><path d="M6 9l6 6 6-6"/></svg>
+                </button>
+                <div class="persona-dropdown" id="persona-dropdown">
+                  <div class="persona-search-wrap">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" placeholder="Selecionar agente" oninput="filterPersonas(this.value)" id="persona-search">
+                  </div>
+                  <div class="persona-list" id="persona-list"></div>
+                  <div class="persona-create" onclick="openNewPersonaModal()">
+                    <span style="font-size:16px;font-weight:400;color:#374151">+</span>
+                    <span>Criar agente</span>
+                  </div>
+                </div>
+              </div>
+              <input type="hidden" id="id-title" value="Carolina">
             </div>
             <div class="f-group">
               <label>Subtítulo</label>
@@ -512,7 +588,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
             <div class="wp-bg-text">Checkout do produto</div>
             <div class="wp-panel">
               <div class="wp-hd" id="wp-hd">
-                <div class="wp-hd-t" id="wp-hd-t">Assistente Voomp</div>
+                <div class="wp-hd-t" id="wp-hd-t">Carolina</div>
                 <div class="wp-hd-s" id="wp-hd-s">Tire suas dúvidas</div>
               </div>
               <div class="wp-body">👋 Olá! Como posso ajudar?</div>
@@ -524,18 +600,29 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
 
           <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
             <div class="f-group">
-              <label>Instruções do agente <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#a1a1aa">(opcional)</span></label>
-              <textarea id="id-instrucoes" rows="3" style="width:100%;border:1.5px solid #e4e4e7;border-radius:8px;padding:10px 12px;font-size:13px;color:#111;outline:none;font-family:inherit;resize:vertical;line-height:1.6;background:#fff;transition:border-color .2s" placeholder="Ex: Nunca mencione concorrentes, destaque os benefícios..."></textarea>
+              <label>Contato de suporte</label>
+              <input type="text" id="id-suporte" placeholder="https://wa.me/55... ou e-mail">
             </div>
-            <div class="id-grid">
-              <div class="f-group">
-                <label>Contato de suporte</label>
-                <input type="text" id="id-suporte" placeholder="https://wa.me/55... ou e-mail">
+
+            <!-- MENSAGEM DE RECUPERAÇÃO — card estilo Hubla -->
+            <div class="rec-card">
+              <div class="rec-card-head">
+                <div>
+                  <div class="rec-card-title">Mensagem de recuperação</div>
+                  <div class="rec-card-sub">Aparece quando o comprador tenta sair do checkout sem concluir a compra.</div>
+                </div>
+                <button class="rec-edit-btn" onclick="openRecModal()" title="Editar mensagem">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
               </div>
-              <div class="f-group">
-                <label>Mensagem de recuperação</label>
-                <input type="text" id="id-rec-titulo" value="Conhece as formas de pagamento que facilitam pra você?">
-              </div>
+              <div class="rec-preview" id="rec-preview">Usando a mensagem padrão da Voomp.</div>
+              <input type="hidden" id="id-rec-titulo" value="">
+              <!-- Toggle: pop-up ou chat direto -->
+              <label class="rec-toggle-wrap">
+                <input type="checkbox" id="rec-show-popup" checked>
+                <span class="rec-toggle-label">Exibir pop-up de saída antes de abrir o chat</span>
+              </label>
+              <div class="rec-toggle-hint" id="rec-toggle-hint">Quando desmarcado, o chat abre diretamente ao detectar a intenção de saída.</div>
             </div>
           </div>
 
@@ -578,7 +665,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
           </div>
           <div class="note">
             <svg viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p>Após salvar, o agente aparece em Meus agentes. O GTM ID fica disponível no menu da automação.</p>
+            <p>Após salvar, o agente entra em Meus agentes e fica ativo no checkout do produto.</p>
           </div>
           <div class="actions">
             <button class="btn btn-ghost" onclick="wGoTo(3)"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg> Voltar</button>
@@ -604,6 +691,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
           </div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MENSAGEM DE RECUPERAÇÃO -->
+<div class="modal-overlay" id="modal-rec">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeRecModal()">×</button>
+    <div class="modal-title">Mensagem de recuperação</div>
+    <p style="font-size:13px;color:#71717a;margin-bottom:16px;line-height:1.6">Aparece quando o comprador tenta sair do checkout sem concluir a compra.</p>
+    <div class="modal-field">
+      <textarea id="rec-textarea" rows="5" maxlength="280" placeholder="Ex: Ainda dá tempo de garantir sua compra. Posso te ajudar a finalizar?" oninput="document.getElementById('rec-char-count').textContent=this.value.length+' / 280'"></textarea>
+      <div style="display:flex;justify-content:space-between;margin-top:4px">
+        <span style="font-size:12px;color:#a1a1aa">Digite "/" para inserir variáveis.</span>
+        <span class="rec-modal-char" id="rec-char-count">0 / 280</span>
+      </div>
+      <div class="rec-modal-hint">Deixe em branco para usar a mensagem padrão da Voomp.</div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeRecModal()">Cancelar</button>
+      <button class="modal-btn-create" onclick="saveRecMessage()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVO AGENTE -->
+<div class="modal-overlay" id="modal-persona">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeNewPersonaModal()">×</button>
+    <div class="modal-title">Novo agente</div>
+    <div class="avatar-upload">
+      <div class="avatar-circle" id="modal-avatar-circle" onclick="document.getElementById('modal-avatar-input').click()">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="10" y1="11" x2="14" y2="11"/></svg>
+      </div>
+      <input type="file" id="modal-avatar-input" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+      <div>
+        <div class="avatar-hint">Imagem de perfil</div>
+        <div class="avatar-sub">JPEG, PNG, GIF ou SVG<br>320px × 320px</div>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label>Nome</label>
+      <input type="text" id="modal-persona-nome" placeholder="Nome da persona">
+    </div>
+    <div class="modal-field">
+      <label>Personalidade</label>
+      <textarea id="modal-persona-personalidade" placeholder="Descreva o tom de voz, o jeito de falar e o comportamento do agente ao conversar com os clientes."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="closeNewPersonaModal()">Cancelar</button>
+      <button class="modal-btn-create" onclick="createPersona()">Criar agente</button>
     </div>
   </div>
 </div>
@@ -851,6 +989,104 @@ document.addEventListener('DOMContentLoaded', function(){
   z.addEventListener('drop',      function(e){ e.preventDefault(); z.style.borderColor=''; Array.from(e.dataTransfer.files).forEach(addFile); });
   z.addEventListener('click',     function(){ triggerFileInput(); });
 });
+
+  function openRecModal() {
+    var cur = document.getElementById('id-rec-titulo').value || '';
+    document.getElementById('rec-textarea').value = cur;
+    document.getElementById('rec-char-count').textContent = cur.length + ' / 280';
+    document.getElementById('modal-rec').classList.add('open');
+  }
+  function closeRecModal() { document.getElementById('modal-rec').classList.remove('open'); }
+  function saveRecMessage() {
+    var val = document.getElementById('rec-textarea').value.trim();
+    document.getElementById('id-rec-titulo').value = val;
+    document.getElementById('rec-preview').textContent = val || 'Usando a mensagem padrão da Voomp.';
+    document.getElementById('rec-preview').style.color = val ? '#18181b' : '#71717a';
+    closeRecModal();
+  }
+
+/* ── PERSONAS ── */
+  var PERSONAS = [
+    { id: 'carolina', name: 'Carolina', initials: 'CA', color: '#fe8700', img: null }
+  ];
+  var selectedPersona = PERSONAS[0];
+  var newPersonaImg = null;
+
+  function renderPersonaList(q) {
+    var list = document.getElementById('persona-list');
+    if (!list) return;
+    var filtered = PERSONAS.filter(function(p){ return p.name.toLowerCase().includes((q||'').toLowerCase()); });
+    list.innerHTML = '';
+    filtered.forEach(function(p) {
+      var div = document.createElement('div');
+      div.className = 'persona-item' + (p.id === selectedPersona.id ? ' selected' : '');
+      var avatarHtml = p.img
+        ? '<div class="persona-avatar"><img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover"></div>'
+        : '<div class="persona-avatar" style="background:'+p.color+'">'+p.initials+'</div>';
+      div.innerHTML = avatarHtml +
+        '<span class="persona-item-name">'+p.name+'</span>' +
+        (p.id === selectedPersona.id ? '<span class="persona-item-check">✓</span>' : '');
+      div.onclick = function(){ selectPersona(p); };
+      list.appendChild(div);
+    });
+  }
+
+  function selectPersona(p) {
+    selectedPersona = p;
+    document.getElementById('id-title').value = p.name;
+    document.getElementById('persona-btn-name').textContent = p.name;
+    var avBtn = document.getElementById('persona-avatar-btn');
+    if (p.img) { avBtn.innerHTML = '<img src="'+p.img+'" style="width:100%;height:100%;object-fit:cover">'; avBtn.style.background=''; }
+    else { avBtn.style.background = p.color; avBtn.textContent = p.initials; avBtn.innerHTML = p.initials; }
+    syncWidget();
+    closePersonaDropdown();
+  }
+
+  function togglePersonaDropdown(e) {
+    e.stopPropagation();
+    var dd = document.getElementById('persona-dropdown');
+    var isOpen = dd.classList.contains('open');
+    dd.classList.toggle('open');
+    if (!isOpen) { renderPersonaList(''); setTimeout(function(){ var s=document.getElementById('persona-search'); if(s) s.focus(); }, 50); }
+  }
+
+  function closePersonaDropdown() { var dd=document.getElementById('persona-dropdown'); if(dd) dd.classList.remove('open'); }
+  function filterPersonas(q) { renderPersonaList(q); }
+
+  function openNewPersonaModal() {
+    closePersonaDropdown();
+    document.getElementById('modal-persona-nome').value = '';
+    document.getElementById('modal-persona-personalidade').value = '';
+    document.getElementById('modal-avatar-circle').innerHTML = '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="10" y1="11" x2="14" y2="11"/></svg>';
+    newPersonaImg = null;
+    document.getElementById('modal-persona').classList.add('open');
+  }
+
+  function closeNewPersonaModal() { document.getElementById('modal-persona').classList.remove('open'); }
+
+  function previewAvatar(inp) {
+    if (!inp.files || !inp.files[0]) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      newPersonaImg = e.target.result;
+      document.getElementById('modal-avatar-circle').innerHTML = '<img src="'+newPersonaImg+'" style="width:100%;height:100%;object-fit:cover">';
+    };
+    reader.readAsDataURL(inp.files[0]);
+  }
+
+  function createPersona() {
+    var nome = (document.getElementById('modal-persona-nome').value || '').trim();
+    if (!nome) { document.getElementById('modal-persona-nome').focus(); return; }
+    var initials = nome.split(' ').map(function(w){ return w[0]||''; }).join('').slice(0,2).toUpperCase();
+    var colors = ['#3b82f6','#16a34a','#9333ea','#ef4444','#0891b2'];
+    var color = colors[PERSONAS.length % colors.length];
+    var p = { id: 'p_'+Date.now(), name: nome, initials: initials, color: color, img: newPersonaImg };
+    PERSONAS.push(p);
+    closeNewPersonaModal();
+    selectPersona(p);
+  }
+
+  document.addEventListener('click', function(e){ if (!e.target.closest && !e.target.closest('#persona-selector')) closePersonaDropdown(); });
 
 /* ── WIDGET PREVIEW ── */
 function syncWidget() {
