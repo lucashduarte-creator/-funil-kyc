@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Carteira KAM — Voomp KYC</title>
+<style>
+:root {
+  --primary-60:#FE6100;--primary-50:#CB4E00;--primary-95:#FFDFCC;--primary-99:#FFF7F2;
+  --neutral-15:#262626;--neutral-30:#6E6E71;--neutral-40:#878787;--neutral-50:#909092;
+  --neutral-85:#CBCBCB;--neutral-90:#E2E2E2;--neutral-95:#ECECEC;--neutral-99:#F9F9F9;
+  --success-20:#14521F;--success-40:#28A43D;--success-95:#EAFAED;
+  --danger-40:#A42B23;--danger-90:#F9DFDC;
+  --warning-30:#5C4E0A;--warning-90:#FBF4D0;
+  --info-30:#2A2044;--info-95:#E4E1EA;
+  --bg:#F4F4F5;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--neutral-15);font-size:14px;line-height:1.5;}
+
+/* ── Header ── */
+.header{background:#fff;border-bottom:1px solid var(--neutral-90);height:64px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--primary-60);text-decoration:none;}
+.logo svg{width:28px;height:28px;}
+.vsep{width:1px;height:28px;background:var(--neutral-90);}
+.nav{display:flex;gap:2px;}
+.nl{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--neutral-40);text-decoration:none;transition:background .15s,color .15s;}
+.nl:hover{background:var(--neutral-95);color:var(--neutral-15);}
+.nl.on{background:var(--primary-95);color:var(--primary-60);}
+.hright{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.last-upd{font-size:11px;color:var(--neutral-50);}
+.btn-out{padding:6px 12px;border:1px solid var(--neutral-90);border-radius:8px;font-size:12px;background:none;cursor:pointer;color:var(--neutral-40);transition:all .15s;}
+.btn-out:hover{border-color:var(--danger-40);color:var(--danger-40);}
+
+/* ── Main ── */
+.main{padding:28px 32px;max-width:1440px;margin:0 auto;}
+.pt{font-size:20px;font-weight:700;margin-bottom:4px;}
+.ps{font-size:13px;color:var(--neutral-30);margin-bottom:20px;}
+
+/* ── Funnel row ── */
+.frow{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.fc{background:#fff;border:2px solid var(--neutral-90);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .15s;position:relative;user-select:none;}
+.fc:hover{border-color:var(--neutral-50);}
+.fc.on{border-color:var(--primary-60);}
+.fc.on::after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);border:7px solid transparent;border-top-color:var(--primary-60);}
+.fc.done{border-color:#C8EDD1;}
+.fc.done.on{border-color:var(--success-40);}
+.fc.done.on::after{border-top-color:var(--success-40);}
+.fc-lbl{font-size:10px;font-weight:600;color:var(--neutral-40);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.fc.done .fc-lbl{color:var(--success-40);}
+.fc-val{font-size:22px;font-weight:700;color:var(--neutral-15);line-height:1;}
+.fc.done .fc-val{color:var(--success-40);}
+.fc-pct{font-size:11px;color:var(--neutral-50);margin-top:3px;}
+
+/* ── KAM Grid ── */
+.kgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.kc{background:#fff;border:1.5px solid var(--neutral-90);border-radius:10px;padding:14px;cursor:pointer;transition:all .15s;user-select:none;}
+.kc:hover{border-color:var(--neutral-50);}
+.kc.on{border-color:var(--primary-60);background:var(--primary-99);}
+.kch{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.kci{display:flex;align-items:center;gap:8px;}
+.kav{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;background:var(--neutral-95);color:var(--neutral-30);flex-shrink:0;}
+.kc.on .kav{background:var(--primary-95);color:var(--primary-50);}
+.kn{font-weight:600;font-size:13px;}
+.ks{font-size:11px;color:var(--neutral-40);}
+.kpct{font-size:14px;font-weight:700;}
+.pbw{background:var(--neutral-90);border-radius:999px;height:4px;margin-bottom:10px;overflow:hidden;}
+.pb{height:100%;border-radius:999px;background:var(--neutral-50);transition:width .5s;}
+.kc.on .pb{background:var(--primary-60);}
+.crow{display:flex;margin-bottom:10px;}
+.ci{flex:1;text-align:center;padding:7px 0;border:1px solid var(--neutral-90);}
+.ci:first-child{border-radius:6px 0 0 6px;border-right:none;}
+.ci:last-child{border-radius:0 6px 6px 0;}
+.cv{font-size:15px;font-weight:700;line-height:1;}
+.cv.g{color:var(--success-40);}
+.cl{font-size:10px;color:var(--neutral-40);text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+.slbl{font-size:10px;font-weight:600;color:var(--neutral-50);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.sgrid{display:flex;flex-direction:column;gap:4px;}
+.sr{display:flex;align-items:center;gap:5px;}
+.snum{width:13px;height:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;background:var(--neutral-85);color:#fff;flex-shrink:0;}
+.kc.on .snum{background:var(--primary-60);}
+.sname{font-size:11px;color:var(--neutral-40);width:50px;flex-shrink:0;}
+.sbw{flex:1;height:3px;background:var(--neutral-90);border-radius:999px;overflow:hidden;}
+.sbar{height:100%;border-radius:999px;background:var(--neutral-85);}
+.kc.on .sbar{background:var(--primary-60);}
+.sv{font-size:11px;font-weight:600;min-width:18px;text-align:right;}
+.sp{font-size:10px;color:var(--neutral-50);min-width:28px;text-align:right;}
+
+/* ── Shimmer loading ── */
+.shim{background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;animation:shimmer 1.2s infinite;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Table section ── */
+.tcard{background:#fff;border:1px solid var(--neutral-90);border-radius:10px;overflow:hidden;}
+.tt{border-bottom:1px solid var(--neutral-90);}
+.tt1{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:10px;flex-wrap:wrap;}
+.ttl{display:flex;align-items:center;gap:8px;}
+.ttitle{font-size:14px;font-weight:600;}
+.tbadge{background:var(--primary-95);color:var(--primary-60);font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;}
+.tright{display:flex;align-items:center;gap:8px;}
+.search-inp{border:1px solid var(--neutral-90);border-radius:8px;padding:6px 11px;font-size:13px;outline:none;width:210px;color:var(--neutral-15);transition:border-color .15s;}
+.search-inp:focus{border-color:var(--primary-60);}
+.search-inp::placeholder{color:var(--neutral-50);}
+.psel{border:1px solid var(--neutral-90);border-radius:8px;padding:6px 10px;font-size:13px;outline:none;background:#fff;color:var(--neutral-15);cursor:pointer;}
+.psel:focus{border-color:var(--primary-60);}
+.tt2{display:flex;align-items:center;gap:6px;padding:0 16px 12px;flex-wrap:wrap;}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--neutral-90);background:#fff;color:var(--neutral-40);transition:all .15s;user-select:none;}
+.chip:hover{border-color:var(--neutral-50);color:var(--neutral-15);}
+.chip.on{border-color:var(--primary-60);background:var(--primary-95);color:var(--primary-60);}
+.chip .cc{font-size:11px;font-weight:700;padding:1px 5px;border-radius:999px;background:var(--neutral-95);color:var(--neutral-50);}
+.chip.on .cc{background:rgba(254,97,0,.15);color:var(--primary-60);}
+
+/* ── Table ── */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--neutral-99);padding:9px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--neutral-40);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--neutral-90);white-space:nowrap;}
+tbody tr{border-bottom:1px solid #F5F5F5;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FFFBF9;}
+tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
+.cid{font-size:12px;color:var(--neutral-40);font-weight:500;}
+.cn{font-weight:500;}
+.ce{color:var(--neutral-40);font-size:12px;}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
+.bsuc{background:var(--success-95);color:var(--success-20);}
+.bwrn{background:var(--warning-90);color:var(--warning-30);}
+.binf{background:var(--info-95);color:var(--info-30);}
+.bdef{background:var(--neutral-95);color:var(--neutral-40);}
+.kpill{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;background:var(--neutral-95);color:var(--neutral-40);}
+.ocell{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.ochip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
+.oc-cont{background:#DCEFFE;color:#1565C0;}
+.oc-neg{background:var(--danger-90);color:var(--danger-40);}
+.oc-bug{background:#EFE0FF;color:#6A1F9A;}
+.oc-wait{background:var(--warning-90);color:var(--warning-30);}
+.osnip{font-size:12px;color:var(--neutral-40);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.onone{font-size:12px;color:var(--neutral-85);font-style:italic;}
+.btn-obs{padding:4px 10px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--neutral-90);background:#fff;color:var(--neutral-40);white-space:nowrap;transition:all .15s;}
+.btn-obs:hover{border-color:var(--primary-60);color:var(--primary-60);}
+.erow td{text-align:center;padding:40px;color:var(--neutral-40);}
+
+/* ── Pagination ── */
+.pw{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-top:1px solid var(--neutral-90);}
+.pi{font-size:12px;color:var(--neutral-40);}
+.pp{display:flex;gap:4px;}
+.pp button{min-width:28px;height:28px;padding:0 6px;border:1px solid var(--neutral-90);background:#fff;border-radius:4px;font-size:12px;cursor:pointer;color:var(--neutral-15);transition:border-color .15s;}
+.pp button:hover{border-color:var(--primary-60);color:var(--primary-60);}
+.pp button.on{border-color:var(--primary-60);color:var(--primary-60);font-weight:600;}
+.pp button:disabled{opacity:.3;cursor:not-allowed;}
+
+/* ── Observation Modal ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:460px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 60px rgba(0,0,0,.2);}
+.mh{padding:18px 22px 14px;border-bottom:1px solid var(--neutral-90);display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.mhtitle{font-weight:700;font-size:15px;margin-bottom:2px;}
+.mhsub{font-size:12px;color:var(--neutral-40);}
+.mclose{background:none;border:none;cursor:pointer;color:var(--neutral-50);padding:4px;border-radius:6px;line-height:1;flex-shrink:0;}
+.mclose:hover{color:var(--neutral-15);}
+.mb{padding:18px 22px;overflow-y:auto;flex:1;}
+.flbl{font-size:11px;font-weight:600;color:var(--neutral-30);text-transform:uppercase;letter-spacing:.3px;margin-bottom:8px;display:block;}
+/* toggle chips for obs */
+.flags{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+.flag{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--neutral-90);background:#fff;color:var(--neutral-40);transition:all .15s;user-select:none;}
+.flag:hover{border-color:var(--neutral-50);}
+.flag.on.fl-cont{border-color:#1565C0;background:#DCEFFE;color:#1565C0;}
+.flag.on.fl-neg{border-color:var(--danger-40);background:var(--danger-90);color:var(--danger-40);}
+.flag.on.fl-bug{border-color:#6A1F9A;background:#EFE0FF;color:#6A1F9A;}
+.ftextarea{width:100%;border:1px solid var(--neutral-90);border-radius:8px;padding:9px 12px;font-size:14px;outline:none;background:#fff;color:var(--neutral-15);font-family:inherit;resize:vertical;min-height:76px;line-height:1.5;transition:border-color .15s;}
+.ftextarea:focus{border-color:var(--primary-60);}
+.fsel{width:100%;border:1px solid var(--neutral-90);border-radius:8px;padding:9px 12px;font-size:14px;outline:none;background:#fff;color:var(--neutral-15);cursor:pointer;margin-top:16px;}
+.fsel:focus{border-color:var(--primary-60);}
+.mf{padding:14px 22px;border-top:1px solid var(--neutral-90);display:flex;justify-content:flex-end;gap:8px;}
+.btn-cancel{padding:8px 20px;border:1px solid var(--neutral-90);border-radius:8px;background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--neutral-40);}
+.btn-cancel:hover{border-color:var(--neutral-40);}
+.btn-save{padding:8px 20px;border:none;border-radius:8px;background:var(--primary-60);color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.btn-save:hover{background:var(--primary-50);}
+.btn-save:disabled{opacity:.5;cursor:not-allowed;}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:#fff;border:1px solid var(--neutral-90);border-radius:10px;padding:12px 18px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,.12);z-index:300;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;max-width:320px;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-left:4px solid var(--success-40);color:var(--success-20);}
+.toast.err{border-left:4px solid var(--danger-40);color:var(--danger-40);}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="logo" href="#">
+    <svg viewBox="0 0 40 40" fill="none"><path d="M8 12L20 28L32 12" stroke="#FE6100" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    voomp
+  </a>
+  <div class="vsep"></div>
+  <nav class="nav">
+    <a class="nl" href="funil-kyc.html">Funil KYC</a>
+    <a class="nl" href="kyc-prioritario.html">KYC Prioritário</a>
+    <a class="nl on" href="kyc-kam.html">Carteira KAM</a>
+  </nav>
+  <div class="hright">
+    <span class="last-upd" id="last-upd"></span>
+    <button class="btn-out" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="pt">Carteira KAM</div>
+  <div class="ps">KYC dos sellers encarteirados — acompanhamento por Key Account Manager</div>
+
+  <!-- Funnel cards (global fixo) -->
+  <div class="frow" id="frow">
+    <!-- shimmer placeholders -->
+    <div class="fc"><div class="shim" style="height:10px;width:50%;margin-bottom:8px"></div><div class="shim" style="height:28px;width:60%"></div></div>
+    <div class="fc"><div class="shim" style="height:10px;width:50%;margin-bottom:8px"></div><div class="shim" style="height:28px;width:60%"></div></div>
+    <div class="fc"><div class="shim" style="height:10px;width:50%;margin-bottom:8px"></div><div class="shim" style="height:28px;width:60%"></div></div>
+    <div class="fc"><div class="shim" style="height:10px;width:50%;margin-bottom:8px"></div><div class="shim" style="height:28px;width:60%"></div></div>
+    <div class="fc"><div class="shim" style="height:10px;width:50%;margin-bottom:8px"></div><div class="shim" style="height:28px;width:60%"></div></div>
+    <div class="fc done"><div class="shim" style="height:10px;width:50%;margin-bottom:8px"></div><div class="shim" style="height:28px;width:60%"></div></div>
+  </div>
+
+  <!-- KAM cards -->
+  <div class="kgrid" id="kgrid">
+    <div class="kc"><div class="shim" style="height:100px"></div></div>
+    <div class="kc"><div class="shim" style="height:100px"></div></div>
+    <div class="kc"><div class="shim" style="height:100px"></div></div>
+    <div class="kc"><div class="shim" style="height:100px"></div></div>
+  </div>
+
+  <!-- Table -->
+  <div class="tcard">
+    <div class="tt">
+      <div class="tt1">
+        <div class="ttl">
+          <span class="ttitle" id="ttitle">Sellers Encarteirados</span>
+          <span class="tbadge" id="tbadge">—</span>
+        </div>
+        <div class="tright">
+          <input class="search-inp" type="text" id="search" placeholder="Buscar nome ou e-mail..." oninput="doSearch()"/>
+          <select class="psel" id="psize" onchange="doPageSize()">
+            <option value="10">10 por página</option>
+            <option value="20">20 por página</option>
+            <option value="50">50 por página</option>
+          </select>
+        </div>
+      </div>
+      <div class="tt2" id="chips"></div>
+    </div>
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th>ID</th><th>Nome</th><th>E-mail</th><th>KAM</th>
+          <th>Status KYC</th><th>Observação</th>
+        </tr></thead>
+        <tbody id="tbody">
+          <tr><td colspan="6" style="text-align:center;padding:40px;color:var(--neutral-40)">
+            <div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin .7s linear infinite"></div>
+            <div style="margin-top:8px;font-size:12px">Aguardando integração n8n...</div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pw">
+      <span class="pi" id="pinfo">—</span>
+      <div class="pp" id="pp"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Observation Modal -->
+<div class="overlay" id="obs-overlay" onclick="if(event.target===this)closeObs()">
+  <div class="modal">
+    <div class="mh">
+      <div>
+        <div class="mhtitle" id="obs-name">Seller</div>
+        <div class="mhsub" id="obs-info">—</div>
+      </div>
+      <button class="mclose" onclick="closeObs()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mb">
+      <span class="flbl">O que aconteceu?</span>
+      <div class="flags">
+        <div class="flag fl-cont" id="flag-cont" onclick="toggleFlag('cont')">📞 Contatado</div>
+        <div class="flag fl-neg"  id="flag-neg"  onclick="toggleFlag('neg')">🚫 Recusou KYC</div>
+        <div class="flag fl-bug"  id="flag-bug"  onclick="toggleFlag('bug')">🐛 Bug no Fluxo</div>
+      </div>
+      <span class="flbl">Observação <span style="font-weight:400;text-transform:none;letter-spacing:0">(opcional)</span></span>
+      <textarea class="ftextarea" id="obs-texto" placeholder="Descreva o contato, situação ou problema..."></textarea>
+      <select class="fsel" id="obs-por">
+        <option value="">Registrado por...</option>
+        <option value="Caique">Caique</option>
+        <option value="Paula">Paula</option>
+        <option value="Nyara">Nyara</option>
+        <option value="Gabriela">Gabriela</option>
+      </select>
+    </div>
+    <div class="mf">
+      <button class="btn-cancel" onclick="closeObs()">Cancelar</button>
+      <button class="btn-save" id="obs-save" onclick="saveObs()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Auth ── */
+if (sessionStorage.getItem('kyc_auth') !== '1') window.location.replace('index.html');
+function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('index.html'); }
+
+/* ── Webhooks n8n ── */
+const N8N = {
+  TOTAIS:    'https://integration.voompcreators.net.br/webhook/kyc-kam-totais',
+  SELLERS:   'https://integration.voompcreators.net.br/webhook/kyc-kam-sellers',
+  OBS_WRITE: 'https://integration.voompcreators.net.br/webhook/kyc-kam-obs-write',
+};
+
+/* ── Constantes ── */
+const STEPS = [
+  { key:'pagarme',   lbl:'Pagar.me', etapa:'Faltam Pagarme'    },
+  { key:'d4sign',    lbl:'D4Sign',   etapa:'Faltam D4Sign'     },
+  { key:'bdr',       lbl:'BDR',      etapa:'Faltam BDR'        },
+  { key:'celcoin',   lbl:'Celcoin',  etapa:'Pendente Celcoin'  },
+  { key:'concluido', lbl:'Concluído',etapa:'Todas Etapas'      },
+];
+const ETAPA_BADGE = {
+  'Faltam Pagarme':  '<span class="badge bwrn">Faltam Pagar.me</span>',
+  'Faltam D4Sign':   '<span class="badge bwrn">Faltam D4Sign</span>',
+  'Faltam BDR':      '<span class="badge bwrn">Faltam BDR</span>',
+  'Pendente Celcoin':'<span class="badge binf">Pendente Celcoin</span>',
+  'Todas Etapas':    '<span class="badge bsuc">Concluído</span>',
+};
+const OBS_CHIP = {
+  contatado:  '<span class="ochip oc-cont">📞 Contatado</span>',
+  recusou_kyc:'<span class="ochip oc-neg">🚫 Recusou KYC</span>',
+  bug_fluxo:  '<span class="ochip oc-bug">🐛 Bug no fluxo</span>',
+};
+
+/* ── Estado ── */
+let selKam   = 'all';
+let selStep  = 'all';
+let fviz     = 'all';       /* visual dos cards macro */
+let page     = 1;
+let psize    = 10;
+let q        = '';
+let qt;
+let totaisData   = null;    /* cache dos totais */
+let activeSeller = null;    /* seller aberto no modal */
+let flags = { cont: false, neg: false, bug: false };
+
+/* ── Helpers ── */
+function fmt(n) { return Number(n||0).toLocaleString('pt-BR'); }
+function pct(v,t) { return t ? ((v/t)*100).toFixed(1).replace('.',',')+'%' : '0%'; }
+
+/* ══════════════════════════════
+   TOTAIS — carrega funnel + KAM cards
+══════════════════════════════ */
+async function loadTotais() {
+  try {
+    const res  = await fetch(N8N.TOTAIS);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw  = await res.json();
+    totaisData = Array.isArray(raw) ? raw[0] : raw;
+    renderFunnel();
+    renderKams();
+    renderChipsFromTotais();
+    if (totaisData.lastUpdate) {
+      document.getElementById('last-upd').textContent =
+        'Atualizado: ' + new Date(totaisData.lastUpdate).toLocaleString('pt-BR');
+    }
+  } catch(e) {
+    console.error('loadTotais:', e);
+    document.getElementById('frow').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:16px;font-size:13px;color:var(--neutral-40)">⚠️ Aguardando integração n8n (kyc-kam-totais)</div>';
+    document.getElementById('kgrid').innerHTML = '';
+  }
+}
+
+/* ── Funnel cards ── */
+function renderFunnel() {
+  if (!totaisData) return;
+  const g = totaisData.global || {};
+  const total = g.total || 0;
+  const cards = [
+    { key:'all',      lbl:'Total',    val:total,          done:false },
+    { key:'pagarme',  lbl:'Pagar.me', val:g.pagarme||0,   done:false },
+    { key:'d4sign',   lbl:'D4Sign',   val:g.d4sign||0,    done:false },
+    { key:'bdr',      lbl:'BDR',      val:g.bdr||0,       done:false },
+    { key:'celcoin',  lbl:'Celcoin',  val:g.celcoin||0,   done:false },
+    { key:'concluido',lbl:'Concluído',val:g.concluido||0, done:true  },
+  ];
+  document.getElementById('frow').innerHTML = cards.map(c => {
+    const on = fviz === c.key;
+    return `<div class="fc${c.done?' done':''}${on?' on':''}" onclick="clickFunnel('${c.key}')">
+      <div class="fc-lbl">${c.lbl}</div>
+      <div class="fc-val">${fmt(c.val)}</div>
+      <div class="fc-pct">${c.key==='all'?'100%':pct(c.val,total)} do total</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── KAM cards ── */
+function renderKams() {
+  if (!totaisData) return;
+  const kams = totaisData.kams || {};
+  document.getElementById('kgrid').innerHTML =
+    ['Caique','Paula','Nyara','Gabriela'].map(name => {
+      const d   = kams[name] || {};
+      const tot = d.total    || 0;
+      const con = d.concluido|| 0;
+      const pnd = d.pendente || 0;
+      const p   = tot ? (con/tot*100).toFixed(1) : 0;
+      const on  = selKam === name;
+      const stHTML = STEPS.slice(0,4).map((s,i) => {
+        const v  = d[s.key] || 0;
+        const bw = pnd ? Math.round(v/pnd*100) : 0;
+        return `<div class="sr">
+          <div class="snum">${i+1}</div>
+          <span class="sname">${s.lbl}</span>
+          <div class="sbw"><div class="sbar" style="width:${bw}%"></div></div>
+          <span class="sv">${fmt(v)}</span>
+          <span class="sp">${pct(v,pnd)}</span>
+        </div>`;
+      }).join('');
+      return `<div class="kc${on?' on':''}" id="kc-${name.toLowerCase()}" onclick="clickKam('${name}')">
+        <div class="kch">
+          <div class="kci">
+            <div class="kav">${name[0]}</div>
+            <div><div class="kn">${name}</div><div class="ks">${fmt(tot)} sellers</div></div>
+          </div>
+          <div class="kpct">${String(p).replace('.',',')}%</div>
+        </div>
+        <div class="pbw"><div class="pb" style="width:${p}%"></div></div>
+        <div class="crow">
+          <div class="ci"><div class="cv g">${fmt(con)}</div><div class="cl">Concluído</div></div>
+          <div class="ci"><div class="cv">${fmt(pnd)}</div><div class="cl">Pendente</div></div>
+        </div>
+        <div class="slbl">Pendentes por etapa</div>
+        <div class="sgrid">${stHTML}</div>
+      </div>`;
+    }).join('');
+}
+
+/* ── Chips: usa totais do KAM selecionado ── */
+function renderChipsFromTotais() {
+  if (!totaisData) { document.getElementById('chips').innerHTML = ''; return; }
+  const g = totaisData.global || {};
+  const k = selKam === 'all' ? null : (totaisData.kams||{})[selKam] || {};
+  const d = selKam === 'all' ? {
+    total: g.total||0, pagarme:g.pagarme||0, d4sign:g.d4sign||0,
+    bdr:g.bdr||0, celcoin:g.celcoin||0, concluido:g.concluido||0
+  } : {
+    total:k.total||0, pagarme:k.pagarme||0, d4sign:k.d4sign||0,
+    bdr:k.bdr||0, celcoin:k.celcoin||0, concluido:k.concluido||0
+  };
+  const list = [
+    {key:'all',      lbl:'Todos',    cnt:d.total},
+    {key:'pagarme',  lbl:'Pagar.me', cnt:d.pagarme},
+    {key:'d4sign',   lbl:'D4Sign',   cnt:d.d4sign},
+    {key:'bdr',      lbl:'BDR',      cnt:d.bdr},
+    {key:'celcoin',  lbl:'Celcoin',  cnt:d.celcoin},
+    {key:'concluido',lbl:'Concluído',cnt:d.concluido},
+  ];
+  document.getElementById('chips').innerHTML = list.map(c =>
+    `<button class="chip${selStep===c.key?' on':''}" onclick="clickChip('${c.key}')">
+      ${c.lbl} <span class="cc">${fmt(c.cnt)}</span>
+    </button>`
+  ).join('');
+}
+
+/* ══════════════════════════════
+   SELLERS — tabela paginada
+══════════════════════════════ */
+let abortCtrl = null;
+
+async function loadSellers() {
+  if (abortCtrl) abortCtrl.abort();
+  abortCtrl = new AbortController();
+  setTableLoading();
+
+  const params = new URLSearchParams({
+    kam: selKam, step: selStep,
+    page, pageSize: psize, search: q,
+  });
+  try {
+    const res = await fetch(`${N8N.SELLERS}?${params}`, { signal: abortCtrl.signal });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const raw = await res.json();
+    const d   = Array.isArray(raw) ? raw[0] : raw;
+    renderTable(d.sellers||[], d.total||0, d.totalPages||1, d.page||page);
+  } catch(e) {
+    if (e.name === 'AbortError') return;
+    document.getElementById('tbody').innerHTML =
+      '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--neutral-40)">⚠️ Aguardando integração n8n (kyc-kam-sellers)</td></tr>';
+    document.getElementById('tbadge').textContent = '—';
+    document.getElementById('pinfo').textContent  = '—';
+    document.getElementById('pp').innerHTML       = '';
+  }
+}
+
+function setTableLoading() {
+  document.getElementById('tbody').innerHTML =
+    `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--neutral-40)">
+      <div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin .7s linear infinite"></div>
+      <div style="margin-top:8px;font-size:12px">Carregando...</div>
+    </td></tr>`;
+}
+
+function renderTable(sellers, total, totalPages, curPage) {
+  const kamLbl  = selKam  === 'all' ? 'Todos os Sellers' : selKam;
+  const stepLbl = selStep === 'all' ? '' : ` — ${STEPS.find(x=>x.key===selStep)?.lbl||''}`;
+  document.getElementById('ttitle').textContent = kamLbl + stepLbl;
+  document.getElementById('tbadge').textContent = `${fmt(total)} sellers`;
+  document.getElementById('pinfo').textContent  = total
+    ? `Exibindo ${(curPage-1)*psize+1}–${Math.min(curPage*psize,total)} de ${fmt(total)}`
+    : 'Nenhum resultado';
+
+  const tb = document.getElementById('tbody');
+  if (!sellers.length) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--neutral-40)">Nenhum seller encontrado.</td></tr>';
+    document.getElementById('pp').innerHTML = '';
+    return;
+  }
+
+  tb.innerHTML = sellers.map(s => {
+    /* observação: contatado / recusou_kyc / bug_fluxo + texto */
+    let oc = '';
+    if (s.contatado)   oc += OBS_CHIP.contatado;
+    if (s.recusou_kyc) oc += OBS_CHIP.recusou_kyc;
+    if (s.bug_fluxo)   oc += OBS_CHIP.bug_fluxo;
+    const txt = s.lastObs
+      ? `<span class="osnip" title="${s.lastObs}">${s.lastObs}</span>` : '';
+    const btn = `<button class="btn-obs" onclick='openObs(${JSON.stringify(s).replace(/'/g,"&#39;")})'>
+      ${oc || !s.lastObs ? '+ Obs' : 'Editar'}
+    </button>`;
+    const obsCellContent = (oc || txt)
+      ? `<div class="ocell">${oc}${txt}${btn}</div>`
+      : `<div class="ocell"><span class="onone">Sem observação</span>${btn}</div>`;
+    return `<tr>
+      <td class="cid">${s.id||'—'}</td>
+      <td class="cn">${s.name||'<span style="color:var(--neutral-40);font-style:italic">Sem nome</span>'}</td>
+      <td class="ce" title="${s.email||''}">${s.email||'—'}</td>
+      <td><span class="kpill">${s.kam||'—'}</span></td>
+      <td>${ETAPA_BADGE[s.etapa_kyc]||'<span class="badge bdef">—</span>'}</td>
+      <td>${obsCellContent}</td>
+    </tr>`;
+  }).join('');
+
+  /* paginação */
+  if (totalPages <= 1) { document.getElementById('pp').innerHTML = ''; return; }
+  let pg = `<button onclick="goPage(${curPage-1})" ${curPage===1?'disabled':''}>‹</button>`;
+  for (let i=1; i<=totalPages; i++) {
+    if (totalPages>7 && i>2 && i<totalPages-1 && Math.abs(i-curPage)>1) {
+      if (i===3||i===totalPages-2) pg+=`<span style="padding:0 4px;color:var(--neutral-50)">…</span>`;
+      continue;
+    }
+    pg += `<button class="${i===curPage?'on':''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  pg += `<button onclick="goPage(${curPage+1})" ${curPage===totalPages?'disabled':''}>›</button>`;
+  document.getElementById('pp').innerHTML = pg;
+}
+
+/* ══════════════════════════════
+   AÇÕES DE FILTRO
+══════════════════════════════ */
+/* Card macro: atualiza visual + filtro */
+function clickFunnel(key) {
+  fviz    = key;
+  selStep = key;
+  page    = 1;
+  renderFunnel();
+  renderChipsFromTotais();
+  loadSellers();
+}
+
+/* Card KAM: muda KAM, reseta step */
+function clickKam(name) {
+  if (selKam === name) return;
+  selKam  = name;
+  selStep = 'all';
+  fviz    = 'all';
+  page    = 1;
+  renderKams();
+  renderFunnel();
+  renderChipsFromTotais();
+  loadSellers();
+}
+
+/* Chip da tabela: só filtro, não mexe nos cards macro */
+function clickChip(key) {
+  if (selStep === key) return;
+  selStep = key;
+  page    = 1;
+  renderChipsFromTotais();
+  loadSellers();
+}
+
+function goPage(p)    { page=p; loadSellers(); }
+function doPageSize() { psize=parseInt(document.getElementById('psize').value); page=1; loadSellers(); }
+function doSearch()   { clearTimeout(qt); q=document.getElementById('search').value; qt=setTimeout(()=>{page=1;loadSellers();},400); }
+
+/* ══════════════════════════════
+   MODAL DE OBSERVAÇÃO
+══════════════════════════════ */
+function openObs(seller) {
+  activeSeller = seller;
+  document.getElementById('obs-name').textContent = seller.name || 'Seller';
+  document.getElementById('obs-info').textContent = `ID ${seller.id} · ${seller.email||''} · KAM: ${seller.kam||'—'}`;
+  /* restaura flags do seller */
+  flags = { cont: !!seller.contatado, neg: !!seller.recusou_kyc, bug: !!seller.bug_fluxo };
+  syncFlags();
+  document.getElementById('obs-texto').value = seller.lastObs || '';
+  document.getElementById('obs-por').value   = '';
+  document.getElementById('obs-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('obs-por').focus(), 100);
+}
+
+function closeObs() {
+  document.getElementById('obs-overlay').classList.remove('open');
+  activeSeller = null;
+}
+
+function toggleFlag(f) {
+  flags[f] = !flags[f];
+  syncFlags();
+}
+
+function syncFlags() {
+  document.getElementById('flag-cont').classList.toggle('on', flags.cont);
+  document.getElementById('flag-neg').classList.toggle('on',  flags.neg);
+  document.getElementById('flag-bug').classList.toggle('on',  flags.bug);
+}
+
+async function saveObs() {
+  const texto = document.getElementById('obs-texto').value.trim();
+  const por   = document.getElementById('obs-por').value;
+  if (!flags.cont && !flags.neg && !flags.bug && !texto) {
+    showToast('Selecione pelo menos uma flag ou escreva uma observação.', 'err'); return;
+  }
+  if (!por) { showToast('Selecione quem está registrando.', 'err'); return; }
+
+  const btn = document.getElementById('obs-save');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+
+  try {
+    const payload = {
+      sellerId:      activeSeller.id,
+      sellerEmail:   activeSeller.email,
+      sellerName:    activeSeller.name,
+      kam:           activeSeller.kam,
+      contatado:     flags.cont,
+      recusou_kyc:   flags.neg,
+      bug_fluxo:     flags.bug,
+      observacao:    texto,
+      registradoPor: por,
+      timestamp:     new Date().toISOString(),
+    };
+    const res = await fetch(N8N.OBS_WRITE, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    closeObs();
+    showToast('Observação salva!', 'ok');
+    setTimeout(loadSellers, 600);
+  } catch(e) {
+    console.error('saveObs:', e);
+    showToast('Erro ao salvar. Verifique a integração n8n.', 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar';
+  }
+}
+
+/* ── Toast ── */
+let toastTimer;
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>{ t.className='toast'; }, 3500);
+}
+
+/* ── Init ── */
+loadTotais();
+loadSellers();
+</script>
+</body>
+</html>
