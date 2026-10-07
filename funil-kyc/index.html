@@ -102,9 +102,9 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
     voomp
   </a>
   <nav class="nav">
-    <a class="nav-link active" href="funil-kyc.html">Funil KYC</a>
-    <a class="nav-link" href="kyc-prioritario.html">KYC Prioritário</a>
-    <a class="nav-link" href="kyc-kam.html">Carteira KAM</a>
+    <a class="nav-link active" href="./">Funil KYC</a>
+    <a class="nav-link" href="../kyc-prioritario/">KYC Prioritário</a>
+    <a class="nav-link" href="../kyc-kam/">Carteira KAM</a>
   </nav>
   <div class="header-right">
     <button class="btn-logout" onclick="logout()">Sair</button>
@@ -169,9 +169,9 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
 <script>
 // ── Auth check ───────────────────────────────────────────────────
 if (sessionStorage.getItem('kyc_auth') !== '1') {
-  window.location.replace('index.html');
+  window.location.replace('../');
 }
-function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('index.html'); }
+function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('../'); }
 // ─────────────────────────────────────────────────────────────────
 
 const N8N = {

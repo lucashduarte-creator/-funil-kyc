@@ -194,9 +194,9 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
   </a>
   <div class="vsep"></div>
   <nav class="nav">
-    <a class="nl" href="funil-kyc.html">Funil KYC</a>
-    <a class="nl" href="kyc-prioritario.html">KYC Prioritário</a>
-    <a class="nl on" href="kyc-kam.html">Carteira KAM</a>
+    <a class="nl" href="../funil-kyc/">Funil KYC</a>
+    <a class="nl" href="../kyc-prioritario/">KYC Prioritário</a>
+    <a class="nl on" href="./">Carteira KAM</a>
   </nav>
   <div class="hright">
     <span class="last-upd" id="last-upd"></span>
@@ -307,8 +307,8 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
 
 <script>
 /* ── Auth ── */
-if (sessionStorage.getItem('kyc_auth') !== '1') window.location.replace('index.html');
-function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('index.html'); }
+if (sessionStorage.getItem('kyc_auth') !== '1') window.location.replace('../');
+function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('../'); }
 
 /* ── Webhooks n8n ── */
 const N8N = {

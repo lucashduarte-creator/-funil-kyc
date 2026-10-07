@@ -103,9 +103,9 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
   </a>
   <div class="nav-sep"></div>
   <nav class="nav-links">
-    <a class="nav-link" href="funil-kyc.html">Funil KYC</a>
-    <a class="nav-link active" href="kyc-prioritario.html">KYC Prioritário</a>
-    <a class="nav-link" href="kyc-kam.html">Carteira KAM</a>
+    <a class="nav-link" href="../funil-kyc/">Funil KYC</a>
+    <a class="nav-link active" href="./">KYC Prioritário</a>
+    <a class="nav-link" href="../kyc-kam/">Carteira KAM</a>
   </nav>
   <div class="header-right">
     <button class="btn-logout" onclick="logout()">Sair</button>
@@ -172,8 +172,8 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
 </main>
 
 <script>
-if (sessionStorage.getItem('kyc_auth') !== '1') { window.location.replace('index.html'); }
-function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('index.html'); }
+if (sessionStorage.getItem('kyc_auth') !== '1') { window.location.replace('../'); }
+function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('../'); }
 
 const N8N = {
   TOTAIS:  'https://integration.voompcreators.net.br/webhook/kyc-prioritario-totais',
