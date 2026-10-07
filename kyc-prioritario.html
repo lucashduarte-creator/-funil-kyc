@@ -30,7 +30,7 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .total-card-value{font-size:36px;font-weight:800;color:#fff;line-height:1;}
 .total-card-sub{font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;}
 .total-card-badge{background:rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;}
-.funnel-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:8px;}
+.funnel-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:8px;}
 .funnel-card{background:var(--surface-container);border:2px solid var(--neutral-90);border-radius:12px;padding:16px;cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s;user-select:none;position:relative;}
 .funnel-card:hover{border-color:var(--primary-60);box-shadow:0 2px 8px rgba(254,97,0,0.12);}
 .funnel-card.active{border-color:var(--primary-60);box-shadow:0 2px 12px rgba(254,97,0,0.18);}
@@ -43,7 +43,6 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .funnel-card.concluido .fc-label{color:var(--success-30);}
 .fc-value{font-size:26px;font-weight:700;color:var(--neutral-15);line-height:1;margin-bottom:4px;}
 .funnel-card.concluido .fc-value{color:var(--success-40);}
-.funnel-card.nao-iniciou .fc-value{color:var(--neutral-40);}
 .fc-pct{font-size:12px;color:var(--neutral-50);}
 .soma-eq{text-align:center;font-size:12px;color:var(--neutral-40);margin-bottom:28px;margin-top:10px;}
 .soma-eq .ok{color:var(--success-40);font-weight:600;}
@@ -112,7 +111,6 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
   </div>
 
   <div class="funnel-grid">
-    <div class="funnel-card nao-iniciou" id="card-nao-iniciou" onclick="selectStage('nao-iniciou')"><div class="fc-label">Não Iniciou</div><div class="fc-value" id="val-nao-iniciou">—</div><div class="fc-pct" id="pct-nao-iniciou">...</div></div>
     <div class="funnel-card" id="card-pagarme" onclick="selectStage('pagarme')"><div class="fc-label">Pagar.me</div><div class="fc-value" id="val-pagarme">—</div><div class="fc-pct" id="pct-pagarme">...</div></div>
     <div class="funnel-card" id="card-d4sign" onclick="selectStage('d4sign')"><div class="fc-label">D4Sign</div><div class="fc-value" id="val-d4sign">—</div><div class="fc-pct" id="pct-d4sign">...</div></div>
     <div class="funnel-card" id="card-bdr" onclick="selectStage('bdr')"><div class="fc-label">BDR</div><div class="fc-value" id="val-bdr">—</div><div class="fc-pct" id="pct-bdr">...</div></div>
@@ -165,7 +163,7 @@ const N8N = {
   SELLERS: 'https://integration.voompcreators.net.br/webhook/kyc-prioritario-sellers',
 };
 
-const STAGE_LABELS = { all:'Todos os Sellers','nao-iniciou':'Não Iniciaram KYC',pagarme:'Em Pagar.me',d4sign:'Em D4Sign',bdr:'Em BDR',celcoin:'Em Celcoin',concluido:'Concluído' };
+const STAGE_LABELS = { all:'Todos os Sellers',pagarme:'Em Pagar.me',d4sign:'Em D4Sign',bdr:'Em BDR',celcoin:'Em Celcoin',concluido:'Concluído' };
 
 let currentStage='all',currentPage=1,pageSize=10,totalsData=null,searchTimer=null,abortCtrl=null;
 
@@ -189,7 +187,7 @@ function waLink(phone){
 
 function setCardsLoading(){
   const sh='<div style="height:26px;background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;animation:shimmer 1.2s infinite"></div>';
-  ['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{document.getElementById('val-'+s).innerHTML=sh;document.getElementById('pct-'+s).textContent='...';});
+  ['pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{document.getElementById('val-'+s).innerHTML=sh;document.getElementById('pct-'+s).textContent='...';});
   document.getElementById('val-total').innerHTML=sh;
   document.getElementById('soma-eq').style.opacity='0.3';
 }
@@ -219,15 +217,15 @@ function renderCards(){
   const period=totalsData.periods?.all||{};
   const total=period.total||0;
   document.getElementById('val-total').textContent=fmt(totalsData.totalPrioritarios||0);
-  ['nao-iniciou','pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{
-    const v=period[s==='nao-iniciou'?'naoIniciou':s]||0;
+  ['pagarme','d4sign','bdr','celcoin','concluido'].forEach(s=>{
+    const v=period[s]||0;
     document.getElementById('val-'+s).textContent=fmt(v);
     document.getElementById('pct-'+s).textContent=pct(v,total)+' do total';
   });
   const p=period;
   document.getElementById('soma-eq').style.opacity='1';
-  const ni=p.naoIniciou||0,pm=p.pagarme||0,d4=p.d4sign||0,br=p.bdr||0,cc=p.celcoin||0,cn=p.concluido||0;
-  document.getElementById('soma-eq').innerHTML=`${fmt(ni)} + ${fmt(pm)} + ${fmt(d4)} + ${fmt(br)} + ${fmt(cc)} + ${fmt(cn)} = <span class="ok">${fmt(total)} ✓</span>`;
+  const pm=p.pagarme||0,d4=p.d4sign||0,br=p.bdr||0,cc=p.celcoin||0,cn=p.concluido||0;
+  document.getElementById('soma-eq').innerHTML=`${fmt(pm)} + ${fmt(d4)} + ${fmt(br)} + ${fmt(cc)} + ${fmt(cn)} = <span class="ok">${fmt(total)} ✓</span>`;
 }
 
 async function loadSellers(){
@@ -253,7 +251,7 @@ async function loadSellers(){
 
 function renderTable(sellers,total,totalPages){
   const period=totalsData?.periods?.all||{};
-  const stageTotal=(currentStage==='all'?period.total:period[currentStage==='nao-iniciou'?'naoIniciou':currentStage])||total;
+  const stageTotal=(currentStage==='all'?period.total:period[currentStage])||total;
   const p=totalsData?pct(stageTotal,totalsData.totalPrioritarios||1):'—';
   document.getElementById('tbl-title').textContent=STAGE_LABELS[currentStage];
   document.getElementById('tbl-count').textContent=`${fmt(stageTotal)} sellers · ${p}`;
