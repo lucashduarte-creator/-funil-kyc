@@ -366,7 +366,7 @@ async function loadTotais() {
     renderKams();
     renderChipsFromTotais();
     if (totaisData.lastUpdate) {
-      document.getElementById('last-upd').textContent =
+      const _lu = document.getElementById('last-upd'); if (_lu) _lu.textContent =
         'Atualizado: ' + new Date(totaisData.lastUpdate).toLocaleString('pt-BR');
     }
   } catch(e) {
