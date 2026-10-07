@@ -74,6 +74,7 @@ body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;ba
 .cv{font-size:15px;font-weight:700;line-height:1;}
 .cv.g{color:var(--success-40);}
 .cl{font-size:10px;color:var(--neutral-40);text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+.cv-sub{font-size:12px;font-weight:600;color:var(--neutral-50);margin-top:1px;}
 .slbl{font-size:10px;font-weight:600;color:var(--neutral-50);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
 .sgrid{display:flex;flex-direction:column;gap:4px;}
 .sr{display:flex;align-items:center;gap:5px;}
@@ -409,8 +410,9 @@ function renderKams() {
       const tot = d.total    || 0;
       const con = d.concluido|| 0;
       const pnd = d.pendente || 0;
-      const p   = tot ? (con/tot*100).toFixed(1) : 0;
-      const on  = selKam === name;
+      const p     = tot ? Math.round(con/tot*100) : 0;
+      const pPend = 100 - p;
+      const on    = selKam === name;
       const stHTML = STEPS.slice(0,4).map((s,i) => {
         const v  = d[s.key] || 0;
         const bw = pnd ? Math.round(v/pnd*100) : 0;
@@ -428,12 +430,11 @@ function renderKams() {
             <div class="kav">${name[0]}</div>
             <div><div class="kn">${name}</div><div class="ks">${fmt(tot)} sellers</div></div>
           </div>
-          <div class="kpct">${String(p).replace('.',',')}%</div>
         </div>
         <div class="pbw"><div class="pb" style="width:${p}%"></div></div>
         <div class="crow">
-          <div class="ci"><div class="cv g">${fmt(con)}</div><div class="cl">Concluído</div></div>
-          <div class="ci"><div class="cv">${fmt(pnd)}</div><div class="cl">Pendente</div></div>
+          <div class="ci"><div class="cv g">${fmt(con)}</div><div class="cv-sub">${p}%</div><div class="cl">Concluído</div></div>
+          <div class="ci"><div class="cv">${fmt(pnd)}</div><div class="cv-sub">${pPend}%</div><div class="cl">Pendente</div></div>
         </div>
         <div class="slbl">Pendentes por etapa</div>
         <div class="sgrid">${stHTML}</div>
