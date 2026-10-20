@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sellers & Co-sellers · KYC — Voomp</title>
+<style>
+:root{
+  --primary-60:#FE6100;--primary-50:#CB4E00;--primary-95:#FFDFCC;--primary-99:#FFF7F2;
+  --neutral-15:#262626;--neutral-30:#6E6E71;--neutral-40:#878787;--neutral-50:#909092;
+  --neutral-85:#CBCBCB;--neutral-90:#E2E2E2;--neutral-95:#ECECEC;--neutral-99:#F9F9F9;
+  --success-20:#14521F;--success-40:#28A43D;--success-95:#EAFAED;
+  --danger-40:#A42B23;--danger-90:#F9DFDC;
+  --warning-30:#5C4E0A;--warning-90:#FBF4D0;
+  --info-30:#2A2044;--info-95:#E4E1EA;
+  --bg:#F9F9F9;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--neutral-15);font-size:13px;line-height:1.5;}
+
+/* Header */
+.header{background:#fff;border-bottom:1px solid var(--neutral-90);height:64px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--primary-60);text-decoration:none;}
+.logo svg{width:28px;height:28px;}
+.vsep{width:1px;height:28px;background:var(--neutral-90);flex-shrink:0;}
+.nav{display:flex;gap:2px;}
+.nl{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--neutral-40);text-decoration:none;transition:background .15s,color .15s;}
+.nl:hover{background:var(--neutral-95);color:var(--neutral-15);}
+.nl.on{background:var(--primary-95);color:var(--primary-60);}
+.hright{margin-left:auto;}
+.btn-out{padding:6px 12px;border:1px solid var(--neutral-90);border-radius:8px;font-size:12px;background:none;cursor:pointer;color:var(--neutral-40);transition:all .15s;}
+.btn-out:hover{border-color:var(--danger-40);color:var(--danger-40);}
+
+/* Main */
+.main{padding:28px 32px;max-width:1440px;margin:0 auto;}
+.ph-title{font-size:20px;font-weight:700;margin-bottom:4px;}
+.ph-sub{font-size:13px;color:var(--neutral-30);max-width:820px;margin-bottom:8px;}
+.ph-resumo{font-size:13px;color:var(--neutral-15);background:#fff;border:1px solid var(--neutral-90);border-radius:8px;padding:10px 16px;margin-bottom:16px;}
+.ph-resumo b{font-weight:700;}
+.ph-updated{font-size:11px;color:var(--neutral-50);margin-left:8px;}
+
+/* Tab bar */
+.tab-bar{display:flex;align-items:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+.tab-pill{padding:7px 16px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--neutral-90);background:#fff;color:var(--neutral-40);transition:all .15s;user-select:none;}
+.tab-pill:hover{border-color:var(--neutral-50);color:var(--neutral-15);}
+.tab-pill.on{border-color:var(--primary-60);background:var(--primary-95);color:var(--primary-60);}
+.tab-spacer{flex:1;}
+.toggle-wrap{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--neutral-40);user-select:none;}
+.toggle-box{width:36px;height:20px;border-radius:999px;background:var(--neutral-90);position:relative;transition:background .2s;flex-shrink:0;}
+.toggle-box.on{background:var(--primary-60);}
+.toggle-knob{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle-box.on .toggle-knob{left:18px;}
+
+/* Section card */
+.card{background:#fff;border:1px solid var(--neutral-90);border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--neutral-90);display:flex;align-items:center;gap:8px;}
+.card-title{font-size:15px;font-weight:600;}
+.card-badge{background:var(--primary-95);color:var(--primary-60);font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;}
+
+/* KPI grids */
+.kpi-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.kpi-grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px;}
+.kpi-card{background:#fff;border:1px solid var(--neutral-90);border-radius:10px;padding:16px 18px;}
+.kpi-label{font-size:11px;font-weight:600;color:var(--neutral-40);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.kpi-val{font-size:26px;font-weight:800;line-height:1;margin-bottom:4px;font-variant-numeric:tabular-nums;}
+.kpi-val.red{color:var(--danger-40);}
+.kpi-sub{font-size:12px;color:var(--neutral-40);}
+.kpi-sub.red{color:var(--danger-40);}
+
+/* Warning banner */
+.warn-banner{border:1px solid var(--warning-90);border-left:4px solid #B8960C;background:var(--warning-90);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--warning-30);}
+
+/* Two-col charts */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+
+/* Horizontal bar chart */
+.chart-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #F5F5F5;}
+.chart-row:last-child{border-bottom:none;}
+.chart-lbl{width:140px;flex-shrink:0;font-size:12px;color:var(--neutral-15);}
+.chart-lbl span{display:block;font-size:10px;color:var(--neutral-50);}
+.chart-bar-bg{flex:1;height:10px;background:var(--neutral-95);border-radius:4px;overflow:hidden;}
+.chart-bar{height:100%;border-radius:4px;background:var(--primary-60);transition:width .4s;}
+.chart-bar.ok{background:var(--success-40);}
+.chart-val{font-size:12px;font-weight:600;width:60px;text-align:right;font-variant-numeric:tabular-nums;}
+.chart-pct{font-size:11px;color:var(--neutral-50);width:38px;text-align:right;}
+
+/* Matrix */
+.matrix-wrap{overflow-x:auto;}
+.matrix{border-collapse:collapse;font-size:11px;width:100%;}
+.matrix th{padding:6px 8px;text-align:center;font-weight:600;color:var(--neutral-40);white-space:nowrap;border-bottom:1px solid var(--neutral-90);}
+.matrix th.row-lbl{text-align:right;width:90px;}
+.matrix td{padding:5px 4px;text-align:center;font-variant-numeric:tabular-nums;font-weight:500;border:1px solid var(--neutral-95);min-width:44px;}
+.matrix td.zero{color:var(--neutral-85);}
+.matrix .row-head{font-weight:600;color:var(--neutral-40);text-align:right;padding-right:8px;white-space:nowrap;}
+
+/* Toolbar */
+.tb{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--neutral-90);flex-wrap:wrap;}
+.search{flex:1;min-width:180px;border:1px solid var(--neutral-90);border-radius:8px;padding:7px 12px;font-size:13px;outline:none;color:var(--neutral-15);background:#fff;transition:border-color .15s;}
+.search:focus{border-color:var(--primary-60);}
+.search::placeholder{color:var(--neutral-50);}
+.sel{border:1px solid var(--neutral-90);border-radius:8px;padding:7px 12px;font-size:13px;outline:none;background:#fff;color:var(--neutral-15);cursor:pointer;}
+.sel:focus{border-color:var(--primary-60);}
+.tb-counter{margin-left:auto;font-size:12px;color:var(--neutral-40);white-space:nowrap;}
+
+/* Table */
+.tw{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--neutral-99);padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--neutral-40);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--neutral-90);white-space:nowrap;cursor:pointer;user-select:none;}
+thead th:hover{color:var(--neutral-15);}
+thead th.s-asc::after{content:' ↑';}
+thead th.s-desc::after{content:' ↓';}
+thead th.r{text-align:right;}
+tbody tr{border-bottom:1px solid #F5F5F5;cursor:pointer;transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FFFBF9;}
+tbody tr.sel-row{background:var(--primary-99);}
+tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
+.c-id{font-size:12px;color:var(--neutral-40);font-weight:500;font-variant-numeric:tabular-nums;}
+.c-name{font-weight:500;}
+.c-email{color:var(--neutral-40);font-size:12px;}
+.c-r{text-align:right;font-variant-numeric:tabular-nums;}
+.c-pend{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;}
+.c-pend.has{color:var(--danger-40);}
+
+/* TPV mini bar */
+.tpv-w{display:flex;flex-direction:column;gap:3px;}
+.tpv-bar-bg{height:2px;background:var(--neutral-90);border-radius:2px;overflow:hidden;}
+.tpv-bar{height:2px;border-radius:2px;background:var(--primary-60);}
+
+/* Etapa badge */
+.eb{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;border:1.5px solid transparent;}
+.eb .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.eb-ok{background:var(--success-95);color:var(--success-20);}
+.eb-ok .dot{background:var(--success-40);}
+.eb-mid{background:var(--warning-90);color:var(--warning-30);}
+.eb-mid .dot{background:#B8960C;}
+.eb-bad{background:var(--danger-90);color:var(--danger-40);}
+.eb-bad .dot{background:var(--danger-40);}
+.eb-div{border-color:#B8960C !important;}
+.ec-div{color:var(--danger-40);font-weight:600;font-size:12px;}
+.ec-ok{color:var(--neutral-40);font-size:12px;}
+
+/* Detail panel */
+.detail-panel{border-top:1px solid var(--neutral-90);padding:20px;}
+.detail-title{font-size:15px;font-weight:600;margin-bottom:4px;}
+.detail-sub{font-size:12px;color:var(--neutral-40);margin-bottom:16px;}
+.detail-empty{font-size:13px;color:var(--neutral-40);padding:20px 0;}
+
+/* Loading / error */
+.loading-row td{text-align:center;padding:48px;color:var(--neutral-40);}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.shim{background:linear-gradient(90deg,#eee 25%,#f5f5f5 50%,#eee 75%);background-size:200%;border-radius:4px;animation:shimmer 1.2s infinite;}
+
+/* Responsive */
+@media(max-width:900px){
+  .kpi-grid-4,.kpi-grid-5{grid-template-columns:repeat(2,1fr);}
+  .two-col{grid-template-columns:1fr;}
+  .hide-m{display:none;}
+  .main{padding:16px;}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a class="logo" href="#">
+    <svg viewBox="0 0 40 40" fill="none"><path d="M8 12L20 28L32 12" stroke="#FE6100" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    voomp
+  </a>
+  <div class="vsep"></div>
+  <nav class="nav">
+    <a class="nl" href="../kyc-prioritario/">KYC Prioritário</a>
+    <a class="nl" href="../kyc-kam/">Carteira KAM</a>
+    <a class="nl on" href="../kyc-sellers-cosellers/">Sellers & Co-sellers</a>
+  </nav>
+  <div class="hright">
+    <button class="btn-out" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="ph-title">Sellers e co-sellers · KYC</div>
+  <p class="ph-sub">Cobertura do KYC, TPV em risco e vínculos seller → co-seller. A etapa com borda amarela não bate com a planilha comercial.</p>
+
+  <div class="ph-resumo" id="resumo-frase">Carregando...</div>
+
+  <!-- Tab bar + toggle -->
+  <div class="tab-bar">
+    <span class="tab-pill on" onclick="setTab('visao')" id="tp-visao">Visão geral</span>
+    <span class="tab-pill" onclick="setTab('sellers')" id="tp-sellers">Sellers</span>
+    <span class="tab-pill" onclick="setTab('cosellers')" id="tp-cosellers">Co-sellers</span>
+    <div class="tab-spacer"></div>
+    <div class="toggle-wrap" onclick="toggleInternal()" id="toggle-wrap">
+      <div class="toggle-box" id="toggle-box"><div class="toggle-knob"></div></div>
+      <span id="toggle-lbl">Ignorar conta interna (16102)</span>
+    </div>
+  </div>
+
+  <!-- TAB: VISÃO GERAL -->
+  <div id="tab-visao">
+    <div class="kpi-grid-4" id="kpi-tpv">
+      <div class="kpi-card"><div class="kpi-label">TPV <span id="tpv-periodo-1">set/26</span> dos sellers</div><div class="kpi-val shim" style="height:32px;width:120px;margin-bottom:6px"></div><div class="kpi-sub shim" style="height:14px;width:160px"></div></div>
+      <div class="kpi-card"><div class="kpi-label">TPV com KYC concluído</div><div class="kpi-val shim" style="height:32px;width:100px;margin-bottom:6px"></div><div class="kpi-sub shim" style="height:14px;width:140px"></div></div>
+      <div class="kpi-card"><div class="kpi-label">TPV com KYC pendente</div><div class="kpi-val red shim" style="height:32px;width:100px;margin-bottom:6px"></div><div class="kpi-sub red shim" style="height:14px;width:140px"></div></div>
+      <div class="kpi-card"><div class="kpi-label">Concluídos com co-seller pendente</div><div class="kpi-val red shim" style="height:32px;width:100px;margin-bottom:6px"></div><div class="kpi-sub red shim" style="height:14px;width:160px"></div></div>
+    </div>
+
+    <div class="kpi-grid-5" id="kpi-contas">
+      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:60px;margin-bottom:8px"></div><div class="kpi-val shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub shim" style="height:12px;width:100px"></div></div>
+      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:80px;margin-bottom:8px"></div><div class="kpi-val shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub shim" style="height:12px;width:80px"></div></div>
+      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:80px;margin-bottom:8px"></div><div class="kpi-val shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub shim" style="height:12px;width:100px"></div></div>
+      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:80px;margin-bottom:8px"></div><div class="kpi-val shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub shim" style="height:12px;width:80px"></div></div>
+      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:80px;margin-bottom:8px"></div><div class="kpi-val red shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub red shim" style="height:12px;width:100px"></div></div>
+    </div>
+
+    <div class="warn-banner" id="warn-interna"></div>
+
+    <div class="two-col">
+      <div class="card" style="padding:20px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px">TPV <span id="tpv-periodo-2">set/26</span> por etapa do seller</div>
+        <div id="chart-tpv-etapa"></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px">Em que etapa cada um está parado</div>
+        <div id="chart-etapa-dist"></div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card" style="padding:20px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px">Etapa do seller × etapa do co-seller</div>
+        <div class="matrix-wrap" id="matrix-wrap"></div>
+        <div style="font-size:11px;color:var(--neutral-50);margin-top:8px">Cor proporcional ao volume. Coluna verde = co-seller concluído.</div>
+      </div>
+      <div class="card" style="padding:20px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px">Como a etapa é definida</div>
+        <div id="legend-etapas"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SELLERS -->
+  <div id="tab-sellers" style="display:none">
+    <div class="card">
+      <div class="tb">
+        <input class="search" type="text" id="s-search" placeholder="Buscar por ID, nome ou e-mail..." oninput="renderSellers()"/>
+        <select class="sel" id="s-resp" onchange="renderSellers()"><option value="">Todos os responsáveis</option></select>
+        <select class="sel" id="s-etapa" onchange="renderSellers()"><option value="">Todas as etapas</option></select>
+        <select class="sel" id="s-co" onchange="renderSellers()">
+          <option value="">Todos</option>
+          <option value="com">Com co-seller</option>
+          <option value="sem">Sem co-seller</option>
+          <option value="pend">Com co-seller pendente</option>
+          <option value="conc-pend">Concluído com co-seller pendente</option>
+          <option value="div">Etapa diferente da planilha</option>
+        </select>
+        <span class="tb-counter" id="s-counter">—</span>
+      </div>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('sellers','seller_id')" class="r">ID</th>
+              <th onclick="sortBy('sellers','nome')">Seller</th>
+              <th class="hide-m" onclick="sortBy('sellers','email')">E-mail</th>
+              <th onclick="sortBy('sellers','tpv')" class="r" id="th-tpv-s">TPV</th>
+              <th class="hide-m" onclick="sortBy('sellers','responsavel')">Responsável</th>
+              <th onclick="sortBy('sellers','etapa_kyc')">Etapa KYC</th>
+              <th class="hide-m" onclick="sortBy('sellers','etapa_comercial')">Etapa (comercial)</th>
+              <th onclick="sortBy('sellers','n_cosellers')" class="r">Co-sellers</th>
+              <th onclick="sortBy('sellers','n_pendentes')" class="r">Pendentes</th>
+            </tr>
+          </thead>
+          <tbody id="sellers-tbody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--neutral-90);">
+        <span style="font-size:12px;color:var(--neutral-40)" id="s-pag-info">—</span>
+        <div style="display:flex;gap:4px" id="s-pag-pages"></div>
+      </div>
+    </div>
+
+    <div class="card" id="seller-detail">
+      <div style="padding:20px;text-align:center;color:var(--neutral-40);font-size:13px">Escolha um seller na tabela acima para ver seus co-sellers.</div>
+    </div>
+  </div>
+
+  <!-- TAB: CO-SELLERS -->
+  <div id="tab-cosellers" style="display:none">
+    <div class="card">
+      <div class="tb">
+        <input class="search" type="text" id="cs-search" placeholder="Buscar por ID, nome ou e-mail..." oninput="renderCosellers()"/>
+        <select class="sel" id="cs-etapa" onchange="renderCosellers()"><option value="">Todas as etapas</option></select>
+        <span class="tb-counter" id="cs-counter">—</span>
+      </div>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy('cosellers','coseller_id')" class="r">ID</th>
+              <th onclick="sortBy('cosellers','coseller_nome')">Co-seller</th>
+              <th class="hide-m" onclick="sortBy('cosellers','coseller_email')">E-mail</th>
+              <th onclick="sortBy('cosellers','coseller_tpv')" class="r" id="th-tpv-cs">TPV próprio</th>
+              <th onclick="sortBy('cosellers','etapa_kyc')">Etapa KYC</th>
+              <th onclick="sortBy('cosellers','n_sellers')" class="r">Sellers</th>
+              <th onclick="sortBy('cosellers','tpv_sellers')" class="r hide-m">TPV dos sellers</th>
+            </tr>
+          </thead>
+          <tbody id="cosellers-tbody"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--neutral-90);">
+        <span style="font-size:12px;color:var(--neutral-40)" id="cs-pag-info">—</span>
+        <div style="display:flex;gap:4px" id="cs-pag-pages"></div>
+      </div>
+    </div>
+
+    <div class="card" id="coseller-detail">
+      <div style="padding:20px;text-align:center;color:var(--neutral-40);font-size:13px">Escolha um co-seller na tabela acima para ver seus sellers.</div>
+    </div>
+  </div>
+</main>
+
+<script>
+/* ─────────────────────────────────────────────────
+   AUTH
+───────────────────────────────────────────────── */
+if (sessionStorage.getItem('kyc_auth') !== '1') window.location.replace('../');
+function logout(){ sessionStorage.removeItem('kyc_auth'); window.location.replace('../'); }
+
+/* ─────────────────────────────────────────────────
+   CONFIG
+───────────────────────────────────────────────── */
+const WEBHOOK = 'https://integration.voompcreators.net.br/webhook/kyc-sellers-cosellers';
+const CONTA_INTERNA_ID = '16102';
+const ORDER  = ['SEM KYC','PAGARME','D4SIGN','BDR','CELCOIN','CONCLUIDO'];
+const RANK   = Object.fromEntries(ORDER.map((e,i)=>[e,i]));
+const LABELS = { 'SEM KYC':'Sem KYC','PAGARME':'Pagar.me','D4SIGN':'D4Sign','BDR':'BDR','CELCOIN':'Celcoin','CONCLUIDO':'Concluído' };
+const DICA   = { 'SEM KYC':'não iniciou','PAGARME':'Pagar.me em análise','D4SIGN':'falta assinar o contrato','BDR':'falta o BDR','CELCOIN':'falta a conta Celcoin','CONCLUIDO':'conta Celcoin aprovada' };
+const ETAPA_COM_MAP = { 'Todas Etapas':'CONCLUIDO','Pendente Celcoin':'CELCOIN','Faltam BDR':'BDR','Faltam D4Sign':'D4SIGN','Faltam Pagarme':'PAGARME' };
+
+/* ─────────────────────────────────────────────────
+   MOCK DATA (substituído pelo webhook em produção)
+───────────────────────────────────────────────── */
+const MOCK = {
+  meta: { gerado_em: new Date().toISOString(), tpv_periodo: 'set/26', conta_interna_id: '16102', tpv_total_planilha: 15708364 },
+  sellers: [
+    {seller_id:'103721',nome:'Rafael Fernandez Fingergut',email:'fingergutrafael@gmail.com',etapa_kyc:'CONCLUIDO',tpv:13600000,responsavel:'Gabriela (CSM)',etapa_comercial:'Todas Etapas',etapa_comercial_enum:'CONCLUIDO'},
+    {seller_id:'16372', nome:'Paulo Andre da Silva Cirino',email:'pauloandrecirino@gmail.com',etapa_kyc:'CONCLUIDO',tpv:13500000,responsavel:'Nyara (KAM)',etapa_comercial:'Todas Etapas',etapa_comercial_enum:'CONCLUIDO'},
+    {seller_id:'159987',nome:'José carlos da Costa Júnior',email:'juniorcostta1@gmail.com',etapa_kyc:'CELCOIN',tpv:13400000,responsavel:'Sem responsável',etapa_comercial:'Pendente Celcoin',etapa_comercial_enum:'CELCOIN'},
+    {seller_id:'295933',nome:'Fernanda da Silva Melo de Lima',email:'institutofernandamascarenhas1@gmail.com',etapa_kyc:'CONCLUIDO',tpv:13000000,responsavel:'Paula (KAM)',etapa_comercial:'Todas Etapas',etapa_comercial_enum:'CONCLUIDO'},
+    {seller_id:'295773',nome:'Daniely Cristina Reisdorfer da Silva',email:'contato@efagro.com.br',etapa_kyc:'D4SIGN',tpv:12800000,responsavel:'Paula (KAM)',etapa_comercial:'Faltam D4Sign',etapa_comercial_enum:'D4SIGN'},
+    {seller_id:'417184',nome:'Tatiana Ferreira Foscaldo',email:'dra.tatianafoscaldo@gmail.com',etapa_kyc:'D4SIGN',tpv:12700000,responsavel:'Nyara (KAM)',etapa_comercial:'Faltam BDR',etapa_comercial_enum:'BDR'},
+    {seller_id:'421723',nome:'ANA LUIZA VASCONCELOS CHAGAS',email:'analuizavsantana@gmail.com',etapa_kyc:'CELCOIN',tpv:12400000,responsavel:'Paula (KAM)',etapa_comercial:'Pendente Celcoin',etapa_comercial_enum:'CELCOIN'},
+    {seller_id:'654274',nome:'PEDRO SOUSA DE ALMEIDA JUNIOR',email:'psousab@gmail.com',etapa_kyc:'CONCLUIDO',tpv:12200000,responsavel:'Caique (CSM)',etapa_comercial:'Todas Etapas',etapa_comercial_enum:'CONCLUIDO'},
+    {seller_id:'407747',nome:'VANNA COELHO CABRAL',email:'profvannacabral@gmail.com',etapa_kyc:'D4SIGN',tpv:11600000,responsavel:'Sem responsável',etapa_comercial:'Faltam D4Sign',etapa_comercial_enum:'D4SIGN'},
+    {seller_id:'408773',nome:'Tarcísio da Costa Lobato',email:'tarcisiolobato@econoquant.com.br',etapa_kyc:'CONCLUIDO',tpv:11500000,responsavel:'Paula (KAM)',etapa_comercial:'Todas Etapas',etapa_comercial_enum:'CONCLUIDO'},
+    {seller_id:'37085', nome:'Ana Paula Niquerito Nunes',email:'anapaulaniquerito@gmail.com',etapa_kyc:'CONCLUIDO',tpv:11400000,responsavel:'Nyara (KAM)',etapa_comercial:'Todas Etapas',etapa_comercial_enum:'CONCLUIDO'},
+    {seller_id:'857',   nome:'Artur Cesar do Amaral',email:'arturamaral08@gmail.com',etapa_kyc:'CELCOIN',tpv:10200000,responsavel:'Nyara (KAM)',etapa_comercial:'Pendente Celcoin',etapa_comercial_enum:'CELCOIN'},
+    {seller_id:'5491',  nome:'FABRICIO ARAUJO GOMES',email:'fabricioaraujo.vet@gmail.com',etapa_kyc:'D4SIGN',tpv:5100000,responsavel:'Nyara (KAM)',etapa_comercial:'Faltam D4Sign',etapa_comercial_enum:'D4SIGN'},
+    {seller_id:'1116',  nome:'Anderson Maciel Lima de Medeiros',email:'cursos@clickgeo.com.br',etapa_kyc:'BDR',tpv:3200000,responsavel:'Caique (CSM)',etapa_comercial:'Faltam BDR',etapa_comercial_enum:'BDR'},
+    {seller_id:'233841',nome:'Douglas Jesus da Silva',email:'contato@industrialbrain.com.br',etapa_kyc:'PAGARME',tpv:1100000,responsavel:'Nyara (KAM)',etapa_comercial:'Faltam Pagarme',etapa_comercial_enum:'PAGARME'},
+  ],
+  vinculos: [
+    {seller_id:'295933',coseller_id:'16102',coseller_nome:'Pos Graduação',coseller_email:'posgraduacao@voomp.com.br',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+    {seller_id:'295933',coseller_id:'280780',coseller_nome:'Rafael de Souza Tímbola',coseller_email:'rafaeltimbola@hotmail.com',coseller_etapa_kyc:'CELCOIN',coseller_tpv:0},
+    {seller_id:'295933',coseller_id:'177849',coseller_nome:'Lucas Giordano Paranhos',coseller_email:'lucasgiordanoparanhos@gmail.com',coseller_etapa_kyc:'CELCOIN',coseller_tpv:0},
+    {seller_id:'295933',coseller_id:'131623',coseller_nome:'Natalia Moura do Vale',coseller_email:'escolanatimoura@gmail.com',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+    {seller_id:'295933',coseller_id:'241704',coseller_nome:'Igor Emanuel Vasconcelos',coseller_email:'igorpsiquiatria@yahoo.com.br',coseller_etapa_kyc:'CELCOIN',coseller_tpv:0},
+    {seller_id:'295933',coseller_id:'205882',coseller_nome:'Daniel de Souza',coseller_email:'danielsouza.batista96@gmail.com',coseller_etapa_kyc:'CONCLUIDO',coseller_tpv:0},
+    {seller_id:'295933',coseller_id:'419009',coseller_nome:'Danilo Barbosa Cavalcanti',coseller_email:'iaaplicada@unipds.com.br',coseller_etapa_kyc:'CONCLUIDO',coseller_tpv:3245677},
+    {seller_id:'295933',coseller_id:'205005',coseller_nome:'Nathalia Braga',coseller_email:'dranathaliabraga@nathaliabraga.com.br',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+    {seller_id:'295773',coseller_id:'141527',coseller_nome:'Valmir de Souza Silva Andrade',coseller_email:'valmir@dsouzasdigital.com.br',coseller_etapa_kyc:'CONCLUIDO',coseller_tpv:23900000},
+    {seller_id:'295773',coseller_id:'16102', coseller_nome:'Pos Graduação',coseller_email:'posgraduacao@voomp.com.br',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+    {seller_id:'295773',coseller_id:'100223',coseller_nome:'Darlan Rafael F Coelho',coseller_email:'darlan.rafael@yahoo.com.br',coseller_etapa_kyc:'SEM KYC',coseller_tpv:0},
+    {seller_id:'295773',coseller_id:'101125',coseller_nome:'Stefanie barbosa',coseller_email:'matsousa1406@gmail.com',coseller_etapa_kyc:'SEM KYC',coseller_tpv:0},
+    {seller_id:'417184',coseller_id:'16102', coseller_nome:'Pos Graduação',coseller_email:'posgraduacao@voomp.com.br',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+    {seller_id:'857',   coseller_id:'16102', coseller_nome:'Pos Graduação',coseller_email:'posgraduacao@voomp.com.br',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+    {seller_id:'857',   coseller_id:'52350', coseller_nome:'Amir Curcio dos Reis',coseller_email:'amircurcio@gmail.com',coseller_etapa_kyc:'CELCOIN',coseller_tpv:0},
+    {seller_id:'1116',  coseller_id:'16102', coseller_nome:'Pos Graduação',coseller_email:'posgraduacao@voomp.com.br',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+    {seller_id:'1116',  coseller_id:'1537',  coseller_nome:'Vanessa da Silva Brum Bastos',coseller_email:'vsbrumb@gmail.com',coseller_etapa_kyc:'BDR',coseller_tpv:0},
+    {seller_id:'1116',  coseller_id:'2723',  coseller_nome:'Juliana Maria Ferreira de Souza Diniz',coseller_email:'contato.radargeo@gmail.com',coseller_etapa_kyc:'CELCOIN',coseller_tpv:0},
+    {seller_id:'5491',  coseller_id:'16102', coseller_nome:'Pos Graduação',coseller_email:'posgraduacao@voomp.com.br',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+    {seller_id:'103721',coseller_id:'16102', coseller_nome:'Pos Graduação',coseller_email:'posgraduacao@voomp.com.br',coseller_etapa_kyc:'D4SIGN',coseller_tpv:0},
+  ]
+};
+
+/* ─────────────────────────────────────────────────
+   STATE
+───────────────────────────────────────────────── */
+let rawData = null;
+let ignoreInternal = false;
+let activeTab = 'visao';
+let sellerSelected = null;
+let cosellerSelected = null;
+let sortState = { sellers: { col: 'tpv', dir: -1 }, cosellers: { col: 'tpv_sellers', dir: -1 } };
+let pagState = { sellers: 1, cosellers: 1 };
+const PAGE_SIZE = 20;
+
+/* ─────────────────────────────────────────────────
+   INIT
+───────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  const hash = location.hash.replace('#','');
+  if (['visao','sellers','cosellers'].includes(hash)) setTab(hash, false);
+  loadData();
+});
+
+async function loadData() {
+  try {
+    const res = await fetch(WEBHOOK);
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const d = await res.json();
+    if (d.erro) throw new Error(d.erro);
+    rawData = d;
+  } catch(e) {
+    console.warn('Webhook indisponível, usando mock:', e.message);
+    rawData = MOCK;
+  }
+  render();
+}
+
+/* ─────────────────────────────────────────────────
+   HELPERS
+───────────────────────────────────────────────── */
+function fmtBRL(v, compact=false) {
+  if (v === null || v === undefined) return '—';
+  if (compact && Math.abs(v) >= 1000000) return 'R$\u00a0' + (v/1000000).toFixed(1).replace('.',',') + '\u00a0mi';
+  if (compact && Math.abs(v) >= 10000)  return 'R$\u00a0' + (v/1000).toFixed(0) + '\u00a0mil';
+  return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0}).format(v);
+}
+function fmtPct(v, dec=0) { return (v*100).toFixed(dec).replace('.',',')+'%'; }
+function fmtN(v) { return Number(v||0).toLocaleString('pt-BR'); }
+
+function etapaClass(e) {
+  if (e === 'CONCLUIDO') return 'eb eb-ok';
+  if (e === 'SEM KYC')   return 'eb eb-bad';
+  return 'eb eb-mid';
+}
+function etapaBadge(e, diverge=false) {
+  return `<span class="${etapaClass(e)}${diverge?' eb-div':''}"><span class="dot"></span>${LABELS[e]||e}</span>`;
+}
+function isDiverge(s) {
+  if (!s.etapa_comercial_enum) return false;
+  return s.etapa_comercial_enum !== s.etapa_kyc;
+}
+
+/* ─────────────────────────────────────────────────
+   CALCULAR RESUMO (puro)
+───────────────────────────────────────────────── */
+function calcular(sellers, vinculos, { ignorarInterna }) {
+  const V = ignorarInterna ? vinculos.filter(v=>v.coseller_id!==CONTA_INTERNA_ID) : vinculos;
+
+  const sellersComVinculo = new Map(); // seller_id → [vinculos]
+  for (const v of V) {
+    if (!sellersComVinculo.has(v.seller_id)) sellersComVinculo.set(v.seller_id,[]);
+    sellersComVinculo.get(v.seller_id).push(v);
+  }
+
+  const T = (arr) => arr.reduce((a,s)=>a+(s.tpv||0),0);
+
+  const concluidos = sellers.filter(s=>s.etapa_kyc==='CONCLUIDO');
+  const pendentes  = sellers.filter(s=>s.etapa_kyc!=='CONCLUIDO');
+
+  const conclComPend = concluidos.filter(s => {
+    const vv = sellersComVinculo.get(s.seller_id)||[];
+    return vv.some(v=>v.coseller_etapa_kyc!=='CONCLUIDO');
+  });
+
+  // Co-sellers únicos
+  const csMap = new Map(); // coseller_id → { ...info, sellers: Set, tpvSellers: 0 }
+  for (const v of V) {
+    if (!csMap.has(v.coseller_id)) {
+      csMap.set(v.coseller_id, {
+        coseller_id: v.coseller_id,
+        coseller_nome: v.coseller_nome,
+        coseller_email: v.coseller_email,
+        coseller_etapa_kyc: v.coseller_etapa_kyc,
+        coseller_tpv: v.coseller_tpv||0,
+        sellers: new Set(),
+        tpv_sellers: 0
+      });
+    }
+    const cs = csMap.get(v.coseller_id);
+    // best etapa
+    if ((RANK[v.coseller_etapa_kyc]??-1) > (RANK[cs.coseller_etapa_kyc]??-1)) {
+      cs.coseller_etapa_kyc = v.coseller_etapa_kyc;
+    }
+    const sel = sellers.find(s=>s.seller_id===v.seller_id);
+    if (sel) { cs.sellers.add(v.seller_id); cs.tpv_sellers += (sel.tpv||0); }
+  }
+  const cosellersArr = [...csMap.values()].map(cs=>({...cs, n_sellers: cs.sellers.size, sellers: [...cs.sellers]}));
+
+  const sellersMap = new Map(sellers.map(s=>[s.seller_id,s]));
+  const enrichedSellers = sellers.map(s => {
+    const vv = sellersComVinculo.get(s.seller_id)||[];
+    const filtered = vv;
+    return {
+      ...s,
+      n_cosellers: filtered.length,
+      n_pendentes: filtered.filter(v=>v.coseller_etapa_kyc!=='CONCLUIDO').length,
+      cosellers_detail: filtered
+    };
+  });
+
+  // TPV por etapa
+  const porEtapa = {};
+  for (const e of ORDER) { porEtapa[e] = { sellers: 0, tpv: 0 }; }
+  for (const s of sellers) {
+    const e = s.etapa_kyc||'SEM KYC';
+    if (porEtapa[e]) { porEtapa[e].sellers++; porEtapa[e].tpv += (s.tpv||0); }
+  }
+
+  // Distribuição co-sellers por etapa
+  const csPorEtapa = {};
+  for (const e of ORDER) csPorEtapa[e] = 0;
+  for (const cs of cosellersArr) { const e = cs.coseller_etapa_kyc||'SEM KYC'; if(csPorEtapa[e]!==undefined) csPorEtapa[e]++; }
+
+  // Matriz 6×6
+  const matrix = {};
+  for (const se of ORDER) { matrix[se]={}; for(const ce of ORDER) matrix[se][ce]=0; }
+  for (const v of V) {
+    const se = sellers.find(s=>s.seller_id===v.seller_id)?.etapa_kyc||'SEM KYC';
+    const ce = v.coseller_etapa_kyc||'SEM KYC';
+    if (matrix[se]&&matrix[se][ce]!==undefined) matrix[se][ce]++;
+  }
+
+  const tpvSellers = T(sellers);
+  const csSemKYC = cosellersArr.filter(c=>c.coseller_etapa_kyc==='SEM KYC');
+
+  // Conta interna
+  const vinculosInterna = vinculos.filter(v=>v.coseller_id===CONTA_INTERNA_ID);
+  const sellersComInterna = new Set(vinculosInterna.map(v=>v.seller_id)).size;
+
+  const divergentes = sellers.filter(isDiverge);
+
+  return {
+    sellers: enrichedSellers,
+    cosellers: cosellersArr,
+    vinculos: V,
+    totais: {
+      nSellers: sellers.length,
+      nConcluidos: concluidos.length,
+      pctConcluidos: sellers.length ? concluidos.length/sellers.length : 0,
+      tpvSellers,
+      pctTpvPlanilha: rawData?.meta?.tpv_total_planilha ? tpvSellers/rawData.meta.tpv_total_planilha : 0,
+      tpvConcluido: T(concluidos),
+      pctTpvConcluido: tpvSellers ? T(concluidos)/tpvSellers : 0,
+      tpvPendente: T(pendentes),
+      nPendentes: pendentes.length,
+      tpvConclComPend: T(conclComPend),
+      nConclComPend: conclComPend.length,
+      nComCoseller: [...sellersComVinculo.keys()].filter(id=>sellersMap.has(id)).length,
+      nVinculos: V.length,
+      nCosellersUnicos: cosellersArr.length,
+      nCsTbSellers: cosellersArr.filter(c=>sellersMap.has(c.coseller_id)).length,
+      nCsConcluidos: cosellersArr.filter(c=>c.coseller_etapa_kyc==='CONCLUIDO').length,
+      pctCsConcluidos: cosellersArr.length ? cosellersArr.filter(c=>c.coseller_etapa_kyc==='CONCLUIDO').length/cosellersArr.length : 0,
+      nCsSemKYC: csSemKYC.length,
+      sellersComInterna,
+      nDivergentes: divergentes.length
+    },
+    porEtapa,
+    csPorEtapa,
+    matrix
+  };
+}
+
+/* ─────────────────────────────────────────────────
+   RENDER (tudo)
+───────────────────────────────────────────────── */
+function render() {
+  if (!rawData) return;
+  const { sellers, vinculos, meta } = rawData;
+  const R = calcular(sellers, vinculos, { ignorarInterna: ignoreInternal });
+
+  // Atualiza período
+  const per = meta.tpv_periodo || '';
+  document.getElementById('tpv-periodo-1').textContent = per;
+  document.getElementById('tpv-periodo-2').textContent = per;
+  document.getElementById('th-tpv-s').textContent  = 'TPV '+(per||'');
+  document.getElementById('th-tpv-cs').textContent = 'TPV próprio '+(per||'');
+
+  // Atualizado às
+  const gerado = meta.gerado_em ? new Date(meta.gerado_em) : null;
+  const updStr = gerado ? ' <span class="ph-updated">Atualizado às '+gerado.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})+'</span>' : '';
+
+  // Frase resumo
+  const t = R.totais;
+  document.getElementById('resumo-frase').innerHTML =
+    `Dos <b>${fmtN(t.nSellers)}</b> sellers, <b>${fmtPct(t.pctConcluidos)}</b> já concluíram o KYC, ` +
+    `e eles somam <b>${fmtPct(t.pctTpvConcluido)}</b> do TPV de ${per}. ` +
+    `Entre os <b>${fmtN(t.nCosellersUnicos)}</b> co-sellers, só <b>${fmtPct(t.pctCsConcluidos)}</b> concluíram ` +
+    `e <b>${fmtN(t.nCsSemKYC)}</b> nem começaram.`+updStr;
+
+  renderVisao(R);
+  populateFilters(R);
+
+  if (activeTab === 'sellers')   renderSellers(R);
+  if (activeTab === 'cosellers') renderCosellers(R);
+}
+
+/* ─────────────────────────────────────────────────
+   VISÃO GERAL
+───────────────────────────────────────────────── */
+function renderVisao(R) {
+  const t = R.totais;
+  const per = rawData?.meta?.tpv_periodo || '';
+
+  document.getElementById('kpi-tpv').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">TPV ${per} dos sellers</div>
+      <div class="kpi-val">${fmtBRL(t.tpvSellers,true)}</div>
+      <div class="kpi-sub">${fmtPct(t.pctTpvPlanilha,1)} do TPV da planilha comercial</div></div>
+    <div class="kpi-card"><div class="kpi-label">TPV com KYC concluído</div>
+      <div class="kpi-val">${fmtBRL(t.tpvConcluido,true)}</div>
+      <div class="kpi-sub">${fmtPct(t.pctTpvConcluido,1)} do TPV dos sellers</div></div>
+    <div class="kpi-card"><div class="kpi-label">TPV com KYC pendente</div>
+      <div class="kpi-val red">${fmtBRL(t.tpvPendente,true)}</div>
+      <div class="kpi-sub red">${fmtN(t.nPendentes)} sellers ainda não concluíram</div></div>
+    <div class="kpi-card"><div class="kpi-label">Concluídos com co-seller pendente</div>
+      <div class="kpi-val red">${fmtBRL(t.tpvConclComPend,true)}</div>
+      <div class="kpi-sub red">${fmtN(t.nConclComPend)} sellers com KYC ok e ≥1 co-seller pendente</div></div>`;
+
+  document.getElementById('kpi-contas').innerHTML = `
+    <div class="kpi-card"><div class="kpi-label">Sellers</div>
+      <div class="kpi-val">${fmtN(t.nSellers)}</div>
+      <div class="kpi-sub">${fmtN(t.nConcluidos)} concluídos (${fmtPct(t.pctConcluidos)})</div></div>
+    <div class="kpi-card"><div class="kpi-label">Sellers com co-seller</div>
+      <div class="kpi-val">${fmtN(t.nComCoseller)}</div>
+      <div class="kpi-sub">${fmtN(t.nVinculos)} vínculos no total</div></div>
+    <div class="kpi-card"><div class="kpi-label">Co-sellers únicos</div>
+      <div class="kpi-val">${fmtN(t.nCosellersUnicos)}</div>
+      <div class="kpi-sub">${fmtN(t.nCsTbSellers)} também são sellers</div></div>
+    <div class="kpi-card"><div class="kpi-label">Co-sellers concluídos</div>
+      <div class="kpi-val">${fmtN(t.nCsConcluidos)}</div>
+      <div class="kpi-sub">${fmtPct(t.pctCsConcluidos)} dos co-sellers</div></div>
+    <div class="kpi-card"><div class="kpi-label">Co-sellers sem KYC</div>
+      <div class="kpi-val red">${fmtN(t.nCsSemKYC)}</div>
+      <div class="kpi-sub red">nunca iniciaram</div></div>`;
+
+  document.getElementById('warn-interna').innerHTML =
+    `⚠️ A conta <b>${CONTA_INTERNA_ID} · Pós Graduação</b> (posgraduacao@voomp.com.br), parada em D4Sign, aparece como co-seller de <b>${fmtN(t.sellersComInterna)}</b> sellers. Ela infla as contagens de co-sellers pendentes. Use o toggle acima para ver os números sem ela.`;
+
+  // Chart 1: TPV por etapa
+  const maxTpv = Math.max(...ORDER.map(e=>R.porEtapa[e]?.tpv||0), 1);
+  document.getElementById('chart-tpv-etapa').innerHTML = ORDER.slice().reverse().map(e => {
+    const d = R.porEtapa[e];
+    if (!d||!d.sellers) return '';
+    const pct = d.tpv/maxTpv;
+    const isOk = e==='CONCLUIDO';
+    return `<div class="chart-row">
+      <div class="chart-lbl">${LABELS[e]}<span>${DICA[e]}</span></div>
+      <div class="chart-bar-bg"><div class="chart-bar${isOk?' ok':''}" style="width:${(pct*100).toFixed(1)}%"></div></div>
+      <div class="chart-val">${fmtBRL(d.tpv,true)}</div>
+      <div class="chart-pct">${fmtPct(t.tpvSellers?d.tpv/t.tpvSellers:0,1)}</div>
+    </div>`;
+  }).join('');
+
+  // Chart 2: distribuição por etapa
+  const maxDist = Math.max(...ORDER.map(e=>Math.max(R.porEtapa[e]?.sellers||0, R.csPorEtapa[e]||0)), 1);
+  document.getElementById('chart-etapa-dist').innerHTML = [
+    `<div style="display:flex;gap:16px;margin-bottom:10px;font-size:11px;color:var(--neutral-40)"><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--primary-60);display:inline-block"></span>Sellers</span><span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--neutral-85);display:inline-block"></span>Co-sellers</span></div>`,
+    ...ORDER.map(e => {
+      const ns = R.porEtapa[e]?.sellers||0;
+      const nc = R.csPorEtapa[e]||0;
+      return `<div class="chart-row"><div class="chart-lbl">${LABELS[e]}</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+          <div class="chart-bar-bg"><div class="chart-bar" style="width:${(ns/maxDist*100).toFixed(1)}%;background:var(--primary-60)"></div></div>
+          <div class="chart-bar-bg"><div class="chart-bar" style="width:${(nc/maxDist*100).toFixed(1)}%;background:var(--neutral-85)"></div></div>
+        </div>
+        <div class="chart-val" style="font-size:11px">${fmtN(ns)}<br><span style="color:var(--neutral-50)">${fmtN(nc)}</span></div>
+      </div>`;
+    })
+  ].join('');
+
+  // Matrix
+  const maxM = Math.max(...ORDER.flatMap(se=>ORDER.map(ce=>R.matrix[se][ce])), 1);
+  let mhtml = `<table class="matrix"><thead><tr><th class="row-lbl">Seller ↓ Co-seller →</th>${ORDER.map(e=>`<th>${LABELS[e]}</th>`).join('')}</tr></thead><tbody>`;
+  for (const se of ORDER) {
+    mhtml += `<tr><td class="row-head">${LABELS[se]}</td>`;
+    for (const ce of ORDER) {
+      const n = R.matrix[se][ce];
+      const alpha = n ? Math.min(0.9, 0.1+0.8*Math.sqrt(n/maxM)) : 0;
+      const bg = ce==='CONCLUIDO'
+        ? `rgba(40,164,61,${alpha})`
+        : `rgba(254,97,0,${alpha})`;
+      const textCol = alpha > 0.5 ? '#fff' : 'inherit';
+      mhtml += `<td class="${n?'':'zero'}" style="${n?`background:${bg};color:${textCol}`:''}"><b>${n||''}</b></td>`;
+    }
+    mhtml += '</tr>';
+  }
+  mhtml += '</tbody></table>';
+  document.getElementById('matrix-wrap').innerHTML = mhtml;
+
+  // Legenda
+  document.getElementById('legend-etapas').innerHTML = ORDER.map(e => {
+    const com = Object.entries(ETAPA_COM_MAP).find(([,v])=>v===e)?.[0]||'—';
+    return `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid #F5F5F5;font-size:12px">
+      <div style="flex:1">${etapaBadge(e)}</div>
+      <div style="flex:1;color:var(--neutral-40)">${com}</div>
+    </div>`;
+  }).join('') + `<div style="font-size:11px;color:var(--neutral-50);margin-top:8px">Etapa KYC sistema × planilha comercial</div>`;
+}
+
+/* ─────────────────────────────────────────────────
+   POPULATE FILTERS
+───────────────────────────────────────────────── */
+function populateFilters(R) {
+  const resps = [...new Set(R.sellers.map(s=>s.responsavel))].sort();
+  const selResp = document.getElementById('s-resp');
+  selResp.innerHTML = '<option value="">Todos os responsáveis</option>' +
+    resps.map(r=>`<option>${r}</option>`).join('');
+
+  const selEtS = document.getElementById('s-etapa');
+  selEtS.innerHTML = '<option value="">Todas as etapas</option>' +
+    ORDER.map(e=>`<option value="${e}">${LABELS[e]}</option>`).join('');
+
+  const selEtC = document.getElementById('cs-etapa');
+  selEtC.innerHTML = '<option value="">Todas as etapas</option>' +
+    ORDER.map(e=>`<option value="${e}">${LABELS[e]}</option>`).join('');
+}
+
+/* ─────────────────────────────────────────────────
+   SELLERS TAB
+───────────────────────────────────────────────── */
+function renderSellers(R) {
+  if (!rawData) return;
+  R = R || calcular(rawData.sellers, rawData.vinculos, { ignorarInterna: ignoreInternal });
+
+  const q     = document.getElementById('s-search').value.toLowerCase();
+  const resp  = document.getElementById('s-resp').value;
+  const etapa = document.getElementById('s-etapa').value;
+  const co    = document.getElementById('s-co').value;
+  const maxTpv = Math.max(...R.sellers.map(s=>s.tpv||0), 1);
+
+  let list = R.sellers.filter(s => {
+    if (q && !`${s.seller_id} ${s.nome} ${s.email}`.toLowerCase().includes(q)) return false;
+    if (resp  && s.responsavel !== resp) return false;
+    if (etapa && s.etapa_kyc !== etapa) return false;
+    if (co === 'com'       && !s.n_cosellers) return false;
+    if (co === 'sem'       && s.n_cosellers)  return false;
+    if (co === 'pend'      && !s.n_pendentes) return false;
+    if (co === 'conc-pend' && !(s.etapa_kyc==='CONCLUIDO' && s.n_pendentes>0)) return false;
+    if (co === 'div'       && !isDiverge(s))  return false;
+    return true;
+  });
+
+  const { col, dir } = sortState.sellers;
+  list.sort((a,b) => {
+    let va = a[col]??'', vb = b[col]??'';
+    if (col==='etapa_kyc') { va=RANK[va]??-1; vb=RANK[vb]??-1; }
+    return (va < vb ? -1 : va > vb ? 1 : 0) * dir;
+  });
+
+  const tpvFilt = list.reduce((a,s)=>a+(s.tpv||0),0);
+  document.getElementById('s-counter').textContent =
+    `${fmtN(list.length)} de ${fmtN(R.sellers.length)} · ${fmtBRL(tpvFilt,true)} de TPV`;
+
+  const total = list.length;
+  const tp = Math.max(1, Math.ceil(total/PAGE_SIZE));
+  if (pagState.sellers > tp) pagState.sellers = 1;
+  const page = list.slice((pagState.sellers-1)*PAGE_SIZE, pagState.sellers*PAGE_SIZE);
+
+  document.getElementById('s-pag-info').textContent =
+    `${(pagState.sellers-1)*PAGE_SIZE+1}–${Math.min(pagState.sellers*PAGE_SIZE,total)} de ${fmtN(total)}`;
+
+  const tbody = document.getElementById('sellers-tbody');
+  if (!page.length) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="9">Nenhum seller com esses filtros.</td></tr>';
+    document.getElementById('s-pag-pages').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = page.map(s => {
+    const div = isDiverge(s);
+    const barW = s.tpv ? Math.sqrt(s.tpv/maxTpv)*100 : 0;
+    return `<tr class="${sellerSelected===s.seller_id?'sel-row':''}" onclick="selectSeller('${s.seller_id}')">
+      <td class="c-id c-r">${s.seller_id}</td>
+      <td class="c-name">${s.nome}</td>
+      <td class="c-email hide-m">${s.email}</td>
+      <td class="c-r"><div class="tpv-w"><span>${fmtBRL(s.tpv,true)}</span><div class="tpv-bar-bg"><div class="tpv-bar" style="width:${barW.toFixed(1)}%"></div></div></div></td>
+      <td class="hide-m">${s.responsavel}</td>
+      <td>${etapaBadge(s.etapa_kyc, div)}</td>
+      <td class="hide-m ${div?'ec-div':'ec-ok'}">${s.etapa_comercial||'—'}</td>
+      <td class="c-r">${fmtN(s.n_cosellers)}</td>
+      <td class="c-pend c-r ${s.n_pendentes>0?'has':''}">${s.n_pendentes>0?'<b>'+fmtN(s.n_pendentes)+'</b>':fmtN(s.n_pendentes)}</td>
+    </tr>`;
+  }).join('');
+
+  // Pages
+  renderPag('s-pag-pages', pagState.sellers, tp, p=>{pagState.sellers=p;renderSellers();});
+
+  // Detail
+  if (sellerSelected) {
+    const s = R.sellers.find(x=>x.seller_id===sellerSelected);
+    if (s) renderSellerDetail(s);
+  }
+}
+
+function selectSeller(id) {
+  sellerSelected = id;
+  renderSellers();
+  setTimeout(()=>document.getElementById('seller-detail').scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+}
+
+function renderSellerDetail(s) {
+  const panel = document.getElementById('seller-detail');
+  const maxTpv = Math.max(...s.cosellers_detail.map(c=>c.coseller_tpv||0),1);
+  panel.innerHTML = `
+    <div class="card-head">
+      <div>
+        <div class="card-title">Co-sellers de ${s.nome}</div>
+        <div style="font-size:12px;color:var(--neutral-40);margin-top:2px">
+          Seller ${s.seller_id} · ${etapaBadge(s.etapa_kyc)} · TPV ${fmtBRL(s.tpv,true)} · ${s.responsavel}.
+          ${s.n_cosellers} co-seller(s), ${s.n_pendentes} pendente(s)${ignoreInternal&&s.cosellers_detail.length!==s.n_cosellers?' (além da conta interna)':''}.
+        </div>
+      </div>
+    </div>
+    ${!s.cosellers_detail.length ? '<div style="padding:20px;color:var(--neutral-40);font-size:13px">Não tem co-sellers'+(ignoreInternal?' (além da conta interna)':'')+'.</div>' : `
+    <div class="tw"><table>
+      <thead><tr><th class="r">ID</th><th>Co-seller</th><th class="hide-m">E-mail</th><th class="r">TPV ${rawData?.meta?.tpv_periodo||''}</th><th>Etapa KYC</th></tr></thead>
+      <tbody>
+        ${[...s.cosellers_detail].sort((a,b)=>(b.coseller_tpv||0)-(a.coseller_tpv||0)).map(c=>{
+          const bw = c.coseller_tpv ? Math.sqrt(c.coseller_tpv/maxTpv)*100 : 0;
+          return `<tr>
+            <td class="c-id c-r">${c.coseller_id}</td>
+            <td class="c-name">${c.coseller_nome}</td>
+            <td class="c-email hide-m">${c.coseller_email}</td>
+            <td class="c-r"><div class="tpv-w"><span>${fmtBRL(c.coseller_tpv,true)}</span><div class="tpv-bar-bg"><div class="tpv-bar" style="width:${bw.toFixed(1)}%"></div></div></div></td>
+            <td>${etapaBadge(c.coseller_etapa_kyc)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>`}`;
+}
+
+/* ─────────────────────────────────────────────────
+   CO-SELLERS TAB
+───────────────────────────────────────────────── */
+function renderCosellers(R) {
+  if (!rawData) return;
+  R = R || calcular(rawData.sellers, rawData.vinculos, { ignorarInterna: ignoreInternal });
+
+  const q     = document.getElementById('cs-search').value.toLowerCase();
+  const etapa = document.getElementById('cs-etapa').value;
+  const maxTpvCS = Math.max(...R.cosellers.map(c=>c.coseller_tpv||0),1);
+  const maxTpvSellers = Math.max(...R.cosellers.map(c=>c.tpv_sellers||0),1);
+
+  let list = R.cosellers.filter(c => {
+    if (q && !`${c.coseller_id} ${c.coseller_nome} ${c.coseller_email}`.toLowerCase().includes(q)) return false;
+    if (etapa && c.coseller_etapa_kyc !== etapa) return false;
+    return true;
+  });
+
+  const { col, dir } = sortState.cosellers;
+  list.sort((a,b) => {
+    let va = col==='etapa_kyc'?RANK[a.coseller_etapa_kyc]??-1:a[col]??'';
+    let vb = col==='etapa_kyc'?RANK[b.coseller_etapa_kyc]??-1:b[col]??'';
+    return (va < vb ? -1 : va > vb ? 1 : 0) * dir;
+  });
+
+  document.getElementById('cs-counter').textContent =
+    `${fmtN(list.length)} de ${fmtN(R.cosellers.length)}`;
+
+  const total = list.length;
+  const tp = Math.max(1, Math.ceil(total/PAGE_SIZE));
+  if (pagState.cosellers > tp) pagState.cosellers = 1;
+  const page = list.slice((pagState.cosellers-1)*PAGE_SIZE, pagState.cosellers*PAGE_SIZE);
+
+  document.getElementById('cs-pag-info').textContent =
+    `${(pagState.cosellers-1)*PAGE_SIZE+1}–${Math.min(pagState.cosellers*PAGE_SIZE,total)} de ${fmtN(total)}`;
+
+  const tbody = document.getElementById('cosellers-tbody');
+  if (!page.length) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="7">Nenhum co-seller com esses filtros.</td></tr>';
+    document.getElementById('cs-pag-pages').innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = page.map(c => {
+    const bwOwn     = c.coseller_tpv    ? Math.sqrt(c.coseller_tpv/maxTpvCS)*100 : 0;
+    const bwSellers = c.tpv_sellers     ? Math.sqrt(c.tpv_sellers/maxTpvSellers)*100 : 0;
+    return `<tr class="${cosellerSelected===c.coseller_id?'sel-row':''}" onclick="selectCoseller('${c.coseller_id}')">
+      <td class="c-id c-r">${c.coseller_id}</td>
+      <td class="c-name">${c.coseller_nome}</td>
+      <td class="c-email hide-m">${c.coseller_email}</td>
+      <td class="c-r"><div class="tpv-w"><span>${fmtBRL(c.coseller_tpv,true)}</span><div class="tpv-bar-bg"><div class="tpv-bar" style="width:${bwOwn.toFixed(1)}%"></div></div></div></td>
+      <td>${etapaBadge(c.coseller_etapa_kyc)}</td>
+      <td class="c-r">${fmtN(c.n_sellers)}</td>
+      <td class="c-r hide-m"><div class="tpv-w"><span>${fmtBRL(c.tpv_sellers,true)}</span><div class="tpv-bar-bg"><div class="tpv-bar" style="width:${bwSellers.toFixed(1)}%"></div></div></div></td>
+    </tr>`;
+  }).join('');
+
+  renderPag('cs-pag-pages', pagState.cosellers, tp, p=>{pagState.cosellers=p;renderCosellers();});
+
+  if (cosellerSelected) {
+    const cs = R.cosellers.find(x=>x.coseller_id===cosellerSelected);
+    if (cs) renderCosellerDetail(cs, R);
+  }
+}
+
+function selectCoseller(id) {
+  cosellerSelected = id;
+  renderCosellers();
+  setTimeout(()=>document.getElementById('coseller-detail').scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+}
+
+function renderCosellerDetail(cs, R) {
+  const panel = document.getElementById('coseller-detail');
+  const sellersVinc = rawData.vinculos.filter(v=>v.coseller_id===cs.coseller_id&&(ignoreInternal?true:true));
+  const sellersDetail = sellersVinc
+    .map(v=>R.sellers.find(s=>s.seller_id===v.seller_id))
+    .filter(Boolean);
+  const sellersDedup = [...new Map(sellersDetail.map(s=>[s.seller_id,s])).values()]
+    .sort((a,b)=>(b.tpv||0)-(a.tpv||0));
+  const maxTpv = Math.max(...sellersDedup.map(s=>s.tpv||0),1);
+  const tpvSum = sellersDedup.reduce((a,s)=>a+(s.tpv||0),0);
+
+  panel.innerHTML = `
+    <div class="card-head">
+      <div>
+        <div class="card-title">Sellers de ${cs.coseller_nome}</div>
+        <div style="font-size:12px;color:var(--neutral-40);margin-top:2px">
+          Co-seller ${cs.coseller_id} · ${etapaBadge(cs.coseller_etapa_kyc)} · TPV próprio ${fmtBRL(cs.coseller_tpv,true)}.
+          Aparece em ${fmtN(cs.n_sellers)} seller(s), que somam ${fmtBRL(tpvSum,true)} de TPV.
+        </div>
+      </div>
+    </div>
+    ${!sellersDedup.length ? '<div style="padding:20px;color:var(--neutral-40);font-size:13px">Nenhum seller encontrado.</div>' : `
+    <div class="tw"><table>
+      <thead><tr><th class="r">ID</th><th>Seller</th><th class="hide-m">E-mail</th><th class="r">TPV ${rawData?.meta?.tpv_periodo||''}</th><th>Etapa KYC</th></tr></thead>
+      <tbody>
+        ${sellersDedup.map(s=>{
+          const bw = s.tpv ? Math.sqrt(s.tpv/maxTpv)*100 : 0;
+          return `<tr>
+            <td class="c-id c-r">${s.seller_id}</td>
+            <td class="c-name">${s.nome}</td>
+            <td class="c-email hide-m">${s.email}</td>
+            <td class="c-r"><div class="tpv-w"><span>${fmtBRL(s.tpv,true)}</span><div class="tpv-bar-bg"><div class="tpv-bar" style="width:${bw.toFixed(1)}%"></div></div></div></td>
+            <td>${etapaBadge(s.etapa_kyc)}</td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table></div>`}`;
+}
+
+/* ─────────────────────────────────────────────────
+   PAGINATION
+───────────────────────────────────────────────── */
+function renderPag(elId, cur, total, onPage) {
+  const el = document.getElementById(elId);
+  if (total <= 1) { el.innerHTML = ''; return; }
+  let html = `<button onclick="(${onPage.toString()})(${cur-1})" ${cur===1?'disabled':''} style="min-width:28px;height:28px;border:1px solid var(--neutral-90);border-radius:4px;background:#fff;cursor:pointer;font-size:12px">‹</button>`;
+  for (let i=1;i<=total;i++) {
+    if (total>7&&i>2&&i<total-1&&Math.abs(i-cur)>1) {
+      if(i===3||i===total-2) html+=`<span style="padding:0 4px;color:var(--neutral-50)">…</span>`;
+      continue;
+    }
+    html+=`<button onclick="(${onPage.toString()})(${i})" style="min-width:28px;height:28px;border:1px solid ${i===cur?'var(--primary-60)':'var(--neutral-90)'};border-radius:4px;background:#fff;cursor:pointer;font-size:12px;color:${i===cur?'var(--primary-60)':'inherit'};font-weight:${i===cur?700:400}">${i}</button>`;
+  }
+  html+=`<button onclick="(${onPage.toString()})(${cur+1})" ${cur===total?'disabled':''} style="min-width:28px;height:28px;border:1px solid var(--neutral-90);border-radius:4px;background:#fff;cursor:pointer;font-size:12px">›</button>`;
+  el.innerHTML = html;
+}
+
+/* ─────────────────────────────────────────────────
+   TABS, TOGGLE, SORT
+───────────────────────────────────────────────── */
+function setTab(tab, pushHash=true) {
+  activeTab = tab;
+  ['visao','sellers','cosellers'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===tab?'':'none';
+    document.getElementById('tp-'+t).classList.toggle('on', t===tab);
+  });
+  if (pushHash) location.hash = '#'+tab;
+  if (rawData) {
+    if (tab==='sellers')   renderSellers();
+    if (tab==='cosellers') renderCosellers();
+  }
+}
+
+function toggleInternal() {
+  ignoreInternal = !ignoreInternal;
+  document.getElementById('toggle-box').classList.toggle('on', ignoreInternal);
+  if (rawData) render();
+}
+
+function sortBy(table, col) {
+  const st = sortState[table];
+  if (st.col === col) st.dir *= -1;
+  else { st.col = col; st.dir = -1; }
+  pagState[table] = 1;
+  if (table==='sellers') renderSellers();
+  else renderCosellers();
+}
+</script>
+</body>
+</html>
