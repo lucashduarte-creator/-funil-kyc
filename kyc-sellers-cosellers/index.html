@@ -185,63 +185,14 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
 
   <div class="ph-resumo" id="resumo-frase">Carregando...</div>
 
-  <!-- Tab bar + toggle -->
-  <div class="tab-bar">
-    <span class="tab-pill on" onclick="setTab('visao')" id="tp-visao">Visão geral</span>
-    <span class="tab-pill" onclick="setTab('sellers')" id="tp-sellers">Sellers</span>
-    <span class="tab-pill" onclick="setTab('cosellers')" id="tp-cosellers">Co-sellers</span>
-    <div class="tab-spacer"></div>
     <div class="toggle-wrap" onclick="toggleInternal()" id="toggle-wrap">
       <div class="toggle-box" id="toggle-box"><div class="toggle-knob"></div></div>
       <span id="toggle-lbl">Ignorar conta interna (16102)</span>
     </div>
   </div>
 
-  <!-- TAB: VISÃO GERAL -->
-  <div id="tab-visao">
-    <div class="kpi-grid-4" id="kpi-tpv">
-      <div class="kpi-card"><div class="kpi-label">TPV <span id="tpv-periodo-1">set/26</span> dos sellers</div><div class="kpi-val shim" style="height:32px;width:120px;margin-bottom:6px"></div><div class="kpi-sub shim" style="height:14px;width:160px"></div></div>
-      <div class="kpi-card"><div class="kpi-label">TPV com KYC concluído</div><div class="kpi-val shim" style="height:32px;width:100px;margin-bottom:6px"></div><div class="kpi-sub shim" style="height:14px;width:140px"></div></div>
-      <div class="kpi-card"><div class="kpi-label">TPV com KYC pendente</div><div class="kpi-val red shim" style="height:32px;width:100px;margin-bottom:6px"></div><div class="kpi-sub red shim" style="height:14px;width:140px"></div></div>
-      <div class="kpi-card"><div class="kpi-label">Concluídos com co-seller pendente</div><div class="kpi-val red shim" style="height:32px;width:100px;margin-bottom:6px"></div><div class="kpi-sub red shim" style="height:14px;width:160px"></div></div>
-    </div>
-
-    <div class="kpi-grid-5" id="kpi-contas">
-      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:60px;margin-bottom:8px"></div><div class="kpi-val shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub shim" style="height:12px;width:100px"></div></div>
-      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:80px;margin-bottom:8px"></div><div class="kpi-val shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub shim" style="height:12px;width:80px"></div></div>
-      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:80px;margin-bottom:8px"></div><div class="kpi-val shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub shim" style="height:12px;width:100px"></div></div>
-      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:80px;margin-bottom:8px"></div><div class="kpi-val shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub shim" style="height:12px;width:80px"></div></div>
-      <div class="kpi-card"><div class="kpi-label shim" style="height:12px;width:80px;margin-bottom:8px"></div><div class="kpi-val red shim" style="height:28px;width:50px;margin-bottom:4px"></div><div class="kpi-sub red shim" style="height:12px;width:100px"></div></div>
-    </div>
-
-    <div class="warn-banner" id="warn-interna"></div>
-
-    <div class="two-col">
-      <div class="card" style="padding:20px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:14px">TPV <span id="tpv-periodo-2">set/26</span> por etapa do seller</div>
-        <div id="chart-tpv-etapa"></div>
-      </div>
-      <div class="card" style="padding:20px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:14px">Em que etapa cada um está parado</div>
-        <div id="chart-etapa-dist"></div>
-      </div>
-    </div>
-
-    <div class="two-col">
-      <div class="card" style="padding:20px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:14px">Etapa do seller × etapa do co-seller</div>
-        <div class="matrix-wrap" id="matrix-wrap"></div>
-        <div style="font-size:11px;color:var(--neutral-50);margin-top:8px">Cor proporcional ao volume. Coluna verde = co-seller concluído.</div>
-      </div>
-      <div class="card" style="padding:20px">
-        <div style="font-size:13px;font-weight:600;margin-bottom:12px">Como a etapa é definida</div>
-        <div id="legend-etapas"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- TAB: SELLERS -->
-  <div id="tab-sellers" style="display:none">
+  <div id="tab-sellers">
     <div class="card">
       <div class="tb">
         <input class="search" type="text" id="s-search" placeholder="Buscar por ID, nome ou e-mail..." oninput="renderSellers()"/>
@@ -283,41 +234,6 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
 
     <div class="card" id="seller-detail">
       <div style="padding:20px;text-align:center;color:var(--neutral-40);font-size:13px">Escolha um seller na tabela acima para ver seus co-sellers.</div>
-    </div>
-  </div>
-
-  <!-- TAB: CO-SELLERS -->
-  <div id="tab-cosellers" style="display:none">
-    <div class="card">
-      <div class="tb">
-        <input class="search" type="text" id="cs-search" placeholder="Buscar por ID, nome ou e-mail..." oninput="renderCosellers()"/>
-        <select class="sel" id="cs-etapa" onchange="renderCosellers()"><option value="">Todas as etapas</option></select>
-        <span class="tb-counter" id="cs-counter">—</span>
-      </div>
-      <div class="tw">
-        <table>
-          <thead>
-            <tr>
-              <th onclick="sortBy('cosellers','coseller_id')" class="r">ID</th>
-              <th onclick="sortBy('cosellers','coseller_nome')">Co-seller</th>
-              <th class="hide-m" onclick="sortBy('cosellers','coseller_email')">E-mail</th>
-              <th onclick="sortBy('cosellers','coseller_tpv')" class="r" id="th-tpv-cs">TPV próprio</th>
-              <th onclick="sortBy('cosellers','etapa_kyc')">Etapa KYC</th>
-              <th onclick="sortBy('cosellers','n_sellers')" class="r">Sellers</th>
-              <th onclick="sortBy('cosellers','tpv_sellers')" class="r hide-m">TPV dos sellers</th>
-            </tr>
-          </thead>
-          <tbody id="cosellers-tbody"></tbody>
-        </table>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--neutral-90);">
-        <span style="font-size:12px;color:var(--neutral-40)" id="cs-pag-info">—</span>
-        <div style="display:flex;gap:4px" id="cs-pag-pages"></div>
-      </div>
-    </div>
-
-    <div class="card" id="coseller-detail">
-      <div style="padding:20px;text-align:center;color:var(--neutral-40);font-size:13px">Escolha um co-seller na tabela acima para ver seus sellers.</div>
     </div>
   </div>
 </main>
