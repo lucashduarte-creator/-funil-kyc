@@ -306,7 +306,7 @@ const MOCK = {
 ───────────────────────────────────────────────── */
 let rawData = null;
 let ignoreInternal = false;
-let activeTab = 'visao';
+let activeTab = 'sellers';
 let sellerSelected = null;
 let cosellerSelected = null;
 let sortState = { sellers: { col: 'tpv', dir: -1 }, cosellers: { col: 'tpv_sellers', dir: -1 } };
@@ -510,8 +510,7 @@ function render() {
     `e <b>${fmtN(t.nCsSemKYC)}</b> nem começaram.`+updStr;
 
   populateFilters(R);
-
-  if (activeTab === 'sellers')   renderSellers(R);
+  renderSellers(R);
   if (activeTab === 'cosellers') renderCosellers(R);
 }
 
