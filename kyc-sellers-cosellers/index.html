@@ -203,6 +203,7 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
           <option value="sem">Sem co-seller</option>
           <option value="pend">Com co-seller pendente</option>
           <option value="conc-pend">Concluído com co-seller pendente</option>
+          <option value="conc-conc">Concluído com co-seller concluído</option>
         </select>
         <span class="tb-counter" id="s-counter">—</span>
       </div>
@@ -650,6 +651,7 @@ function renderSellers(R) {
     if (co === 'sem'       && s.n_cosellers)  return false;
     if (co === 'pend'      && !s.n_pendentes) return false;
     if (co === 'conc-pend' && !(s.etapa_kyc==='CONCLUIDO' && s.n_pendentes>0)) return false;
+    if (co === 'conc-conc' && !(s.etapa_kyc==='CONCLUIDO' && s.n_cosellers>0 && s.n_pendentes===0)) return false;
     if (co === 'div'       && !isDiverge(s))  return false;
     return true;
   });
