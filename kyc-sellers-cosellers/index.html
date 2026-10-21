@@ -492,10 +492,6 @@ function render() {
 
   // Atualiza período
   const per = meta.tpv_periodo || '';
-  document.getElementById('tpv-periodo-1').textContent = per;
-  document.getElementById('tpv-periodo-2').textContent = per;
-  document.getElementById('th-tpv-s').textContent  = 'TPV '+(per||'');
-  document.getElementById('th-tpv-cs').textContent = 'TPV próprio '+(per||'');
 
   // Atualizado às
   const gerado = meta.gerado_em ? new Date(meta.gerado_em) : null;
