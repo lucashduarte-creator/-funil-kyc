@@ -300,6 +300,7 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
             <tr>
               <th>Seller</th>
               <th>Situação</th>
+              <th>Status KYC</th>
               <th>Co-sellers</th>
               <th class="r">TPV Rec</th>
               <th class="r">TPV Único</th>
@@ -1438,6 +1439,7 @@ function impRenderSellers(filtered) {
         <div class="c-id">${s.seller_id} · ${s.email}</div>
       </td>
       <td>${sitBadge(s.sit)}</td>
+      <td>${etapaBadge(s.etapa||'SEM KYC')}</td>
       <td style="font-size:12px">${coInfo}</td>
       <td class="c-money">${s.cl_r?fmtBRL(s.cl_r):'<span style="color:var(--neutral-85)">—</span>'}</td>
       <td class="c-money">${s.cl_u?fmtBRL(s.cl_u):'<span style="color:var(--neutral-85)">—</span>'}</td>
