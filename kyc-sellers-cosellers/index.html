@@ -262,29 +262,6 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
     <div class="card">
       <div class="tb">
         <input class="search" type="text" id="imp-q" placeholder="Buscar seller ou co-seller…" oninput="impRender()"/>
-        <select class="sel" id="imp-tipo" onchange="impRender()">
-          <option value="">Tipo TPV: Todos</option>
-          <option value="rec">Recorrente</option>
-          <option value="uni">Único</option>
-        </select>
-        <select class="sel" id="imp-sit" onchange="impRender()">
-          <option value="">Situação: Todos</option>
-          <option value="protegido">Protegido</option>
-          <option value="em_risco">Em risco</option>
-        </select>
-        <select class="sel" id="imp-orig" onchange="impRender()">
-          <option value="">Origem: Todos</option>
-          <option value="seller">Seller</option>
-          <option value="coseller">Co-seller</option>
-          <option value="ambos">Ambos</option>
-        </select>
-        <select class="sel" id="imp-etapa" onchange="impRender()">
-          <option value="">Etapa: Todas</option>
-          <option value="pagarme">Pagar.me</option>
-          <option value="d4sign">D4Sign</option>
-          <option value="bdr">BDR</option>
-        </select>
-        <button id="imp-clear" onclick="impLimparFiltros()" style="padding:7px 12px;border:1px solid var(--neutral-90);border-radius:8px;font-size:12px;background:none;cursor:pointer;color:var(--neutral-40);display:none">Limpar filtros</button>
         <span class="tb-counter" id="imp-counter">—</span>
       </div>
     </div>
