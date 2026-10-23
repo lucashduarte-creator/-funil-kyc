@@ -159,6 +159,64 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
   .hide-m{display:none;}
   .main{padding:16px;}
 }
+
+/* ── Tab pills (main tabs) ── */
+.tab-pills{display:flex;gap:6px;margin-bottom:20px;}
+.tab-pill.active{border-color:var(--primary-60);background:var(--primary-95);color:var(--primary-60);font-weight:600;}
+
+/* ── Impacto: KPI grid ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;padding:16px 20px;}
+.kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;color:var(--neutral-40);margin-bottom:6px;}
+.kpi-card.kpi-fixed{background:var(--neutral-99);}
+.kpi-card.kpi-safe{background:var(--success-95);border-color:var(--success-95);}
+.kpi-card.kpi-danger{background:var(--danger-90);border-color:var(--danger-90);}
+.kpi-card.kpi-safe .kpi-lbl,.kpi-card.kpi-safe .kpi-sub{color:var(--success-20);opacity:.8;}
+.kpi-card.kpi-safe .kpi-val{color:var(--success-20);}
+.kpi-card.kpi-danger .kpi-lbl,.kpi-card.kpi-danger .kpi-sub{color:var(--danger-40);opacity:.8;}
+.kpi-card.kpi-danger .kpi-val{color:var(--danger-40);}
+#tab-impacto .kpi-val{font-size:17px;font-weight:700;}
+#tab-impacto .kpi-sub{font-size:11px;margin-top:3px;}
+
+/* ── Situação badges ── */
+.sit-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
+.sit-badge .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.sit-protegido{background:var(--success-95);color:var(--success-20);}
+.sit-protegido .dot{background:var(--success-40);}
+.sit-em_risco{background:var(--danger-90);color:var(--danger-40);}
+.sit-em_risco .dot{background:var(--danger-40);}
+.sit-nao_validado{background:var(--neutral-95);color:var(--neutral-50);}
+.sit-nao_validado .dot{background:var(--neutral-85);}
+
+/* ── Clickable summary rows ── */
+.clkrow{cursor:pointer;transition:background .1s;}
+.clkrow:hover td{background:#FFF7F2 !important;}
+.clkrow.clk-active td{background:var(--primary-99) !important;border-left:3px solid var(--primary-60);}
+.clkrow.clk-active td:not(:first-child){border-left:none;}
+
+/* ── Risk row highlight ── */
+.row-risk{background:#FFF8F7;}
+.row-risk:hover{background:#FFF0EE !important;}
+.expand-inner{padding:16px 20px;background:#FAFAFA;}
+
+/* ── Section header ── */
+.sec-hdr{padding:14px 20px;border-bottom:1px solid var(--neutral-90);}
+.sec-hdr h3{font-size:14px;font-weight:700;margin:0;}
+.sec-hdr p{font-size:12px;color:var(--neutral-40);margin-top:4px;}
+
+/* ── Impacto pagination ── */
+.pag-wrap{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--neutral-90);}
+.pag-info{font-size:12px;color:var(--neutral-40);}
+.pag-pages{display:flex;gap:4px;}
+.pag-btn{min-width:28px;height:28px;border:1px solid var(--neutral-90);border-radius:4px;background:#fff;cursor:pointer;font-size:12px;}
+.pag-btn:disabled{opacity:.4;cursor:default;}
+.pag-btn.cur{border-color:var(--primary-60);color:var(--primary-60);font-weight:700;}
+
+/* ── Money cells ── */
+.c-money{font-size:12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--neutral-15);}
+.c-money.zero{color:var(--neutral-85);}
+
+/* ── Conta interna badge ── */
+.conta-int-badge{font-size:9px;font-weight:700;color:#7C3AED;background:#EDE9FE;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -184,14 +242,125 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
   <p class="ph-sub">Cobertura do KYC, TPV em risco e vínculos seller → co-seller. A etapa com borda amarela não bate com a planilha comercial.</p>
 
 
+  <div class="ph-resumo"><b id="resumo-frase">&nbsp;</b></div>
+
+  <!-- Tab pills -->
+  <div class="tab-pills">
+    <button class="tab-pill" id="tp-impacto" onclick="switchTab('impacto')">Impacto no TPV</button>
+    <button class="tab-pill" id="tp-sellers" onclick="switchTab('sellers')">Sellers &amp; Co-sellers · KYC</button>
+  </div>
+
+  <!-- TAB: IMPACTO -->
+  <div id="tab-impacto">
+
+    <!-- Seção 1: Resumo Executivo -->
+    <div class="card">
+      <div class="sec-hdr">
+        <h3>Resumo Executivo</h3>
+        <p>Análise de impacto no TPV — KYC Sellers &amp; Co-sellers</p>
+      </div>
+      <div class="kpi-grid" id="imp-kpis"></div>
+    </div>
+
+    <!-- Filtros das seções 2–5 -->
+    <div class="card">
+      <div class="tb">
+        <input class="search" type="text" id="imp-q" placeholder="Buscar seller ou co-seller…" oninput="impRender()"/>
+        <select class="sel" id="imp-tipo" onchange="impRender()">
+          <option value="">Tipo TPV: Todos</option>
+          <option value="rec">Recorrente</option>
+          <option value="uni">Único</option>
+        </select>
+        <select class="sel" id="imp-sit" onchange="impRender()">
+          <option value="">Situação: Todos</option>
+          <option value="protegido">Protegido</option>
+          <option value="em_risco">Em risco</option>
+        </select>
+        <select class="sel" id="imp-orig" onchange="impRender()">
+          <option value="">Origem: Todos</option>
+          <option value="seller">Seller</option>
+          <option value="coseller">Co-seller</option>
+          <option value="ambos">Ambos</option>
+        </select>
+        <select class="sel" id="imp-etapa" onchange="impRender()">
+          <option value="">Etapa: Todas</option>
+          <option value="pagarme">Pagar.me</option>
+          <option value="d4sign">D4Sign</option>
+          <option value="bdr">BDR</option>
+        </select>
+        <button id="imp-clear" onclick="impLimparFiltros()" style="padding:7px 12px;border:1px solid var(--neutral-90);border-radius:8px;font-size:12px;background:none;cursor:pointer;color:var(--neutral-40);display:none">Limpar filtros</button>
+        <span class="tb-counter" id="imp-counter">—</span>
+      </div>
+    </div>
+
+    <!-- Seção 2: Impacto por tipo de TPV -->
+    <div class="card">
+      <div class="sec-hdr"><h3>Impacto financeiro por tipo de TPV</h3></div>
+      <div class="tw"><table id="imp-tab-tipo"></table></div>
+    </div>
+
+    <!-- Seção 3: Quem está impedindo a regularização? -->
+    <div class="card">
+      <div class="sec-hdr">
+        <h3>Quem está impedindo a regularização?</h3>
+        <p>Esta visão mostra onde estão as pendências documentais que colocam o TPV em risco de bloqueio.</p>
+      </div>
+      <div class="tw"><table id="imp-tab-orig"></table></div>
+    </div>
+
+    <!-- Seção 4: TPV em risco por etapa documental -->
+    <div class="card">
+      <div class="sec-hdr"><h3>TPV em risco por etapa documental</h3></div>
+      <div class="tw"><table id="imp-tab-etapa"></table></div>
+    </div>
+
+    <!-- Seção 5: Sellers — Impacto no TPV -->
+    <div class="card">
+      <div class="tb" style="border-bottom:none">
+        <div>
+          <div style="font-size:14px;font-weight:700">Sellers — Impacto no TPV</div>
+          <div style="font-size:12px;color:var(--neutral-40);margin-top:2px" id="imp-sell-lbl">Ordenado por TPV total decrescente</div>
+        </div>
+        <span class="tb-counter" id="imp-sell-counter">—</span>
+      </div>
+      <div id="imp-filtro-strip" style="display:none;padding:8px 16px;background:#FFFBF9;border-top:1px solid var(--neutral-90);border-bottom:1px solid var(--neutral-90);font-size:12px;align-items:center;gap:8px">
+        <span id="imp-filtro-txt" style="color:var(--primary-50)"></span>
+        <button onclick="impLimparClick()" style="font-size:11px;border:none;background:none;cursor:pointer;color:var(--primary-60);text-decoration:underline;padding:0">Limpar seleção</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th>Seller</th>
+              <th>Situação</th>
+              <th>Co-sellers</th>
+              <th class="r">TPV Rec</th>
+              <th class="r">TPV Único</th>
+              <th class="r">TPV Total</th>
+            </tr>
+          </thead>
+          <tbody id="imp-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pag-wrap">
+        <span class="pag-info" id="imp-pag-info">—</span>
+        <div class="pag-pages" id="imp-pag-pages"></div>
+      </div>
+    </div>
+
+    <!-- Detalhe expandido do seller -->
+    <div class="card" id="imp-detail" style="display:none"></div>
+
+  </div><!-- /tab-impacto -->
+
+  <!-- TAB: SELLERS -->
+  <div id="tab-sellers" style="display:none">
     <div class="toggle-wrap" onclick="toggleInternal()" id="toggle-wrap">
       <div class="toggle-box" id="toggle-box"><div class="toggle-knob"></div></div>
       <span id="toggle-lbl">Ignorar conta interna (16102)</span>
     </div>
-  </div>
-
-  <!-- TAB: SELLERS -->
-  <div id="tab-sellers">
+    <!-- hidden element required by populateFilters -->
+    <select id="cs-etapa" style="display:none"></select>
     <div class="card">
       <div class="tb">
         <input class="search" type="text" id="s-search" placeholder="Buscar por ID, nome ou e-mail..." oninput="renderSellers()"/>
@@ -317,7 +486,8 @@ const PAGE_SIZE = 20;
 ───────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   const hash = location.hash.replace('#','');
-  if (['visao','sellers','cosellers'].includes(hash)) setTab(hash, false);
+  if (hash === 'sellers') switchTab('sellers');
+  else switchTab('impacto');
   loadData();
 });
 
@@ -333,6 +503,7 @@ async function loadData() {
     rawData = MOCK;
   }
   render();
+  impRender();
 }
 
 /* ─────────────────────────────────────────────────
@@ -899,6 +1070,485 @@ function sortBy(table, col) {
   pagState[table] = 1;
   if (table==='sellers') renderSellers();
   else renderCosellers();
+}
+
+/* ═════════════════════════════════════════════════════════════
+   IMPACTO NO TPV — Tab
+   ═════════════════════════════════════════════════════════════ */
+
+/* ── Tab switching ── */
+function switchTab(tab) {
+  ['sellers','impacto'].forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if (el) el.style.display = t===tab?'':'none';
+    const pill = document.getElementById('tp-'+t);
+    if (pill) pill.classList.toggle('active', t===tab);
+  });
+  if (tab==='impacto' && rawData) impRender();
+  history.replaceState(null,'','#'+tab);
+}
+
+/* ── Constants (computed from rawData after load) ── */
+let IMP_TPV_TOTAL = 0;
+let IMP_TPV_POS   = 0;
+let IMP_TPV_CL    = 0;
+const IMP_PAGE_SIZE = 20;
+
+function initImpConstants() {
+  if (!rawData) return;
+  const sellers = rawData.sellers || [];
+  /* rule 6: cl_rec=tpv*0.4, cl_uni=tpv*0.6 → cl_total = tpv */
+  IMP_TPV_CL    = sellers.reduce((a,s) => a+(s.cl_rec!=null?(s.cl_rec||0)+(s.cl_uni||0):(s.tpv||0)), 0);
+  IMP_TPV_POS   = 0;
+  IMP_TPV_TOTAL = rawData.meta?.tpv_total_planilha || IMP_TPV_CL;
+}
+
+/* ── State ── */
+const impSt = {
+  search:'', tipo:'', sit:'', orig:'', etapa:'',
+  clickSec3:'', clickSec4:'',
+  page:1, expanded:null
+};
+
+/* ── Field mapping helpers ── */
+
+/** Derive 3-step object from etapa_kyc string (rule 6) */
+function etapaToSteps(etapa) {
+  if (etapa==='CONCLUIDO'||etapa==='CELCOIN') return {pagarme:'ok',d4sign:'ok',bdr:'ok'};
+  if (etapa==='BDR')    return {pagarme:'ok',d4sign:'ok',bdr:'nao_iniciada'};
+  if (etapa==='D4SIGN') return {pagarme:'ok',d4sign:'nao_iniciada',bdr:'nao_iniciada'};
+  return {pagarme:'nao_iniciada',d4sign:'nao_iniciada',bdr:'nao_iniciada'};
+}
+
+/** Build impacto-compatible vinculos from cosellers_detail (rule 7) */
+function getImpVinculos() {
+  if (!rawData) return [];
+  const R = calcular(rawData.sellers, rawData.vinculos, {ignorarInterna:false});
+  return R.sellers.flatMap(s => (s.cosellers_detail||[]).map(c => ({
+    seller_id:       s.seller_id,
+    coseller_id:     c.coseller_id,
+    coseller_nome:   c.coseller_nome,
+    coseller_email:  c.coseller_email,
+    coseller_etapa:  c.coseller_etapa_kyc,
+    coseller_steps:  etapaToSteps(c.coseller_etapa_kyc),
+    conta_interna:   c.coseller_id===CONTA_INTERNA_ID,
+    coseller_set_tpv: c.coseller_tpv||0
+  })));
+}
+
+/* ── Pure step helpers ── */
+function imp3(steps) {
+  if (!steps) return {pagarme:null,d4sign:null,bdr:null};
+  return {pagarme:steps.pagarme==='ok', d4sign:steps.d4sign==='ok', bdr:steps.bdr==='ok'};
+}
+function impEtapaTo3(etapa) {
+  const r = RANK[etapa]??-1;
+  return {pagarme:r>=2, d4sign:r>=3, bdr:r>=4};
+}
+function impCoSteps(vin) {
+  if (vin.coseller_steps) return imp3(vin.coseller_steps);
+  if (vin.coseller_etapa) return impEtapaTo3(vin.coseller_etapa);
+  return {pagarme:null,d4sign:null,bdr:null};
+}
+function impHasPend(s3) { return s3.pagarme===false||s3.d4sign===false||s3.bdr===false; }
+function impAllOk(s3)   { return s3.pagarme===true&&s3.d4sign===true&&s3.bdr===true; }
+function impFirst(s3) {
+  if (s3.pagarme===false) return 'pagarme';
+  if (s3.d4sign===false)  return 'd4sign';
+  if (s3.bdr===false)     return 'bdr';
+  return null;
+}
+
+/* ── Scale CL values so they sum to IMP_TPV_CL (rule 6) ── */
+function impScaleCL() {
+  if (!rawData) return {};
+  const sellers = rawData.sellers||[];
+  const tot = sellers.reduce((a,s) => {
+    const rec = s.cl_rec!=null ? s.cl_rec : (s.tpv||0)*0.4;
+    const uni = s.cl_uni!=null ? s.cl_uni : (s.tpv||0)*0.6;
+    return a+rec+uni;
+  },0);
+  if (!tot) return {};
+  const f = IMP_TPV_CL/tot;
+  const m = {};
+  sellers.forEach(s => {
+    const rec = s.cl_rec!=null ? s.cl_rec : (s.tpv||0)*0.4;
+    const uni = s.cl_uni!=null ? s.cl_uni : (s.tpv||0)*0.6;
+    m[s.seller_id] = {rec:Math.round(rec*f), uni:Math.round(uni*f)};
+  });
+  return m;
+}
+
+/* ── Classify a single seller ── */
+function classificarSeller(s, vinculos) {
+  if (!s.no_kyc||!s.steps) return {sit:'nao_validado',orig:null,etapa:null,coMap:{}};
+  const ss      = imp3(s.steps);
+  const selPend = impHasPend(ss);
+  const selMiss = impFirst(ss);
+  const vins    = (vinculos||[]).filter(v=>v.seller_id===s.seller_id);
+  let coPend    = false;
+  const coMissAll = [];
+  const coMap   = {};
+  for (const v of vins) {
+    const cs = impCoSteps(v);
+    coMap[v.coseller_id] = {nome:v.coseller_nome,email:v.coseller_email,
+      s3:cs,missing:impFirst(cs),etapa:v.coseller_etapa,conta_interna:v.conta_interna};
+    if (impHasPend(cs)) { coPend=true; const m=impFirst(cs); if(m) coMissAll.push(m); }
+  }
+  if (s.n_cos_pend>0&&!coPend) { coPend=true; coMissAll.push('d4sign'); }
+  if (s.n_cos>0&&vins.length===0&&s.n_cos_pend===0&&s.cos_status==='concluidos') coPend=false;
+  if (!selPend&&!coPend) {
+    if (s.n_cos>0&&vins.length===0&&s.n_cos_pend===0&&s.cos_status!=='concluidos'&&s.cos_status!=='sem')
+      return {sit:'nao_validado',orig:null,etapa:null,coMap};
+    return {sit:'protegido',orig:null,etapa:null,coMap};
+  }
+  const orig = selPend&&coPend?'ambos':selPend?'seller':'coseller';
+  const allMiss = selMiss?[selMiss,...coMissAll]:coMissAll;
+  const etapa = allMiss.includes('pagarme')?'pagarme':allMiss.includes('d4sign')?'d4sign':allMiss.includes('bdr')?'bdr':'d4sign';
+  return {sit:'em_risco',orig,etapa,coMap};
+}
+
+/* ── Build enriched seller list for impacto ── */
+function calcularImpacto() {
+  if (!rawData) return [];
+  initImpConstants();
+  const clSc     = impScaleCL();
+  const vinculos = getImpVinculos();
+  return rawData.sellers.map(s => {
+    const cl = clSc[s.seller_id]||{rec:0,uni:0};
+    /* map production fields → impacto-expected fields (rule 6) */
+    const adapted = {
+      ...s,
+      set_tpv:    s.set_tpv    !=null ? s.set_tpv    : (s.tpv||0),
+      cl_rec:     s.cl_rec     !=null ? s.cl_rec     : (s.tpv||0)*0.4,
+      cl_uni:     s.cl_uni     !=null ? s.cl_uni     : (s.tpv||0)*0.6,
+      etapa:      s.etapa      || s.etapa_kyc,
+      no_kyc:     true,   /* rule 6: all production sellers are in KYC */
+      steps:      s.steps      || etapaToSteps(s.etapa_kyc),
+      n_cos:      s.n_cos      !=null ? s.n_cos      : (s.n_cosellers||0),
+      n_cos_pend: s.n_cos_pend !=null ? s.n_cos_pend : (s.n_pendentes||0),
+      cos_status: !s.n_cosellers ? 'sem' : (s.n_pendentes===0 ? 'concluidos' : 'pendentes')
+    };
+    const {sit,orig,etapa,coMap} = classificarSeller(adapted, vinculos);
+    return {...adapted, cl_r:cl.rec, cl_u:cl.uni, cl_t:cl.rec+cl.uni, sit, orig, etapa, coMap};
+  });
+}
+
+/* ── Filter ── */
+function impFilter(classified) {
+  const q        = impSt.search.toLowerCase();
+  const vinculos = getImpVinculos();
+  return classified.filter(s => {
+    if (q) {
+      const inSel = `${s.seller_id} ${s.nome} ${s.email}`.toLowerCase().includes(q);
+      const inCo  = vinculos.filter(v=>v.seller_id===s.seller_id)
+        .some(v=>`${v.coseller_id} ${v.coseller_nome} ${v.coseller_email}`.toLowerCase().includes(q));
+      if (!inSel&&!inCo) return false;
+    }
+    if (impSt.tipo==='rec'&&!s.cl_r) return false;
+    if (impSt.tipo==='uni'&&!s.cl_u) return false;
+    if (impSt.sit  && s.sit !==impSt.sit)  return false;
+    if (impSt.orig && s.orig!==impSt.orig) return false;
+    if (impSt.etapa) {
+      if (s.sit!=='em_risco') return false;
+      if (imp3(s.steps)[impSt.etapa]===false) return true;
+      const vins = vinculos.filter(v=>v.seller_id===s.seller_id);
+      for (const v of vins) { if (impCoSteps(v)[impSt.etapa]===false) return true; }
+      if (s.n_cos_pend>0&&impSt.etapa==='d4sign') return true;
+      return false;
+    }
+    if (impSt.clickSec3) {
+      if (impSt.clickSec3==='protegido'    && s.sit!=='protegido')                          return false;
+      if (impSt.clickSec3==='nao_validado' && s.sit!=='nao_validado')                       return false;
+      if (impSt.clickSec3==='seller'       && !(s.sit==='em_risco'&&s.orig==='seller'))     return false;
+      if (impSt.clickSec3==='coseller'     && !(s.sit==='em_risco'&&s.orig==='coseller'))   return false;
+      if (impSt.clickSec3==='ambos'        && !(s.sit==='em_risco'&&s.orig==='ambos'))      return false;
+    }
+    if (impSt.clickSec4 && s.etapa!==impSt.clickSec4) return false;
+    return true;
+  });
+}
+
+/* ── sitBadge ── */
+function sitBadge(sit) {
+  const MAP = {
+    protegido:    ['✓ Protegido',    'sit-protegido'],
+    em_risco:     ['⚠ Em risco',     'sit-em_risco'],
+    nao_validado: ['– Não validado', 'sit-nao_validado']
+  };
+  const [lbl,cls] = MAP[sit]||['—','sit-nao_validado'];
+  return `<span class="sit-badge ${cls}"><span class="dot"></span>${lbl}</span>`;
+}
+
+/* ── impRenderKpis (Seção 1) ── */
+function impRenderKpis(filtered) {
+  const prot  = filtered.filter(s=>s.sit==='protegido');
+  const risco = filtered.filter(s=>s.sit==='em_risco');
+  const tvP   = prot.reduce((a,s)=>a+s.cl_t,0);
+  const tvR   = risco.reduce((a,s)=>a+s.cl_t,0);
+  const pctR  = IMP_TPV_CL ? tvR/IMP_TPV_CL : 0;
+  const nR    = risco.length;
+  document.getElementById('imp-kpis').innerHTML = `
+    <div class="kpi-card kpi-fixed">
+      <div class="kpi-lbl">TPV Total</div>
+      <div class="kpi-val">${fmtBRL(IMP_TPV_TOTAL,true)}</div>
+      <div class="kpi-sub">Referência da planilha</div>
+    </div>
+    <div class="kpi-card kpi-fixed">
+      <div class="kpi-lbl">TPV Sellers (universo)</div>
+      <div class="kpi-val">${fmtBRL(IMP_TPV_CL,true)}</div>
+      <div class="kpi-sub">base de análise de risco</div>
+    </div>
+    <div class="kpi-card kpi-safe">
+      <div class="kpi-lbl">TPV Protegido</div>
+      <div class="kpi-val">${fmtBRL(tvP,true)}</div>
+      <div class="kpi-sub">${fmtPct(IMP_TPV_CL?tvP/IMP_TPV_CL:0)} dos sellers</div>
+    </div>
+    <div class="kpi-card kpi-danger">
+      <div class="kpi-lbl">TPV Em risco</div>
+      <div class="kpi-val">${fmtBRL(tvR,true)}</div>
+      <div class="kpi-sub">${fmtPct(pctR)} dos sellers</div>
+    </div>
+    <div class="kpi-card kpi-danger">
+      <div class="kpi-lbl">% Em risco</div>
+      <div class="kpi-val">${fmtPct(pctR,1)}</div>
+      <div class="kpi-sub">de ${fmtBRL(IMP_TPV_CL,true)} em TPV</div>
+    </div>
+    <div class="kpi-card ${nR>0?'kpi-danger':'kpi-safe'}">
+      <div class="kpi-lbl">Sellers em risco</div>
+      <div class="kpi-val">${nR}</div>
+      <div class="kpi-sub">${filtered.length} sellers filtrados</div>
+    </div>`;
+}
+
+/* ── impRenderSec2: Impacto por tipo de TPV ── */
+function impRenderSec2(filtered) {
+  const el = document.getElementById('imp-tab-tipo');
+  if (!el) return;
+  const risco = filtered.filter(s=>s.sit==='em_risco');
+  const prot  = filtered.filter(s=>s.sit==='protegido');
+  const S = (arr,k) => arr.reduce((a,s)=>a+(s[k]||0),0);
+  const rows = [
+    {lbl:'Recorrente',tot:S(filtered,'cl_r'),prot:S(prot,'cl_r'),risco:S(risco,'cl_r')},
+    {lbl:'Único',     tot:S(filtered,'cl_u'),prot:S(prot,'cl_u'),risco:S(risco,'cl_u')}
+  ];
+  rows.push({lbl:'Total',bold:true,
+    tot:rows.reduce((a,r)=>a+r.tot,0),prot:rows.reduce((a,r)=>a+r.prot,0),risco:rows.reduce((a,r)=>a+r.risco,0)});
+  el.innerHTML = `<thead><tr><th>Tipo</th><th class="r">Total</th><th class="r">Protegido</th><th class="r">Em risco</th><th class="r">% Em risco</th></tr></thead><tbody>`
+    +rows.map(r=>`<tr style="${r.bold?'font-weight:700;background:var(--neutral-99)':''}">
+      <td>${r.bold?'<b>'+r.lbl+'</b>':r.lbl}</td>
+      <td class="c-money">${fmtBRL(r.tot)}</td>
+      <td class="c-money" style="color:${r.prot?'var(--success-20)':'var(--neutral-85)'}">${fmtBRL(r.prot)}</td>
+      <td class="c-money" style="color:${r.risco?'var(--danger-40)':'var(--neutral-85)'}">${fmtBRL(r.risco)}</td>
+      <td class="c-r" style="${r.risco?'color:var(--danger-40);font-weight:600':''}">${r.tot?fmtPct(r.risco/r.tot):'—'}</td>
+    </tr>`).join('')+`</tbody>`;
+}
+
+/* ── impRenderSec3: Quem está impedindo ── */
+function impRenderSec3(filtered) {
+  const el = document.getElementById('imp-tab-orig');
+  if (!el) return;
+  const S = (arr,k) => arr.reduce((a,s)=>a+(s[k]||0),0);
+  const groups = [
+    {key:'protegido',   lbl:'Totalmente regularizados',fn:s=>s.sit==='protegido'},
+    {key:'seller',      lbl:'Pendência no Seller',     fn:s=>s.sit==='em_risco'&&s.orig==='seller'},
+    {key:'coseller',    lbl:'Pendência no co-seller',  fn:s=>s.sit==='em_risco'&&s.orig==='coseller'},
+    {key:'ambos',       lbl:'Pendências nos dois',     fn:s=>s.sit==='em_risco'&&s.orig==='ambos'}
+  ];
+  el.innerHTML = `<thead><tr><th>Situação</th><th class="r">Sellers</th><th class="r">TPV Rec</th><th class="r">TPV Único</th><th class="r">TPV Total</th></tr></thead><tbody>`
+    +groups.map(g=>{
+      const rows=filtered.filter(g.fn);
+      const n=rows.length,rec=S(rows,'cl_r'),uni=S(rows,'cl_u'),tot=S(rows,'cl_t');
+      const act=impSt.clickSec3===g.key;
+      return `<tr class="clkrow${act?' clk-active':''}" onclick="impClickSec3('${g.key}')">
+        <td style="font-weight:500">${g.lbl}${act?' <span style="font-size:10px;font-weight:400;color:var(--primary-60)">← filtrado</span>':''}</td>
+        <td class="c-r"><b>${n}</b></td>
+        <td class="c-money">${tot?fmtBRL(rec):'<span style="color:var(--neutral-85)">—</span>'}</td>
+        <td class="c-money">${tot?fmtBRL(uni):'<span style="color:var(--neutral-85)">—</span>'}</td>
+        <td class="c-money" style="font-weight:600">${tot?fmtBRL(tot):'<span style="color:var(--neutral-85)">—</span>'}</td>
+      </tr>`;
+    }).join('')+`</tbody>`;
+}
+
+/* ── impRenderSec4: TPV por etapa ── */
+function impRenderSec4(filtered) {
+  const el = document.getElementById('imp-tab-etapa');
+  if (!el) return;
+  const em_risco = filtered.filter(s=>s.sit==='em_risco');
+  const S = (arr,k) => arr.reduce((a,s)=>a+(s[k]||0),0);
+  const etapas = [{key:'pagarme',lbl:'Pagar.me'},{key:'d4sign',lbl:'D4Sign'},{key:'bdr',lbl:'BDR'}];
+  el.innerHTML = `<thead><tr><th>Etapa principal</th><th class="r">Sellers impactados</th><th class="r">TPV Rec</th><th class="r">TPV Único</th><th class="r">TPV Total</th></tr></thead><tbody>`
+    +etapas.map(e=>{
+      const rows=em_risco.filter(s=>s.etapa===e.key);
+      const n=rows.length,rec=S(rows,'cl_r'),uni=S(rows,'cl_u'),tot=S(rows,'cl_t');
+      const act=impSt.clickSec4===e.key;
+      return `<tr class="clkrow${act?' clk-active':''}" onclick="impClickSec4('${e.key}')">
+        <td style="font-weight:500">${e.lbl}${act?' <span style="font-size:10px;font-weight:400;color:var(--primary-60)">← filtrado</span>':''}</td>
+        <td class="c-r"><b>${n}</b></td>
+        <td class="c-money">${n?fmtBRL(rec):'<span style="color:var(--neutral-85)">—</span>'}</td>
+        <td class="c-money">${n?fmtBRL(uni):'<span style="color:var(--neutral-85)">—</span>'}</td>
+        <td class="c-money" style="font-weight:600">${n?fmtBRL(tot):'<span style="color:var(--neutral-85)">—</span>'}</td>
+      </tr>`;
+    }).join('')+`</tbody>`;
+}
+
+/* ── impRenderSellers (Seção 5) ── */
+function impRenderSellers(filtered) {
+  const sorted = [...filtered].sort((a,b)=>(b.cl_t||0)-(a.cl_t||0));
+  const tp = Math.max(1,Math.ceil(sorted.length/IMP_PAGE_SIZE));
+  if (impSt.page>tp) impSt.page=1;
+  const page = sorted.slice((impSt.page-1)*IMP_PAGE_SIZE, impSt.page*IMP_PAGE_SIZE);
+  document.getElementById('imp-sell-counter').textContent =
+    `${fmtN(sorted.length)} sellers · ${fmtBRL(sorted.reduce((a,s)=>a+s.cl_t,0))} de TPV`;
+  document.getElementById('imp-pag-info').textContent =
+    `${(impSt.page-1)*IMP_PAGE_SIZE+1}–${Math.min(impSt.page*IMP_PAGE_SIZE,sorted.length)} de ${fmtN(sorted.length)}`;
+  const strip = document.getElementById('imp-filtro-strip');
+  const txt   = document.getElementById('imp-filtro-txt');
+  const hasClick = impSt.clickSec3||impSt.clickSec4;
+  if (hasClick) {
+    const lbl = impSt.clickSec3
+      ? ({protegido:'Totalmente regularizados',seller:'Pendência no Seller',
+          coseller:'Pendência no co-seller',ambos:'Pendências nos dois',
+          nao_validado:'Não validado'}[impSt.clickSec3]||impSt.clickSec3)
+      : 'Etapa: '+({pagarme:'Pagar.me',d4sign:'D4Sign',bdr:'BDR'}[impSt.clickSec4]||impSt.clickSec4);
+    txt.textContent = 'Filtro ativo: '+lbl;
+    strip.style.display = 'flex';
+  } else {
+    strip.style.display = 'none';
+  }
+  const tbody = document.getElementById('imp-tbody');
+  if (!page.length) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--neutral-40)">Nenhum seller com esses filtros.</td></tr>`;
+    renderPag('imp-pag-pages',impSt.page,tp,p=>{impSt.page=p;impRender();});
+    return;
+  }
+  tbody.innerHTML = page.map(s => {
+    const isRisk = s.sit==='em_risco';
+    const isExp  = impSt.expanded===s.seller_id;
+    const nCo    = s.n_cos||0;
+    const coInfo = nCo>0
+      ? `${fmtN(nCo)} co-seller${nCo!==1?'s':''}${s.n_cos_pend>0?` <b style="color:var(--danger-40)">(${s.n_cos_pend} pend.)</b>`:''}`
+      : '—';
+    return `<tr class="${isRisk?'row-risk':''} ${isExp?'sel-row':''}" onclick="impExpandSeller('${s.seller_id}')" style="cursor:pointer">
+      <td>
+        <div style="font-weight:500">${s.nome}</div>
+        <div class="c-id">${s.seller_id} · ${s.email}</div>
+      </td>
+      <td>${sitBadge(s.sit)}</td>
+      <td style="font-size:12px">${coInfo}</td>
+      <td class="c-money">${s.cl_r?fmtBRL(s.cl_r):'<span style="color:var(--neutral-85)">—</span>'}</td>
+      <td class="c-money">${s.cl_u?fmtBRL(s.cl_u):'<span style="color:var(--neutral-85)">—</span>'}</td>
+      <td class="c-money" style="font-weight:600">${s.cl_t?fmtBRL(s.cl_t):'<span style="color:var(--neutral-85)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+  renderPag('imp-pag-pages',impSt.page,tp,p=>{impSt.page=p;impRender();});
+}
+
+/* ── impExpandHtml: detail panel for a seller ── */
+function impExpandHtml(s) {
+  /* use adapted vinculos (rule 7) */
+  const vins = getImpVinculos().filter(v=>v.seller_id===s.seller_id);
+  const etapa = s.etapa||s.etapa_kyc;
+  const tpv   = s.set_tpv!=null ? s.set_tpv : (s.tpv||0);
+  const subParts = [
+    `Seller ${s.seller_id}`,
+    etapaBadge(etapa),
+    `TPV ${fmtBRL(tpv)}`,
+    `${fmtN(s.n_cos)} co-seller${s.n_cos!==1?'s':''}${s.n_cos_pend>0?`, <b style="color:var(--danger-40)">${fmtN(s.n_cos_pend)} pendente${s.n_cos_pend!==1?'s':''}</b>`:''}`
+  ];
+  let cosBody = '';
+  if (!vins.length) {
+    cosBody = `<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--neutral-50);font-size:12px">${s.n_cos>0?`${fmtN(s.n_cos)} co-sellers (carregados pelo webhook em produção).`:'Nenhum co-seller cadastrado.'}</td></tr>`;
+  } else {
+    cosBody = vins.map(v=>`
+      <tr style="border-bottom:1px solid #F5F5F5">
+        <td style="padding:10px 14px;font-size:11px;color:var(--neutral-40);text-align:right;font-variant-numeric:tabular-nums">${v.coseller_id}</td>
+        <td style="padding:10px 14px;font-weight:500">${v.coseller_nome}${v.conta_interna?'<span class="conta-int-badge">conta interna</span>':''}</td>
+        <td style="padding:10px 14px;color:var(--neutral-40);font-size:12px">${v.coseller_email}</td>
+        <td style="padding:10px 14px;text-align:right;font-variant-numeric:tabular-nums">${fmtBRL(v.coseller_set_tpv||0)}</td>
+        <td style="padding:10px 14px">${etapaBadge(v.coseller_etapa)}</td>
+      </tr>`).join('');
+  }
+  return `<div style="background:#fff;border:1px solid var(--neutral-90);border-radius:10px;margin:8px 0 4px;overflow:hidden">
+    <div style="padding:14px 20px;border-bottom:1px solid var(--neutral-90)">
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px">Co-sellers de ${s.nome}</div>
+      <div style="font-size:12px;color:var(--neutral-40);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        ${subParts.join('<span style="color:var(--neutral-85)">·</span>')}
+      </div>
+    </div>
+    <div class="tw"><table>
+      <thead><tr>
+        <th class="r" style="width:60px">ID</th>
+        <th>Co-seller</th><th>E-mail</th>
+        <th class="r">TPV</th><th>Etapa KYC</th>
+      </tr></thead>
+      <tbody>${cosBody}</tbody>
+    </table></div>
+  </div>`;
+}
+
+/* ── impExpandSeller ── */
+function impExpandSeller(id) {
+  impSt.expanded = impSt.expanded===id ? null : id;
+  impRender();
+  const detail = document.getElementById('imp-detail');
+  if (impSt.expanded) {
+    const s = calcularImpacto().find(x=>x.seller_id===impSt.expanded);
+    if (s) {
+      detail.style.display = '';
+      detail.innerHTML = impExpandHtml(s);
+      setTimeout(()=>{ detail.scrollIntoView({behavior:'smooth',block:'nearest'}); },80);
+    }
+  } else {
+    detail.style.display = 'none';
+  }
+}
+
+/* ── Section click filters ── */
+function impClickSec3(key) {
+  impSt.clickSec3 = impSt.clickSec3===key?'':key;
+  impSt.clickSec4 = ''; impSt.page=1; impRender();
+}
+function impClickSec4(key) {
+  impSt.clickSec4 = impSt.clickSec4===key?'':key;
+  impSt.clickSec3 = ''; impSt.page=1; impRender();
+}
+function impLimparClick() {
+  impSt.clickSec3=impSt.clickSec4=''; impSt.page=1; impRender();
+}
+
+/* ── impRender: main entry point ── */
+function impRender() {
+  if (!rawData) return;
+  initImpConstants();
+  impSt.search = (document.getElementById('imp-q')?.value||'').trim();
+  impSt.tipo   = document.getElementById('imp-tipo')?.value||'';
+  impSt.sit    = document.getElementById('imp-sit')?.value||'';
+  impSt.orig   = document.getElementById('imp-orig')?.value||'';
+  impSt.etapa  = document.getElementById('imp-etapa')?.value||'';
+  const hasF = impSt.search||impSt.tipo||impSt.sit||impSt.orig||impSt.etapa;
+  const btn  = document.getElementById('imp-clear');
+  if (btn) btn.style.display = hasF?'':'none';
+  const cEl  = document.getElementById('imp-counter');
+  if (cEl) cEl.textContent = hasF?'Filtros ativos':`${fmtN((rawData.sellers||[]).length)} sellers`;
+  const classified = calcularImpacto();
+  const filtered   = impFilter(classified);
+  impRenderKpis(filtered);
+  impRenderSec2(filtered);
+  impRenderSec3(filtered);
+  impRenderSec4(filtered);
+  impRenderSellers(filtered);
+}
+
+/* ── impLimparFiltros ── */
+function impLimparFiltros() {
+  ['imp-q','imp-tipo','imp-sit','imp-orig','imp-etapa'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    if(el.tagName==='INPUT')el.value='';else el.selectedIndex=0;
+  });
+  impSt.search=impSt.tipo=impSt.sit=impSt.orig=impSt.etapa='';
+  impSt.page=1; impRender();
 }
 </script>
 </body>
