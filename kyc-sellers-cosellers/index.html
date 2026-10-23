@@ -217,6 +217,8 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
 
 /* ── Conta interna badge ── */
 .conta-int-badge{font-size:9px;font-weight:700;color:#7C3AED;background:#EDE9FE;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;}
+/* ── Phone sub-line ── */
+.c-phone{font-size:11px;color:var(--neutral-40);margin-top:1px;}
 </style>
 </head>
 <body>
@@ -350,7 +352,7 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
             <tr>
               <th onclick="sortBy('sellers','seller_id')" class="r">ID</th>
               <th onclick="sortBy('sellers','nome')">Seller</th>
-              <th class="hide-m" onclick="sortBy('sellers','email')">E-mail</th>
+              <th class="hide-m" onclick="sortBy('sellers','email')">E-mail / Telefone</th>
               <th onclick="sortBy('sellers','tpv')" class="r" id="th-tpv-s">TPV</th>
               <th class="hide-m" onclick="sortBy('sellers','responsavel')">Responsável</th>
               <th onclick="sortBy('sellers','etapa_kyc')">Etapa KYC</th>
@@ -770,9 +772,11 @@ function renderVisao(R) {
    POPULATE FILTERS
 ───────────────────────────────────────────────── */
 function populateFilters(R) {
-  const resps = [...new Set(R.sellers.map(s=>s.responsavel))].sort();
+  const resps = [...new Set(R.sellers.map(s=>s.responsavel).filter(Boolean))].sort();
   const selResp = document.getElementById('s-resp');
+  const hasKam = resps.some(r => r.includes('KAM'));
   selResp.innerHTML = '<option value="">Todos os responsáveis</option>' +
+    (hasKam ? '<option value="__KAM__">— Somente KAM —</option>' : '') +
     resps.map(r=>`<option>${r}</option>`).join('');
 
   const selEtC = document.getElementById('cs-etapa');
@@ -794,7 +798,8 @@ function renderSellers(R) {
 
   let list = R.sellers.filter(s => {
     if (q && !`${s.seller_id} ${s.nome} ${s.email}`.toLowerCase().includes(q)) return false;
-    if (resp  && s.responsavel !== resp) return false;
+    if (resp === '__KAM__' && !(s.responsavel && s.responsavel.includes('KAM'))) return false;
+    else if (resp && resp !== '__KAM__' && s.responsavel !== resp) return false;
     // Concluídos: seller ✅ E (sem cosellers OU todos cosellers ✅)
     if (co === 'concluidos'        && !(s.etapa_kyc==='CONCLUIDO' && s.n_pendentes===0)) return false;
     // Pendentes: seller ❌ OU algum coseller ❌
@@ -841,9 +846,9 @@ function renderSellers(R) {
     return `<tr class="${sellerSelected===s.seller_id?'sel-row':''}" onclick="selectSeller('${s.seller_id}')">
       <td class="c-id c-r">${s.seller_id}</td>
       <td class="c-name">${s.nome}</td>
-      <td class="c-email hide-m">${s.email}</td>
+      <td class="c-email hide-m">${s.email}${s.telefone ? `<div class="c-phone">${s.telefone}</div>` : ''}</td>
       <td class="c-r"><div class="tpv-w"><span>${fmtBRL(s.tpv,true)}</span><div class="tpv-bar-bg"><div class="tpv-bar" style="width:${barW.toFixed(1)}%"></div></div></div></td>
-      <td class="hide-m">${s.responsavel}</td>
+      <td class="hide-m">${s.responsavel||'—'}</td>
       <td>${etapaBadge(s.etapa_kyc)}</td>
       <td class="c-r">${fmtN(s.n_cosellers)}</td>
       <td class="c-pend c-r ${s.n_pendentes>0?'has':''}">${s.n_pendentes>0?'<b>'+fmtN(s.n_pendentes)+'</b>':fmtN(s.n_pendentes)}</td>
@@ -881,14 +886,14 @@ function renderSellerDetail(s) {
     </div>
     ${!s.cosellers_detail.length ? '<div style="padding:20px;color:var(--neutral-40);font-size:13px">Não tem co-sellers'+(ignoreInternal?' (além da conta interna)':'')+'.</div>' : `
     <div class="tw"><table>
-      <thead><tr><th class="r">ID</th><th>Co-seller</th><th class="hide-m">E-mail</th><th class="r">TPV ${rawData?.meta?.tpv_periodo||''}</th><th>Etapa KYC</th></tr></thead>
+      <thead><tr><th class="r">ID</th><th>Co-seller</th><th class="hide-m">E-mail / Telefone</th><th class="r">TPV ${rawData?.meta?.tpv_periodo||''}</th><th>Etapa KYC</th></tr></thead>
       <tbody>
         ${[...s.cosellers_detail].sort((a,b)=>(b.coseller_tpv||0)-(a.coseller_tpv||0)).map(c=>{
           const bw = c.coseller_tpv ? Math.sqrt(c.coseller_tpv/maxTpv)*100 : 0;
           return `<tr>
             <td class="c-id c-r">${c.coseller_id}</td>
             <td class="c-name">${c.coseller_nome}</td>
-            <td class="c-email hide-m">${c.coseller_email}</td>
+            <td class="c-email hide-m">${c.coseller_email}${c.coseller_phone ? `<div class="c-phone">${c.coseller_phone}</div>` : ''}</td>
             <td class="c-r"><div class="tpv-w"><span>${fmtBRL(c.coseller_tpv,true)}</span><div class="tpv-bar-bg"><div class="tpv-bar" style="width:${bw.toFixed(1)}%"></div></div></div></td>
             <td>${etapaBadge(c.coseller_etapa_kyc)}</td>
           </tr>`;
@@ -991,14 +996,14 @@ function renderCosellerDetail(cs, R) {
     </div>
     ${!sellersDedup.length ? '<div style="padding:20px;color:var(--neutral-40);font-size:13px">Nenhum seller encontrado.</div>' : `
     <div class="tw"><table>
-      <thead><tr><th class="r">ID</th><th>Seller</th><th class="hide-m">E-mail</th><th class="r">TPV ${rawData?.meta?.tpv_periodo||''}</th><th>Etapa KYC</th></tr></thead>
+      <thead><tr><th class="r">ID</th><th>Seller</th><th class="hide-m">E-mail / Telefone</th><th class="r">TPV ${rawData?.meta?.tpv_periodo||''}</th><th>Etapa KYC</th></tr></thead>
       <tbody>
         ${sellersDedup.map(s=>{
           const bw = s.tpv ? Math.sqrt(s.tpv/maxTpv)*100 : 0;
           return `<tr>
             <td class="c-id c-r">${s.seller_id}</td>
             <td class="c-name">${s.nome}</td>
-            <td class="c-email hide-m">${s.email}</td>
+            <td class="c-email hide-m">${s.email}${s.telefone ? `<div class="c-phone">${s.telefone}</div>` : ''}</td>
             <td class="c-r"><div class="tpv-w"><span>${fmtBRL(s.tpv,true)}</span><div class="tpv-bar-bg"><div class="tpv-bar" style="width:${bw.toFixed(1)}%"></div></div></div></td>
             <td>${etapaBadge(s.etapa_kyc)}</td>
           </tr>`;
