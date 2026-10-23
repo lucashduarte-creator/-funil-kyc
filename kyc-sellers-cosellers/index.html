@@ -1109,11 +1109,13 @@ const IMP_PAGE_SIZE = 20;
 
 function initImpConstants() {
   if (!impactoData) return;
+  const meta    = impactoData.meta || {};
   const sellers = impactoData.sellers || [];
-  // Totais direto da planilha (via webhook impacto)
-  IMP_TPV_TOTAL = sellers.reduce((a,s) => a + (s.tpv||0), 0);
-  IMP_TPV_CL    = sellers.reduce((a,s) => a + (s.cl_rec||0) + (s.cl_uni||0), 0);
-  IMP_TPV_POS   = IMP_TPV_TOTAL - IMP_TPV_CL; // Pós = Total - CL
+  // Usa totais da planilha do meta (todos os sellers, inclusive só-Pós)
+  // Fallback: soma dos sellers filtrados (compatibilidade com caches antigos)
+  IMP_TPV_TOTAL = meta.tpv_total_planilha || sellers.reduce((a,s) => a + (s.tpv||0), 0);
+  IMP_TPV_CL    = meta.cl_total_planilha  || sellers.reduce((a,s) => a + (s.cl_rec||0) + (s.cl_uni||0), 0);
+  IMP_TPV_POS   = meta.pos_total_planilha || (IMP_TPV_TOTAL - IMP_TPV_CL);
 }
 
 /* ── State ── */
