@@ -1477,7 +1477,13 @@ function impExpandHtml(s) {
           ${v.conta_interna?'<span class="conta-int-badge">conta interna</span>':''}
           ${v.participa_cl
             ? '<span style="font-size:9px;font-weight:700;background:#FFDFCC;color:#CB4E00;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle">CL</span>'
-            : '<span style="font-size:9px;font-weight:600;background:var(--neutral-95);color:var(--neutral-50);border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle">Pós</span>'}
+            : ''}
+          ${v.participa_pos
+            ? '<span style="font-size:9px;font-weight:700;background:#F3F0FF;color:#7C3AED;border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle">PÓS</span>'
+            : ''}
+          ${!v.participa_cl && !v.participa_pos
+            ? '<span style="font-size:9px;font-weight:600;background:var(--neutral-95);color:var(--neutral-50);border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle">Pós</span>'
+            : ''}
         </td>
         <td style="padding:10px 14px;color:var(--neutral-40);font-size:12px">${v.coseller_email}</td>
         <td style="padding:10px 14px;text-align:right;font-variant-numeric:tabular-nums">${fmtBRL(v.comissao_set||0)}</td>
