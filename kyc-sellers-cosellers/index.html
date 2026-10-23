@@ -1325,28 +1325,28 @@ function impRenderKpis(filtered) {
   document.getElementById('imp-kpis').innerHTML = `
     <div class="kpi-card kpi-fixed">
       <div class="kpi-lbl">TPV Total</div>
-      <div class="kpi-val">${fmtBRL(IMP_TPV_TOTAL,true)}</div>
+      <div class="kpi-val">${fmtBRL(IMP_TPV_TOTAL)}</div>
       <div class="kpi-sub">Referência da planilha</div>
     </div>
     <div class="kpi-card kpi-fixed">
       <div class="kpi-lbl">TPV Sellers (universo)</div>
-      <div class="kpi-val">${fmtBRL(IMP_TPV_CL,true)}</div>
+      <div class="kpi-val">${fmtBRL(IMP_TPV_CL)}</div>
       <div class="kpi-sub">base de análise de risco</div>
     </div>
     <div class="kpi-card kpi-safe">
       <div class="kpi-lbl">TPV Protegido</div>
-      <div class="kpi-val">${fmtBRL(tvP,true)}</div>
+      <div class="kpi-val">${fmtBRL(tvP)}</div>
       <div class="kpi-sub">${fmtPct(IMP_TPV_CL?tvP/IMP_TPV_CL:0)} dos sellers</div>
     </div>
     <div class="kpi-card kpi-danger">
       <div class="kpi-lbl">TPV Em risco</div>
-      <div class="kpi-val">${fmtBRL(tvR,true)}</div>
+      <div class="kpi-val">${fmtBRL(tvR)}</div>
       <div class="kpi-sub">${fmtPct(pctR)} dos sellers</div>
     </div>
     <div class="kpi-card kpi-danger">
       <div class="kpi-lbl">% Em risco</div>
       <div class="kpi-val">${fmtPct(pctR,1)}</div>
-      <div class="kpi-sub">de ${fmtBRL(IMP_TPV_CL,true)} em TPV</div>
+      <div class="kpi-sub">de ${fmtBRL(IMP_TPV_CL)} em TPV</div>
     </div>
     <div class="kpi-card ${nR>0?'kpi-danger':'kpi-safe'}">
       <div class="kpi-lbl">Sellers em risco</div>
