@@ -416,6 +416,7 @@ function logout(){ sessionStorage.removeItem('kyc_auth'); window.location.replac
    CONFIG
 ───────────────────────────────────────────────── */
 const WEBHOOK = 'https://integration.voompcreators.net.br/webhook/kyc-sellers-cosellers';
+const WEBHOOK_IMPACTO = 'https://integration.voompcreators.net.br/webhook/kyc-impacto-tpv';
 const CONTA_INTERNA_ID = '16102';
 const ORDER  = ['SEM KYC','PAGARME','D4SIGN','BDR','CELCOIN','CONCLUIDO'];
 const RANK   = Object.fromEntries(ORDER.map((e,i)=>[e,i]));
@@ -473,6 +474,7 @@ const MOCK = {
    STATE
 ───────────────────────────────────────────────── */
 let rawData = null;
+let impactoData = null; // alimentado pelo webhook /kyc-impacto-tpv
 let ignoreInternal = false;
 let activeTab = 'sellers';
 let sellerSelected = null;
@@ -503,7 +505,21 @@ async function loadData() {
     rawData = MOCK;
   }
   render();
-  impRender();
+}
+
+async function loadImpactoData() {
+  impRenderLoading();
+  try {
+    const res = await fetch(WEBHOOK_IMPACTO, { signal: AbortSignal.timeout(10000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    if (d.erro) throw new Error(d.erro);
+    impactoData = d;
+    impRender();
+  } catch(e) {
+    console.warn('Webhook Impacto indisponível:', e.message);
+    impRenderEmpty('Execute o workflow <b>KYC · Impacto TPV · Scheduler</b> no n8n para gerar os dados desta visão.');
+  }
 }
 
 /* ─────────────────────────────────────────────────
@@ -1084,7 +1100,8 @@ function switchTab(tab) {
     const pill = document.getElementById('tp-'+t);
     if (pill) pill.classList.toggle('active', t===tab);
   });
-  if (tab==='impacto' && rawData) impRender();
+  if (tab==='impacto' && impactoData) impRender();
+  if (tab==='impacto' && !impactoData) loadImpactoData();
   history.replaceState(null,'','#'+tab);
 }
 
@@ -1210,40 +1227,57 @@ function classificarSeller(s, vinculos) {
 
 /* ── Build enriched seller list for impacto ── */
 function calcularImpacto() {
-  if (!rawData) return [];
-  initImpConstants();
-  const clSc     = impScaleCL();
-  const vinculos = getImpVinculos();
-  return rawData.sellers.map(s => {
-    const cl = clSc[s.seller_id]||{rec:0,uni:0};
-    /* map production fields → impacto-expected fields (rule 6) */
-    const adapted = {
-      ...s,
-      set_tpv:    s.set_tpv    !=null ? s.set_tpv    : (s.tpv||0),
-      cl_rec:     s.cl_rec     !=null ? s.cl_rec     : (s.tpv||0)*0.4,
-      cl_uni:     s.cl_uni     !=null ? s.cl_uni     : (s.tpv||0)*0.6,
-      etapa:      s.etapa      || s.etapa_kyc,
-      no_kyc:     true,   /* rule 6: all production sellers are in KYC */
-      steps:      s.steps      || etapaToSteps(s.etapa_kyc),
-      n_cos:      s.n_cos      !=null ? s.n_cos      : (s.n_cosellers||0),
-      n_cos_pend: s.n_cos_pend !=null ? s.n_cos_pend : (s.n_pendentes||0),
-      cos_status: !s.n_cosellers ? 'sem' : (s.n_pendentes===0 ? 'concluidos' : 'pendentes')
-    };
-    const {sit,orig,etapa,coMap} = classificarSeller(adapted, vinculos);
-    return {...adapted, cl_r:cl.rec, cl_u:cl.uni, cl_t:cl.rec+cl.uni, sit, orig, etapa, coMap};
+  if (!impactoData) return [];
+  // O webhook já retorna os sellers classificados com cl_rec, cl_uni, cl_total, sit, orig, etapa_principal, vinculos
+  return impactoData.sellers.map(s => ({
+    ...s,
+    cl_r: s.cl_rec   || 0,
+    cl_u: s.cl_uni   || 0,
+    cl_t: s.cl_total || (s.cl_rec||0) + (s.cl_uni||0),
+    set_tpv: s.tpv || 0,
+    steps: etapaToSteps(s.etapa || 'SEM KYC'),
+    coMap: Object.fromEntries((s.vinculos||[]).map(v => [v.coseller_id, {
+      nome: v.coseller_nome, email: v.coseller_email,
+      s3: etapaToSteps(v.coseller_etapa||'SEM KYC'),
+      missing: impFirst(etapaToSteps(v.coseller_etapa||'SEM KYC')),
+      etapa: v.coseller_etapa, conta_interna: v.conta_interna
+    }]))
+  }));
+}
+
+/* ── Loading / Empty states ── */
+function impRenderLoading() {
+  const sections = ['imp-kpis','imp-sec2-body','imp-sec3-body','imp-sec4-body','imp-tbody'];
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--neutral-50);font-size:13px">Carregando…</div>';
   });
+}
+
+function impRenderEmpty(msg) {
+  const container = document.getElementById('imp-kpis');
+  if (container) {
+    container.closest('#tab-impacto').querySelectorAll('.card').forEach((c, i) => {
+      if (i > 0) c.style.display = 'none';
+    });
+    container.innerHTML = `<div style="grid-column:1/-1;padding:40px;text-align:center;background:#fff;border-radius:10px;border:1px solid var(--neutral-90)">
+      <div style="font-size:32px;margin-bottom:12px">📊</div>
+      <div style="font-size:14px;font-weight:600;color:var(--neutral-15);margin-bottom:8px">Dados ainda não disponíveis</div>
+      <div style="font-size:13px;color:var(--neutral-50);max-width:420px;margin:0 auto">${msg}</div>
+      <button onclick="loadImpactoData()" style="margin-top:16px;padding:8px 20px;border:1px solid var(--primary-60);border-radius:8px;background:var(--primary-95);color:var(--primary-60);cursor:pointer;font-size:13px;font-weight:500">Tentar novamente</button>
+    </div>`;
+  }
 }
 
 /* ── Filter ── */
 function impFilter(classified) {
-  const q        = impSt.search.toLowerCase();
-  const vinculos = getImpVinculos();
+  const q = impSt.search.toLowerCase();
   return classified.filter(s => {
     if (q) {
       const inSel = `${s.seller_id} ${s.nome} ${s.email}`.toLowerCase().includes(q);
-      const inCo  = vinculos.filter(v=>v.seller_id===s.seller_id)
-        .some(v=>`${v.coseller_id} ${v.coseller_nome} ${v.coseller_email}`.toLowerCase().includes(q));
-      if (!inSel&&!inCo) return false;
+      const inCo  = (s.vinculos||[]).some(v =>
+        `${v.coseller_id} ${v.coseller_nome} ${v.coseller_email}`.toLowerCase().includes(q));
+      if (!inSel && !inCo) return false;
     }
     if (impSt.tipo==='rec'&&!s.cl_r) return false;
     if (impSt.tipo==='uni'&&!s.cl_u) return false;
@@ -1519,7 +1553,7 @@ function impLimparClick() {
 
 /* ── impRender: main entry point ── */
 function impRender() {
-  if (!rawData) return;
+  if (!impactoData) return;
   initImpConstants();
   impSt.search = (document.getElementById('imp-q')?.value||'').trim();
   impSt.tipo   = document.getElementById('imp-tipo')?.value||'';
@@ -1530,7 +1564,7 @@ function impRender() {
   const btn  = document.getElementById('imp-clear');
   if (btn) btn.style.display = hasF?'':'none';
   const cEl  = document.getElementById('imp-counter');
-  if (cEl) cEl.textContent = hasF?'Filtros ativos':`${fmtN((rawData.sellers||[]).length)} sellers`;
+  if (cEl) cEl.textContent = hasF?'Filtros ativos':`${fmtN((impactoData.sellers||[]).length)} sellers`;
   const classified = calcularImpacto();
   const filtered   = impFilter(classified);
   impRenderKpis(filtered);
