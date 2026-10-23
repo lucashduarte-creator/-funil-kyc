@@ -1112,12 +1112,12 @@ let IMP_TPV_CL    = 0;
 const IMP_PAGE_SIZE = 20;
 
 function initImpConstants() {
-  if (!rawData) return;
-  const sellers = rawData.sellers || [];
-  /* rule 6: cl_rec=tpv*0.4, cl_uni=tpv*0.6 → cl_total = tpv */
-  IMP_TPV_CL    = sellers.reduce((a,s) => a+(s.cl_rec!=null?(s.cl_rec||0)+(s.cl_uni||0):(s.tpv||0)), 0);
-  IMP_TPV_POS   = 0;
-  IMP_TPV_TOTAL = rawData.meta?.tpv_total_planilha || IMP_TPV_CL;
+  if (!impactoData) return;
+  const sellers = impactoData.sellers || [];
+  // Totais direto da planilha (via webhook impacto)
+  IMP_TPV_TOTAL = sellers.reduce((a,s) => a + (s.tpv||0), 0);
+  IMP_TPV_CL    = sellers.reduce((a,s) => a + (s.cl_rec||0) + (s.cl_uni||0), 0);
+  IMP_TPV_POS   = IMP_TPV_TOTAL - IMP_TPV_CL; // Pós = Total - CL
 }
 
 /* ── State ── */
@@ -1324,34 +1324,34 @@ function impRenderKpis(filtered) {
   const nR    = risco.length;
   document.getElementById('imp-kpis').innerHTML = `
     <div class="kpi-card kpi-fixed">
-      <div class="kpi-lbl">TPV Total</div>
+      <div class="kpi-lbl">TPV Total SET/26</div>
       <div class="kpi-val">${fmtBRL(IMP_TPV_TOTAL)}</div>
-      <div class="kpi-sub">Referência da planilha</div>
+      <div class="kpi-sub">${filtered.length} sellers · planilha</div>
     </div>
     <div class="kpi-card kpi-fixed">
-      <div class="kpi-lbl">TPV Sellers (universo)</div>
+      <div class="kpi-lbl">Pós-Graduação</div>
+      <div class="kpi-val">${fmtBRL(IMP_TPV_POS)}</div>
+      <div class="kpi-sub">Sempre protegido</div>
+    </div>
+    <div class="kpi-card kpi-fixed">
+      <div class="kpi-lbl">Cursos Livres / Ext.</div>
       <div class="kpi-val">${fmtBRL(IMP_TPV_CL)}</div>
-      <div class="kpi-sub">base de análise de risco</div>
+      <div class="kpi-sub">Sujeito a bloqueio</div>
     </div>
     <div class="kpi-card kpi-safe">
-      <div class="kpi-lbl">TPV Protegido</div>
+      <div class="kpi-lbl">CL Protegido</div>
       <div class="kpi-val">${fmtBRL(tvP)}</div>
-      <div class="kpi-sub">${fmtPct(IMP_TPV_CL?tvP/IMP_TPV_CL:0)} dos sellers</div>
+      <div class="kpi-sub">${fmtPct(IMP_TPV_CL?tvP/IMP_TPV_CL:0)} do CL</div>
     </div>
     <div class="kpi-card kpi-danger">
-      <div class="kpi-lbl">TPV Em risco</div>
+      <div class="kpi-lbl">CL Em Risco</div>
       <div class="kpi-val">${fmtBRL(tvR)}</div>
-      <div class="kpi-sub">${fmtPct(pctR)} dos sellers</div>
-    </div>
-    <div class="kpi-card kpi-danger">
-      <div class="kpi-lbl">% Em risco</div>
-      <div class="kpi-val">${fmtPct(pctR,1)}</div>
-      <div class="kpi-sub">de ${fmtBRL(IMP_TPV_CL)} em TPV</div>
+      <div class="kpi-sub">${fmtPct(pctR)} do CL</div>
     </div>
     <div class="kpi-card ${nR>0?'kpi-danger':'kpi-safe'}">
       <div class="kpi-lbl">Sellers em risco</div>
       <div class="kpi-val">${nR}</div>
-      <div class="kpi-sub">${filtered.length} sellers filtrados</div>
+      <div class="kpi-sub">${filtered.length} sellers no filtro</div>
     </div>`;
 }
 
