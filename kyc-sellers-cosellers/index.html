@@ -258,14 +258,6 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
       <div class="kpi-grid" id="imp-kpis"></div>
     </div>
 
-    <!-- Filtros das seções 2–5 -->
-    <div class="card">
-      <div class="tb">
-        <input class="search" type="text" id="imp-q" placeholder="Buscar seller ou co-seller…" oninput="impRender()"/>
-        <span class="tb-counter" id="imp-counter">—</span>
-      </div>
-    </div>
-
     <!-- Seção 2: Impacto por tipo de TPV -->
     <div class="card">
       <div class="sec-hdr"><h3>Impacto financeiro por tipo de TPV</h3></div>
@@ -279,6 +271,14 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
         <p>Esta visão mostra onde estão as pendências documentais que colocam o TPV em risco de bloqueio.</p>
       </div>
       <div class="tw"><table id="imp-tab-orig"></table></div>
+    </div>
+
+    <!-- Busca -->
+    <div class="card">
+      <div class="tb">
+        <input class="search" type="text" id="imp-q" placeholder="Buscar seller ou co-seller…" oninput="impRender()"/>
+        <span class="tb-counter" id="imp-counter">—</span>
+      </div>
     </div>
 
     <!-- Seção 5: Sellers — Impacto no TPV -->
