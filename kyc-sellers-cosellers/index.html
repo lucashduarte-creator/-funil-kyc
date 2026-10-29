@@ -176,6 +176,8 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
 .kpi-card.kpi-danger .kpi-val{color:var(--danger-40);}
 #tab-impacto .kpi-val{font-size:17px;font-weight:700;}
 #tab-impacto .kpi-sub{font-size:11px;margin-top:3px;}
+#tab-outubro .kpi-val{font-size:17px;font-weight:700;}
+#tab-outubro .kpi-sub{font-size:11px;margin-top:3px;}
 
 /* ── Situação badges ── */
 .sit-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
@@ -246,6 +248,7 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
   <div class="tab-pills">
     <button class="tab-pill" id="tp-impacto" onclick="switchTab('impacto')">Impacto no TPV</button>
     <button class="tab-pill" id="tp-sellers" onclick="switchTab('sellers')">Sellers &amp; Co-sellers · KYC</button>
+    <button class="tab-pill" id="tp-outubro" onclick="switchTab('outubro')">Impacto Outubro Parcial</button>
   </div>
 
   <!-- TAB: IMPACTO -->
@@ -323,6 +326,81 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
 
   </div><!-- /tab-impacto -->
 
+  <!-- TAB: OUTUBRO -->
+  <div id="tab-outubro" style="display:none">
+
+    <!-- Seção 1: Resumo Executivo -->
+    <div class="card">
+      <div class="sec-hdr">
+        <h3>Resumo Executivo</h3>
+        <p>Análise de impacto no TPV — KYC Sellers &amp; Co-sellers · Outubro Parcial</p>
+      </div>
+      <div class="kpi-grid" id="out-kpis"></div>
+    </div>
+
+    <!-- Seção 2: Impacto por tipo de TPV -->
+    <div class="card">
+      <div class="sec-hdr"><h3>Impacto financeiro por tipo de TPV</h3></div>
+      <div class="tw"><table id="out-tab-tipo"></table></div>
+    </div>
+
+    <!-- Seção 3: Quem está impedindo a regularização? -->
+    <div class="card">
+      <div class="sec-hdr">
+        <h3>Quem está impedindo a regularização?</h3>
+        <p>Esta visão mostra onde estão as pendências documentais que colocam o TPV em risco de bloqueio.</p>
+      </div>
+      <div class="tw"><table id="out-tab-orig"></table></div>
+    </div>
+
+    <!-- Busca -->
+    <div class="card">
+      <div class="tb">
+        <input class="search" type="text" id="out-q" placeholder="Buscar seller ou co-seller…" oninput="impRender('out')"/>
+        <span class="tb-counter" id="out-counter">—</span>
+      </div>
+    </div>
+
+    <!-- Seção 5: Sellers — Impacto no TPV -->
+    <div class="card">
+      <div class="tb" style="border-bottom:none">
+        <div>
+          <div style="font-size:14px;font-weight:700">Sellers — Impacto no TPV</div>
+          <div style="font-size:12px;color:var(--neutral-40);margin-top:2px" id="out-sell-lbl">Ordenado por TPV total decrescente</div>
+        </div>
+        <span class="tb-counter" id="out-sell-counter">—</span>
+      </div>
+      <div id="out-filtro-strip" style="display:none;padding:8px 16px;background:#FFFBF9;border-top:1px solid var(--neutral-90);border-bottom:1px solid var(--neutral-90);font-size:12px;align-items:center;gap:8px">
+        <span id="out-filtro-txt" style="color:var(--primary-50)"></span>
+        <button onclick="impLimparClick('out')" style="font-size:11px;border:none;background:none;cursor:pointer;color:var(--primary-60);text-decoration:underline;padding:0">Limpar seleção</button>
+      </div>
+      <div class="tw">
+        <table>
+          <thead>
+            <tr>
+              <th>Seller</th>
+              <th>Situação</th>
+              <th>Status KYC</th>
+              <th>Co-sellers</th>
+              <th class="r">TPV Rec</th>
+              <th class="r">TPV Único</th>
+              <th class="r">TPV Total</th>
+            </tr>
+          </thead>
+          <tbody id="out-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pag-wrap">
+        <span class="pag-info" id="out-pag-info">—</span>
+        <div class="pag-pages" id="out-pag-pages"></div>
+      </div>
+    </div>
+
+    <!-- Detalhe expandido do seller -->
+    <div class="card" id="out-detail" style="display:none"></div>
+
+  </div><!-- /tab-outubro -->
+
   <!-- TAB: SELLERS -->
   <div id="tab-sellers" style="display:none">
     <div class="toggle-wrap" onclick="toggleInternal()" id="toggle-wrap">
@@ -387,6 +465,7 @@ function logout(){ sessionStorage.removeItem('kyc_auth'); window.location.replac
 ───────────────────────────────────────────────── */
 const WEBHOOK = 'https://integration.voompcreators.net.br/webhook/kyc-sellers-cosellers';
 const WEBHOOK_IMPACTO = 'https://integration.voompcreators.net.br/webhook/kyc-impacto-tpv';
+const WEBHOOK_IMPACTO_OUTUBRO = 'https://integration.voompcreators.net.br/webhook/kyc-impacto-outubro-parcial';
 const CONTA_INTERNA_ID = '16102';
 const ORDER  = ['SEM KYC','PAGARME','D4SIGN','BDR','CELCOIN','CONCLUIDO'];
 const RANK   = Object.fromEntries(ORDER.map((e,i)=>[e,i]));
@@ -445,6 +524,7 @@ const MOCK = {
 ───────────────────────────────────────────────── */
 let rawData = null;
 let impactoData = null; // alimentado pelo webhook /kyc-impacto-tpv
+let impactoDataOutubro = null;
 let ignoreInternal = false;
 let activeTab = 'sellers';
 let sellerSelected = null;
@@ -459,6 +539,7 @@ const PAGE_SIZE = 20;
 document.addEventListener('DOMContentLoaded', () => {
   const hash = location.hash.replace('#','');
   if (hash === 'sellers') switchTab('sellers');
+  else if (hash === 'outubro') switchTab('outubro');
   else switchTab('impacto');
   loadData();
 });
@@ -478,17 +559,32 @@ async function loadData() {
 }
 
 async function loadImpactoData() {
-  impRenderLoading();
+  impRenderLoading('imp');
   try {
     const res = await fetch(WEBHOOK_IMPACTO, { signal: AbortSignal.timeout(60000) });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const d = await res.json();
     if (d.erro) throw new Error(d.erro);
     impactoData = d;
-    impRender();
+    impRender('imp');
   } catch(e) {
     console.warn('Webhook Impacto indisponível:', e.message);
-    impRenderEmpty('Execute o workflow <b>KYC · Impacto TPV · Scheduler</b> no n8n para gerar os dados desta visão.');
+    impRenderEmpty('Execute o workflow <b>KYC · Impacto TPV · Scheduler</b> no n8n para gerar os dados desta visão.', 'imp');
+  }
+}
+
+async function loadOutubroData() {
+  impRenderLoading('out');
+  try {
+    const res = await fetch(WEBHOOK_IMPACTO_OUTUBRO, { signal: AbortSignal.timeout(60000) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const d = await res.json();
+    if (d.erro) throw new Error(d.erro);
+    impactoDataOutubro = d;
+    impRender('out');
+  } catch(e) {
+    console.warn('Webhook Outubro indisponível:', e.message);
+    impRenderEmpty('Execute o workflow <b>KYC Impacto TPV Outubro Parcial Scheduler</b> no n8n para gerar os dados desta visão.', 'out');
   }
 }
 
@@ -503,6 +599,9 @@ function fmtBRL(v, compact=false) {
 }
 function fmtPct(v, dec=0) { return (v*100).toFixed(dec).replace('.',',')+'%'; }
 function fmtN(v) { return Number(v||0).toLocaleString('pt-BR'); }
+function $id(ns, suf) { return document.getElementById(ns+'-'+suf); }
+function getNsData(ns) { return ns === 'imp' ? impactoData : impactoDataOutubro; }
+function getNsSt(ns)   { return ns === 'imp' ? impSt : outSt; }
 
 function etapaClass(e) {
   if (e === 'CONCLUIDO') return 'eb eb-ok';
@@ -1067,14 +1166,16 @@ function sortBy(table, col) {
 
 /* ── Tab switching ── */
 function switchTab(tab) {
-  ['sellers','impacto'].forEach(t => {
+  ['sellers','impacto','outubro'].forEach(t => {
     const el = document.getElementById('tab-'+t);
     if (el) el.style.display = t===tab?'':'none';
     const pill = document.getElementById('tp-'+t);
     if (pill) pill.classList.toggle('active', t===tab);
   });
-  if (tab==='impacto' && impactoData) impRender();
+  if (tab==='impacto' && impactoData) impRender('imp');
   if (tab==='impacto' && !impactoData) loadImpactoData();
+  if (tab==='outubro' && impactoDataOutubro) impRender('out');
+  if (tab==='outubro' && !impactoDataOutubro) loadOutubroData();
   history.replaceState(null,'','#'+tab);
 }
 
@@ -1084,15 +1185,17 @@ let IMP_TPV_POS   = 0;
 let IMP_TPV_CL    = 0;
 const IMP_PAGE_SIZE = 20;
 
-function initImpConstants() {
-  if (!impactoData) return;
-  const meta    = impactoData.meta || {};
-  const sellers = impactoData.sellers || [];
+function initImpConstants(ns = 'imp') {
+  const d = getNsData(ns);
+  if (!d) return { total: 0, pos: 0, cl: 0 };
+  const meta    = d.meta || {};
+  const sellers = d.sellers || [];
   // Usa totais da planilha do meta (todos os sellers, inclusive só-Pós)
   // Fallback: soma dos sellers filtrados (compatibilidade com caches antigos)
-  IMP_TPV_TOTAL = meta.tpv_total_planilha || sellers.reduce((a,s) => a + (s.tpv||0), 0);
-  IMP_TPV_CL    = meta.cl_total_planilha  || sellers.reduce((a,s) => a + (s.cl_rec||0) + (s.cl_uni||0), 0);
-  IMP_TPV_POS   = meta.pos_total_planilha || (IMP_TPV_TOTAL - IMP_TPV_CL);
+  const total = meta.tpv_total_planilha || sellers.reduce((a,s) => a + (s.tpv||0), 0);
+  const cl    = meta.cl_total_planilha  || sellers.reduce((a,s) => a + (s.cl_rec||0) + (s.cl_uni||0), 0);
+  const pos   = meta.pos_total_planilha || (total - cl);
+  return { total, pos, cl };
 }
 
 /* ── State ── */
@@ -1101,6 +1204,7 @@ const impSt = {
   clickSec3:'', clickSec4:'',
   page:1, expanded:null
 };
+const outSt = { search:'', tipo:'', sit:'', orig:'', etapa:'', clickSec3:'', clickSec4:'', page:1, expanded:null };
 
 /* ── Field mapping helpers ── */
 
@@ -1201,10 +1305,11 @@ function classificarSeller(s, vinculos) {
 }
 
 /* ── Build enriched seller list for impacto ── */
-function calcularImpacto() {
-  if (!impactoData) return [];
+function calcularImpacto(ns = 'imp') {
+  const d = getNsData(ns);
+  if (!d) return [];
   // O webhook já retorna os sellers classificados com cl_rec, cl_uni, cl_total, sit, orig, etapa_principal, vinculos
-  return impactoData.sellers.map(s => ({
+  return d.sellers.map(s => ({
     ...s,
     cl_r: s.cl_rec   || 0,
     cl_u: s.cl_uni   || 0,
@@ -1221,32 +1326,33 @@ function calcularImpacto() {
 }
 
 /* ── Loading / Empty states ── */
-function impRenderLoading() {
-  const sections = ['imp-kpis','imp-sec2-body','imp-sec3-body','imp-sec4-body','imp-tbody'];
-  sections.forEach(id => {
-    const el = document.getElementById(id);
+function impRenderLoading(ns = 'imp') {
+  ['kpis','sec2-body','sec3-body','sec4-body','tbody'].forEach(suf => {
+    const el = $id(ns, suf);
     if (el) el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--neutral-50);font-size:13px">Carregando…</div>';
   });
 }
 
-function impRenderEmpty(msg) {
-  const container = document.getElementById('imp-kpis');
+function impRenderEmpty(msg, ns = 'imp') {
+  const container = $id(ns, 'kpis');
   if (container) {
-    container.closest('#tab-impacto').querySelectorAll('.card').forEach((c, i) => {
+    container.closest('#tab-'+ns).querySelectorAll('.card').forEach((c, i) => {
       if (i > 0) c.style.display = 'none';
     });
+    const loadFn = ns === 'imp' ? 'loadImpactoData()' : 'loadOutubroData()';
     container.innerHTML = `<div style="grid-column:1/-1;padding:40px;text-align:center;background:#fff;border-radius:10px;border:1px solid var(--neutral-90)">
       <div style="font-size:32px;margin-bottom:12px">📊</div>
       <div style="font-size:14px;font-weight:600;color:var(--neutral-15);margin-bottom:8px">Dados ainda não disponíveis</div>
       <div style="font-size:13px;color:var(--neutral-50);max-width:420px;margin:0 auto">${msg}</div>
-      <button onclick="loadImpactoData()" style="margin-top:16px;padding:8px 20px;border:1px solid var(--primary-60);border-radius:8px;background:var(--primary-95);color:var(--primary-60);cursor:pointer;font-size:13px;font-weight:500">Tentar novamente</button>
+      <button onclick="${loadFn}" style="margin-top:16px;padding:8px 20px;border:1px solid var(--primary-60);border-radius:8px;background:var(--primary-95);color:var(--primary-60);cursor:pointer;font-size:13px;font-weight:500">Tentar novamente</button>
     </div>`;
   }
 }
 
 /* ── Filter ── */
-function impFilter(classified) {
-  const q = impSt.search.toLowerCase();
+function impFilter(classified, ns = 'imp') {
+  const st = getNsSt(ns);
+  const q = st.search.toLowerCase();
   return classified.filter(s => {
     if (q) {
       const inSel = `${s.seller_id} ${s.nome} ${s.email}`.toLowerCase().includes(q);
@@ -1254,26 +1360,26 @@ function impFilter(classified) {
         `${v.coseller_id} ${v.coseller_nome} ${v.coseller_email}`.toLowerCase().includes(q));
       if (!inSel && !inCo) return false;
     }
-    if (impSt.tipo==='rec'&&!s.cl_r) return false;
-    if (impSt.tipo==='uni'&&!s.cl_u) return false;
-    if (impSt.sit  && s.sit !==impSt.sit)  return false;
-    if (impSt.orig && s.orig!==impSt.orig) return false;
-    if (impSt.etapa) {
+    if (st.tipo==='rec'&&!s.cl_r) return false;
+    if (st.tipo==='uni'&&!s.cl_u) return false;
+    if (st.sit  && s.sit !==st.sit)  return false;
+    if (st.orig && s.orig!==st.orig) return false;
+    if (st.etapa) {
       if (s.sit!=='em_risco') return false;
-      if (imp3(s.steps)[impSt.etapa]===false) return true;
+      if (imp3(s.steps)[st.etapa]===false) return true;
       const vins = vinculos.filter(v=>v.seller_id===s.seller_id);
-      for (const v of vins) { if (impCoSteps(v)[impSt.etapa]===false) return true; }
-      if (s.n_cos_pend>0&&impSt.etapa==='d4sign') return true;
+      for (const v of vins) { if (impCoSteps(v)[st.etapa]===false) return true; }
+      if (s.n_cos_pend>0&&st.etapa==='d4sign') return true;
       return false;
     }
-    if (impSt.clickSec3) {
-      if (impSt.clickSec3==='protegido'    && s.sit!=='protegido')                          return false;
-      if (impSt.clickSec3==='nao_validado' && s.sit!=='nao_validado')                       return false;
-      if (impSt.clickSec3==='seller'       && !(s.sit==='em_risco'&&s.orig==='seller'))     return false;
-      if (impSt.clickSec3==='coseller'     && !(s.sit==='em_risco'&&s.orig==='coseller'))   return false;
-      if (impSt.clickSec3==='ambos'        && !(s.sit==='em_risco'&&s.orig==='ambos'))      return false;
+    if (st.clickSec3) {
+      if (st.clickSec3==='protegido'    && s.sit!=='protegido')                          return false;
+      if (st.clickSec3==='nao_validado' && s.sit!=='nao_validado')                       return false;
+      if (st.clickSec3==='seller'       && !(s.sit==='em_risco'&&s.orig==='seller'))     return false;
+      if (st.clickSec3==='coseller'     && !(s.sit==='em_risco'&&s.orig==='coseller'))   return false;
+      if (st.clickSec3==='ambos'        && !(s.sit==='em_risco'&&s.orig==='ambos'))      return false;
     }
-    if (impSt.clickSec4 && s.etapa!==impSt.clickSec4) return false;
+    if (st.clickSec4 && s.etapa!==st.clickSec4) return false;
     return true;
   });
 }
@@ -1290,18 +1396,19 @@ function sitBadge(sit) {
 }
 
 /* ── impRenderKpis (Seção 1) ── */
-function impRenderKpis(filtered) {
+function impRenderKpis(filtered, ns = 'imp') {
+  const { total: IMP_TPV_TOTAL, pos: IMP_TPV_POS, cl: IMP_TPV_CL } = initImpConstants(ns);
   const prot  = filtered.filter(s=>s.sit==='protegido');
   const risco = filtered.filter(s=>s.sit==='em_risco');
   const tvP   = prot.reduce((a,s)=>a+s.cl_t,0);
   const tvR   = risco.reduce((a,s)=>a+s.cl_t,0);
   const pctR  = IMP_TPV_CL ? tvR/IMP_TPV_CL : 0;
   const nR    = risco.length;
-  document.getElementById('imp-kpis').innerHTML = `
+  $id(ns,'kpis').innerHTML = `
     <div class="kpi-card kpi-fixed">
       <div class="kpi-lbl">TPV Total SET/26</div>
       <div class="kpi-val">${fmtBRL(IMP_TPV_TOTAL)}</div>
-      <div class="kpi-sub">${fmtN(impactoData.meta?.sellers_total_planilha || 468)} sellers · planilha</div>
+      <div class="kpi-sub">${fmtN(getNsData(ns)?.meta?.sellers_total_planilha || 468)} sellers · planilha</div>
     </div>
     <div class="kpi-card kpi-fixed">
       <div class="kpi-lbl">Pós-Graduação</div>
@@ -1311,7 +1418,7 @@ function impRenderKpis(filtered) {
     <div class="kpi-card kpi-fixed">
       <div class="kpi-lbl">Cursos Livres / Ext.</div>
       <div class="kpi-val">${fmtBRL(IMP_TPV_CL)}</div>
-      <div class="kpi-sub">${fmtN(impactoData.meta?.sellers_cl_planilha || filtered.length)} sellers com CL</div>
+      <div class="kpi-sub">${fmtN(getNsData(ns)?.meta?.sellers_cl_planilha || filtered.length)} sellers com CL</div>
     </div>
     <div class="kpi-card kpi-safe">
       <div class="kpi-lbl">CL Protegido</div>
@@ -1331,8 +1438,8 @@ function impRenderKpis(filtered) {
 }
 
 /* ── impRenderSec2: Impacto por tipo de TPV ── */
-function impRenderSec2(filtered) {
-  const el = document.getElementById('imp-tab-tipo');
+function impRenderSec2(filtered, ns = 'imp') {
+  const el = $id(ns, 'tab-tipo');
   if (!el) return;
   const risco = filtered.filter(s=>s.sit==='em_risco');
   const prot  = filtered.filter(s=>s.sit==='protegido');
@@ -1354,9 +1461,10 @@ function impRenderSec2(filtered) {
 }
 
 /* ── impRenderSec3: Quem está impedindo ── */
-function impRenderSec3(filtered) {
-  const el = document.getElementById('imp-tab-orig');
+function impRenderSec3(filtered, ns = 'imp') {
+  const el = $id(ns, 'tab-orig');
   if (!el) return;
+  const st = getNsSt(ns);
   const S = (arr,k) => arr.reduce((a,s)=>a+(s[k]||0),0);
   const groups = [
     {key:'protegido',   lbl:'Totalmente regularizados',fn:s=>s.sit==='protegido'},
@@ -1368,8 +1476,8 @@ function impRenderSec3(filtered) {
     +groups.map(g=>{
       const rows=filtered.filter(g.fn);
       const n=rows.length,rec=S(rows,'cl_r'),uni=S(rows,'cl_u'),tot=S(rows,'cl_t');
-      const act=impSt.clickSec3===g.key;
-      return `<tr class="clkrow${act?' clk-active':''}" onclick="impClickSec3('${g.key}')">
+      const act=st.clickSec3===g.key;
+      return `<tr class="clkrow${act?' clk-active':''}" onclick="impClickSec3('${g.key}','${ns}')">
         <td style="font-weight:500">${g.lbl}${act?' <span style="font-size:10px;font-weight:400;color:var(--primary-60)">← filtrado</span>':''}</td>
         <td class="c-r"><b>${n}</b></td>
         <td class="c-money">${tot?fmtBRL(rec):'<span style="color:var(--neutral-85)">—</span>'}</td>
@@ -1380,9 +1488,10 @@ function impRenderSec3(filtered) {
 }
 
 /* ── impRenderSec4: TPV por etapa ── */
-function impRenderSec4(filtered) {
-  const el = document.getElementById('imp-tab-etapa');
+function impRenderSec4(filtered, ns = 'imp') {
+  const el = $id(ns, 'tab-etapa');
   if (!el) return;
+  const st = getNsSt(ns);
   const em_risco = filtered.filter(s=>s.sit==='em_risco');
   const S = (arr,k) => arr.reduce((a,s)=>a+(s[k]||0),0);
   const etapas = [{key:'pagarme',lbl:'Pagar.me'},{key:'d4sign',lbl:'D4Sign'},{key:'bdr',lbl:'BDR'}];
@@ -1390,8 +1499,8 @@ function impRenderSec4(filtered) {
     +etapas.map(e=>{
       const rows=em_risco.filter(s=>s.etapa===e.key);
       const n=rows.length,rec=S(rows,'cl_r'),uni=S(rows,'cl_u'),tot=S(rows,'cl_t');
-      const act=impSt.clickSec4===e.key;
-      return `<tr class="clkrow${act?' clk-active':''}" onclick="impClickSec4('${e.key}')">
+      const act=st.clickSec4===e.key;
+      return `<tr class="clkrow${act?' clk-active':''}" onclick="impClickSec4('${e.key}','${ns}')">
         <td style="font-weight:500">${e.lbl}${act?' <span style="font-size:10px;font-weight:400;color:var(--primary-60)">← filtrado</span>':''}</td>
         <td class="c-r"><b>${n}</b></td>
         <td class="c-money">${n?fmtBRL(rec):'<span style="color:var(--neutral-85)">—</span>'}</td>
@@ -1402,43 +1511,45 @@ function impRenderSec4(filtered) {
 }
 
 /* ── impRenderSellers (Seção 5) ── */
-function impRenderSellers(filtered) {
+function impRenderSellers(filtered, ns = 'imp') {
+  const st = getNsSt(ns);
   const sorted = [...filtered].sort((a,b)=>(b.cl_t||0)-(a.cl_t||0));
   const tp = Math.max(1,Math.ceil(sorted.length/IMP_PAGE_SIZE));
-  if (impSt.page>tp) impSt.page=1;
-  const page = sorted.slice((impSt.page-1)*IMP_PAGE_SIZE, impSt.page*IMP_PAGE_SIZE);
-  document.getElementById('imp-sell-counter').textContent =
+  if (st.page>tp) st.page=1;
+  const page = sorted.slice((st.page-1)*IMP_PAGE_SIZE, st.page*IMP_PAGE_SIZE);
+  $id(ns,'sell-counter').textContent =
     `${fmtN(sorted.length)} sellers · ${fmtBRL(sorted.reduce((a,s)=>a+s.cl_t,0))} de TPV`;
-  document.getElementById('imp-pag-info').textContent =
-    `${(impSt.page-1)*IMP_PAGE_SIZE+1}–${Math.min(impSt.page*IMP_PAGE_SIZE,sorted.length)} de ${fmtN(sorted.length)}`;
-  const strip = document.getElementById('imp-filtro-strip');
-  const txt   = document.getElementById('imp-filtro-txt');
-  const hasClick = impSt.clickSec3||impSt.clickSec4;
+  $id(ns,'pag-info').textContent =
+    `${(st.page-1)*IMP_PAGE_SIZE+1}–${Math.min(st.page*IMP_PAGE_SIZE,sorted.length)} de ${fmtN(sorted.length)}`;
+  const strip = $id(ns,'filtro-strip');
+  const txt   = $id(ns,'filtro-txt');
+  const hasClick = st.clickSec3||st.clickSec4;
   if (hasClick) {
-    const lbl = impSt.clickSec3
+    const lbl = st.clickSec3
       ? ({protegido:'Totalmente regularizados',seller:'Pendência no Seller',
           coseller:'Pendência no co-seller',ambos:'Pendências nos dois',
-          nao_validado:'Não validado'}[impSt.clickSec3]||impSt.clickSec3)
-      : 'Etapa: '+({pagarme:'Pagar.me',d4sign:'D4Sign',bdr:'BDR'}[impSt.clickSec4]||impSt.clickSec4);
+          nao_validado:'Não validado'}[st.clickSec3]||st.clickSec3)
+      : 'Etapa: '+({pagarme:'Pagar.me',d4sign:'D4Sign',bdr:'BDR'}[st.clickSec4]||st.clickSec4);
     txt.textContent = 'Filtro ativo: '+lbl;
     strip.style.display = 'flex';
   } else {
     strip.style.display = 'none';
   }
-  const tbody = document.getElementById('imp-tbody');
+  const tbody = $id(ns,'tbody');
   if (!page.length) {
     tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--neutral-40)">Nenhum seller com esses filtros.</td></tr>`;
-    renderPag('imp-pag-pages',impSt.page,tp,p=>{impSt.page=p;impRender();});
+    const cb = ns === 'imp' ? p=>{impSt.page=p;impRender('imp');} : p=>{outSt.page=p;impRender('out');};
+    renderPag(ns+'-pag-pages',st.page,tp,cb);
     return;
   }
   tbody.innerHTML = page.map(s => {
     const isRisk = s.sit==='em_risco';
-    const isExp  = impSt.expanded===s.seller_id;
+    const isExp  = st.expanded===s.seller_id;
     const nCo    = s.n_cos||0;
     const coInfo = nCo>0
       ? `${fmtN(nCo)} co-seller${nCo!==1?'s':''}${s.n_cos_pend>0?` <b style="color:var(--danger-40)">(${s.n_cos_pend} pend.)</b>`:''}`
       : '—';
-    return `<tr class="${isRisk?'row-risk':''} ${isExp?'sel-row':''}" onclick="impExpandSeller('${s.seller_id}')" style="cursor:pointer">
+    return `<tr class="${isRisk?'row-risk':''} ${isExp?'sel-row':''}" onclick="impExpandSeller('${s.seller_id}','${ns}')" style="cursor:pointer">
       <td>
         <div style="font-weight:500">${s.nome}</div>
         <div class="c-id">${s.seller_id} · ${s.email}</div>
@@ -1451,7 +1562,8 @@ function impRenderSellers(filtered) {
       <td class="c-money" style="font-weight:600">${s.cl_t?fmtBRL(s.cl_t):'<span style="color:var(--neutral-85)">—</span>'}</td>
     </tr>`;
   }).join('');
-  renderPag('imp-pag-pages',impSt.page,tp,p=>{impSt.page=p;impRender();});
+  const cb = ns === 'imp' ? p=>{impSt.page=p;impRender('imp');} : p=>{outSt.page=p;impRender('out');};
+  renderPag(ns+'-pag-pages',st.page,tp,cb);
 }
 
 /* ── impExpandHtml: detail panel for a seller ── */
@@ -1514,12 +1626,13 @@ function impExpandHtml(s) {
 }
 
 /* ── impExpandSeller ── */
-function impExpandSeller(id) {
-  impSt.expanded = impSt.expanded===id ? null : id;
-  impRender();
-  const detail = document.getElementById('imp-detail');
-  if (impSt.expanded) {
-    const s = calcularImpacto().find(x=>x.seller_id===impSt.expanded);
+function impExpandSeller(id, ns = 'imp') {
+  const st = getNsSt(ns);
+  st.expanded = st.expanded===id ? null : id;
+  impRender(ns);
+  const detail = $id(ns, 'detail');
+  if (st.expanded) {
+    const s = calcularImpacto(ns).find(x=>x.seller_id===st.expanded);
     if (s) {
       detail.style.display = '';
       detail.innerHTML = impExpandHtml(s);
@@ -1531,50 +1644,54 @@ function impExpandSeller(id) {
 }
 
 /* ── Section click filters ── */
-function impClickSec3(key) {
-  impSt.clickSec3 = impSt.clickSec3===key?'':key;
-  impSt.clickSec4 = ''; impSt.page=1; impRender();
+function impClickSec3(key, ns = 'imp') {
+  const st = getNsSt(ns);
+  st.clickSec3 = st.clickSec3===key?'':key;
+  st.clickSec4 = ''; st.page=1; impRender(ns);
 }
-function impClickSec4(key) {
-  impSt.clickSec4 = impSt.clickSec4===key?'':key;
-  impSt.clickSec3 = ''; impSt.page=1; impRender();
+function impClickSec4(key, ns = 'imp') {
+  const st = getNsSt(ns);
+  st.clickSec4 = st.clickSec4===key?'':key;
+  st.clickSec3 = ''; st.page=1; impRender(ns);
 }
-function impLimparClick() {
-  impSt.clickSec3=impSt.clickSec4=''; impSt.page=1; impRender();
+function impLimparClick(ns = 'imp') {
+  const st = getNsSt(ns);
+  st.clickSec3=st.clickSec4=''; st.page=1; impRender(ns);
 }
 
 /* ── impRender: main entry point ── */
-function impRender() {
-  if (!impactoData) return;
-  initImpConstants();
-  impSt.search = (document.getElementById('imp-q')?.value||'').trim();
-  impSt.tipo   = document.getElementById('imp-tipo')?.value||'';
-  impSt.sit    = document.getElementById('imp-sit')?.value||'';
-  impSt.orig   = document.getElementById('imp-orig')?.value||'';
-  impSt.etapa  = document.getElementById('imp-etapa')?.value||'';
-  const hasF = impSt.search||impSt.tipo||impSt.sit||impSt.orig||impSt.etapa;
-  const btn  = document.getElementById('imp-clear');
+function impRender(ns = 'imp') {
+  if (!getNsData(ns)) return;
+  const st = getNsSt(ns);
+  st.search = ($id(ns,'q')?.value||'').trim();
+  st.tipo   = $id(ns,'tipo')?.value||'';
+  st.sit    = $id(ns,'sit')?.value||'';
+  st.orig   = $id(ns,'orig')?.value||'';
+  st.etapa  = $id(ns,'etapa')?.value||'';
+  const hasF = st.search||st.tipo||st.sit||st.orig||st.etapa;
+  const btn  = $id(ns,'clear');
   if (btn) btn.style.display = hasF?'':'none';
-  const cEl  = document.getElementById('imp-counter');
-  if (cEl) cEl.textContent = hasF?'Filtros ativos':`${fmtN((impactoData.sellers||[]).length)} sellers`;
-  const classified = calcularImpacto();
-  const filtered   = impFilter(classified);
-  impRenderKpis(filtered);
-  impRenderSec2(filtered);
-  impRenderSec3(filtered);
-  impRenderSec4(filtered);
-  impRenderSellers(filtered);
+  const cEl  = $id(ns,'counter');
+  if (cEl) cEl.textContent = hasF?'Filtros ativos':`${fmtN((getNsData(ns).sellers||[]).length)} sellers`;
+  const classified = calcularImpacto(ns);
+  const filtered   = impFilter(classified, ns);
+  impRenderKpis(filtered, ns);
+  impRenderSec2(filtered, ns);
+  impRenderSec3(filtered, ns);
+  impRenderSec4(filtered, ns);
+  impRenderSellers(filtered, ns);
 }
 
 /* ── impLimparFiltros ── */
-function impLimparFiltros() {
-  ['imp-q','imp-tipo','imp-sit','imp-orig','imp-etapa'].forEach(id=>{
-    const el=document.getElementById(id);
+function impLimparFiltros(ns = 'imp') {
+  ['q','tipo','sit','orig','etapa'].forEach(suf=>{
+    const el=$id(ns, suf);
     if(!el)return;
     if(el.tagName==='INPUT')el.value='';else el.selectedIndex=0;
   });
-  impSt.search=impSt.tipo=impSt.sit=impSt.orig=impSt.etapa='';
-  impSt.page=1; impRender();
+  const st = getNsSt(ns);
+  st.search=st.tipo=st.sit=st.orig=st.etapa='';
+  st.page=1; impRender(ns);
 }
 </script>
 </body>
