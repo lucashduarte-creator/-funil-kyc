@@ -581,17 +581,6 @@ async function loadOutubroData() {
     const d = await res.json();
     if (d.erro) throw new Error(d.erro);
     impactoDataOutubro = d;
-    // Pós-processamento: adiciona campos esperados pelo impExpandHtml
-    // (o webhook de Outubro não inclui participa_cl, participa_pos, comissao_set)
-    if (impactoDataOutubro?.sellers) {
-      impactoDataOutubro.sellers.forEach(s => {
-        (s.vinculos || []).forEach(v => {
-          v.participa_cl  = true;            // Query C já filtra só CL (Pós excluído)
-          v.participa_pos = false;
-          v.comissao_set  = v.comissao_out || 0; // Mapeia nome outubro -> nome do frontend
-        });
-      });
-    }
     impRender('out');
   } catch(e) {
     console.warn('Webhook Outubro indisponível:', e.message);
