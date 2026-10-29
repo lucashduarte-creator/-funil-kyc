@@ -465,7 +465,7 @@ function logout(){ sessionStorage.removeItem('kyc_auth'); window.location.replac
 ───────────────────────────────────────────────── */
 const WEBHOOK = 'https://integration.voompcreators.net.br/webhook/kyc-sellers-cosellers';
 const WEBHOOK_IMPACTO = 'https://integration.voompcreators.net.br/webhook/kyc-impacto-tpv';
-const WEBHOOK_IMPACTO_OUTUBRO = 'https://integration.voompcreators.net.br/webhook/kyc-impacto-outubro-parcial';
+const WEBHOOK_IMPACTO_OUTUBRO = 'https://integration.voompcreators.net.br/webhook/kyc-impacto-tpv-outubro';
 const CONTA_INTERNA_ID = '16102';
 const ORDER  = ['SEM KYC','PAGARME','D4SIGN','BDR','CELCOIN','CONCLUIDO'];
 const RANK   = Object.fromEntries(ORDER.map((e,i)=>[e,i]));
