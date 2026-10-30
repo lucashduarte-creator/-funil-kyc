@@ -518,6 +518,17 @@ function renderSplitTable(users, total, totalPages) {
     tbody.innerHTML = users.map(function(u) {
       var allDocOk = (u.pagarme === 'APPROVED') && (u.d4sign === 'FINISHED') && (u.bdr === 'processed');
       var docBadges;
+      if (allDocOk && u.celcoin === 'APPROVED') {
+        docBadges = '<span class="badge badge-success" style="font-size:11px">Fluxo completo</span>';
+      } else if (allDocOk) {
+        docBadges = '<span class="badge badge-success" style="font-size:11px">Apto ao Split</span><br><span style="font-size:10px;color:var(--neutral-40)">Pendente Celcoin</span>';
+      } else if (u.pagarme !== 'APPROVED') {
+        docBadges = '<span class="badge badge-error" style="font-size:11px">Faltam Pagar.me</span>';
+      } else if (u.d4sign !== 'FINISHED') {
+        docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam D4Sign</span>';
+      } else {
+        docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam BDR</span>';
+      }
       if (allDocOk) {
         docBadges = '<span class="badge badge-success" style="font-size:11px">Documentação completa</span>';
       } else if (u.pagarme !== 'APPROVED') {
@@ -526,8 +537,7 @@ function renderSplitTable(users, total, totalPages) {
         docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam D4Sign</span>';
       } else {
         docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam BDR</span>';
-      }
-      var splitBadge = u.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
+      }      var splitBadge = u.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
       return '<tr>' +
         '<td class="cell-name">' + esc(u.name || '—') + '</td>' +
         '<td><div class="cell-email">' + esc(u.email || '—') + '</div><div class="cell-id">#' + u.id + '</div></td>' +
@@ -660,7 +670,8 @@ function renderSplitDetail(user) {
           '<td class="cell-id">#' + co.id + '</td>' +
           '<td>' + (function(co) {
             var ok = co.pagarme === 'APPROVED' && co.d4sign === 'FINISHED' && co.bdr === 'processed';
-            if (ok) return '<span class="badge badge-success" style="font-size:11px">Documentação completa</span>';
+            if (ok && co.celcoin === 'APPROVED') return '<span class="badge badge-success" style="font-size:11px">Fluxo completo</span>';
+            if (ok) return '<span class="badge badge-success" style="font-size:11px">Apto ao Split</span><br><span style="font-size:10px;color:var(--neutral-40)">Pendente Celcoin</span>';
             if (co.pagarme !== 'APPROVED') return '<span class="badge badge-error" style="font-size:11px">Faltam Pagar.me</span>';
             if (co.d4sign !== 'FINISHED') return '<span class="badge badge-warning" style="font-size:11px">Faltam D4Sign</span>';
             return '<span class="badge badge-warning" style="font-size:11px">Faltam BDR</span>';
