@@ -628,10 +628,46 @@ async function fetchSplitUsers() {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const raw = await res.json();
     const d = Array.isArray(raw) ? raw[0] : raw;
-    renderSplitIndicators(d.indicators || SPLIT_MOCK.indicators);
-    splitCurrentUsers = d.users || [];
-    setSplitOutOfBase(d.outOfBase === true);
-    renderSplitTable(splitCurrentUsers, d.total || 0, d.totalPages || 1);
+
+    // Normaliza indicadores (webhook retorna 'indicadores', mock espera 'indicators')
+    const wInd = d.indicadores || d.indicators || null;
+    const mappedIndicators = wInd ? {
+      total:       wInd.total                  || 0,
+      split:       wInd.ja_no_split  || wInd.split      || 0,
+      prontos:     wInd.pode_migrar  || wInd.prontos     || 0,
+      verificar:   (wInd.verificar_outras || 0) + (wInd.cosellers_regularizar || 0) || wInd.verificar || 0,
+      regularizar: wInd.precisam_regularizar || wInd.regularizar || 0
+    } : null;
+    renderSplitIndicators(mappedIndicators || SPLIT_MOCK.indicators);
+
+    // Normaliza usuarios (webhook retorna 'usuarios' com campos PT, mock espera EN)
+    const SITU_MAP = { ja_no_split:'JA_NO_SPLIT', pode_migrar:'PODE_MIGRAR', verificar_outras:'VERIFICAR', cosellers_regularizar:'COSELLERS_PENDENTES', precisa_regularizar:'PRECISA_REGULARIZAR' };
+    function normCS(cs) {
+      return { id: cs.user_id, name: cs.nome||'', email: cs.email||'', pagarme: cs.pagarme?'APPROVED':'PENDING', d4sign: cs.d4sign?'FINISHED':'PENDING', bdr: cs.bdr?'processed':'not_processed', celcoin: cs.celcoin?'APPROVED':null, splitStatus: cs.no_split?'SPLIT':'LEGADO', allFlags: !!cs.todas_flags, produtosComSeller: cs.n_produtos_como_coseller||0, temProprios: !!cs.tem_produtos_proprios, proprios: cs.n_produtos_nao_pos||0, coSellersNoProprio: cs.n_cosellers_proprios||0, precisamReg: cs.n_pendentes_proprios||0, produtosAfetados: cs.n_produtos_afetados||0, valor60d: cs.valor_60d||0, ultimaVenda: cs.ultima_venda||null, situacao: SITU_MAP[cs.situacao]||cs.situacao||'—' };
+    }
+    function normUser(u) {
+      var situ = SITU_MAP[u.situacao] || (u.situacao||'').toUpperCase() || 'PRECISA_REGULARIZAR';
+      return { id: u.user_id, name: u.nome||'', email: u.email||'', cpf_cnpj: u.cpf_cnpj||null, papel: u.papel||'', pagarme: u.pagarme?'APPROVED':'PENDING', d4sign: u.d4sign?'FINISHED':'PENDING', bdr: u.bdr?'processed':'not_processed', celcoin: u.celcoin?'APPROVED':null, splitStatus: u.no_split?'SPLIT':'LEGADO', flags: { boleto_sub:!!u.boleto_sub, boleto_tx:!!u.boleto_tx, cc_sub:!!u.cc_sub, cc_tx:!!u.cc_tx, pix_tx:!!u.pix_tx }, produtosProprios: u.n_produtos_nao_pos||0, coSellersQtd: u.n_cosellers||0, outrasContas: u.n_outras_afetadas||0, valor60d: u.valor_60d||0, ultimaVenda: u.ultima_venda||null, situacao: situ, oQueEncontramos: '', oquePodeAcontecer: '', oQuePrecisa: '', coSellersData: (u.cosellers||[]).map(normCS), produtosAfetados: (u.produtos_afetados||[]).map(function(p){ return { id:p.produto_id, name:p.nome||'', sellerNome:u.nome||'', origemNome:u.nome||'', tipoPagamento:p.tipo_pagamento||'—', qtdCoSellers:p.n_cosellers||0, coSellersReg:p.cosellers_pendentes||0, sales60d:0, valor60d:p.valor_60d||0, ultimaVenda:p.ultima_venda||null, recorrencias:0, situacaoComercial:p.situacao||'—' }; }) };
+    }
+    var allUsers = (d.usuarios || d.users || []).map(normUser);
+
+    // Filtro client-side
+    var filtered = allUsers;
+    if (splitFilter !== 'all') filtered = allUsers.filter(function(u){ return u.situacao === splitFilter; });
+    if (splitSearch) {
+      var q = splitSearch.toLowerCase(), qc = q.replace(/[\.\-\/]/g,'');
+      filtered = filtered.filter(function(u){ return String(u.name).toLowerCase().includes(q)||String(u.email).toLowerCase().includes(q)||String(u.id).includes(q)||(u.cpf_cnpj||'').toLowerCase().includes(q)||(u.cpf_cnpj||'').replace(/[\.\-\/]/g,'').includes(qc); });
+    }
+    if (splitSortCol) {
+      var col=splitSortCol, dir=splitSortDir;
+      var SP = { PODE_MIGRAR:1, JA_NO_SPLIT:2, VERIFICAR:3, COSELLERS_PENDENTES:4, PRECISA_REGULARIZAR:5 };
+      filtered = filtered.slice().sort(function(a,b){ var va,vb; if(col==='situacao'){va=SP[a.situacao]||99;vb=SP[b.situacao]||99;}else{va=a[col];vb=b[col];if(va==null&&vb==null)return 0;if(va==null)return dir==='asc'?1:-1;if(vb==null)return dir==='asc'?-1:1;if(typeof va==='string')va=va.toLowerCase();if(typeof vb==='string')vb=vb.toLowerCase();}return va<vb?(dir==='asc'?-1:1):va>vb?(dir==='asc'?1:-1):0;});
+    }
+    var total = filtered.length, totalPages = Math.max(1, Math.ceil(total/splitPageSize));
+    var start = (splitPage-1)*splitPageSize;
+    splitCurrentUsers = filtered.slice(start, start+splitPageSize);
+    setSplitOutOfBase(d.outOfBase === true || (splitSearch && splitCurrentUsers.length === 0));
+    renderSplitTable(splitCurrentUsers, total, totalPages);
   } catch (e) {
     if (e.name === 'AbortError') return;
     let users = SPLIT_MOCK.users.slice();
