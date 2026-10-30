@@ -590,7 +590,7 @@ function openSplitDetail(userId) {
       var su = splitDetailStack[m];
       if (su.coSellersData) {
         for (var n = 0; n < su.coSellersData.length; n++) {
-          if (su.coSellersData[n].id === userId) { user = synthesizeFromCoSeller(su.coSellersData[n], su); break outer; }
+          if (String(su.coSellersData[n].id) === String(userId)) { user = synthesizeFromCoSeller(su.coSellersData[n], su); break outer; }
         }
       }
     }
