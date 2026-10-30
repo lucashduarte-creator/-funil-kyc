@@ -175,6 +175,12 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
 .mkd-pend{background:var(--warning-90);color:var(--warning-30);}
 .mkd-rej{background:var(--danger-90);color:var(--danger-40);}
 .mkd-na{background:var(--neutral-95);color:var(--neutral-40);}
+
+/* Detail stat strip */
+.detail-stat-strip{display:flex;gap:20px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--neutral-90);}
+.detail-stat{display:inline-flex;flex-direction:column;gap:2px;min-width:80px;}
+.detail-stat-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--neutral-40);}
+.detail-stat-val{font-size:13px;font-weight:600;color:var(--neutral-15);}
 </style>
 </head>
 <body>
@@ -596,6 +602,8 @@ const SPLIT_MOCK = {
   total: 5, totalPages: 1
 };
 
+function esc(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 function switchInnerTab(tab) {
   document.getElementById('view-kyc').style.display = tab === 'kyc' ? '' : 'none';
   document.getElementById('view-split').style.display = tab === 'split' ? '' : 'none';
@@ -606,7 +614,6 @@ function switchInnerTab(tab) {
 }
 
 async function loadSplitData() {
-  renderSplitIndicators(SPLIT_MOCK.indicators);
   await fetchSplitUsers();
 }
 
@@ -668,6 +675,7 @@ async function fetchSplitUsers() {
     splitCurrentUsers = users;
     const start = (splitPage - 1) * splitPageSize;
     const paged = users.slice(start, start + splitPageSize);
+    renderSplitIndicators(SPLIT_MOCK.indicators);
     renderSplitTable(paged, users.length, Math.ceil(users.length / splitPageSize) || 1);
   }
 }
@@ -733,9 +741,9 @@ function renderSplitTable(users, total, totalPages) {
       var docBadges = (allDocOk ? '<div style="margin-bottom:3px"><span class="badge badge-success" style="font-size:10px">Documentação completa</span></div>' : '') + '<span class="mini-kyc">' + miniKycBadge(u.pagarme, 'PM') + miniKycBadge(u.d4sign, 'D4') + miniKycBadge(u.bdr, 'BDR') + '</span>';
       var splitBadge = u.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
       return '<tr>' +
-        '<td class="cell-name">' + (u.name || '—') + '</td>' +
-        '<td><div class="cell-email">' + (u.email || '—') + '</div><div class="cell-id">#' + u.id + '</div></td>' +
-        '<td>' + (u.papel || '—') + '</td>' +
+        '<td class="cell-name">' + esc(u.name || '—') + '</td>' +
+        '<td><div class="cell-email">' + esc(u.email || '—') + '</div><div class="cell-id">#' + u.id + '</div></td>' +
+        '<td>' + esc(u.papel || '—') + '</td>' +
         '<td>' + docBadges + '</td>' +
         '<td>' + splitBadge + '</td>' +
         '<td style="text-align:center">' + (u.produtosProprios || 0) + '</td>' +
@@ -844,9 +852,9 @@ function renderSplitDetail(user) {
     return '<span class="flag-chip ' + (ok ? 'flag-ok' : 'flag-nok') + '">' + (ok ? '✓' : '✗') + ' ' + f.label + '</span>';
   }).join('') + '</div>';
   var explainHtml = '<div class="explain-grid">' +
-    '<div class="explain-box explain-found"><h4>O que encontramos</h4><p>' + (user.oQueEncontramos || '—') + '</p></div>' +
-    '<div class="explain-box explain-risk"><h4>O que pode acontecer se habilitarmos esta conta</h4><p>' + (user.oquePodeAcontecer || '—') + '</p></div>' +
-    '<div class="explain-box explain-action"><h4>O que precisa ser resolvido antes da habilitação</h4><p>' + (user.oQuePrecisa || '—') + '</p></div>' +
+    '<div class="explain-box explain-found"><h4>O que encontramos</h4><p>' + esc(user.oQueEncontramos || '—') + '</p></div>' +
+    '<div class="explain-box explain-risk"><h4>O que pode acontecer se habilitarmos esta conta</h4><p>' + esc(user.oquePodeAcontecer || '—') + '</p></div>' +
+    '<div class="explain-box explain-action"><h4>O que precisa ser resolvido antes da habilitação</h4><p>' + esc(user.oQuePrecisa || '—') + '</p></div>' +
     '</div>';
   var coSellersHtml = '';
   if (user.coSellersData && user.coSellersData.length > 0) {
@@ -859,8 +867,8 @@ function renderSplitDetail(user) {
       user.coSellersData.map(function(co) {
         var coBadge = co.splitStatus === 'SPLIT' ? '<span class="badge badge-success">No Split</span>' : '<span class="badge badge-default">Legado</span>';
         return '<tr>' +
-          '<td class="cell-name">' + co.name + '</td>' +
-          '<td class="cell-email">' + co.email + '</td>' +
+          '<td class="cell-name">' + esc(co.name) + '</td>' +
+          '<td class="cell-email">' + esc(co.email) + '</td>' +
           '<td class="cell-id">#' + co.id + '</td>' +
           '<td>' + miniKycBadge(co.pagarme, 'PM') + '</td>' +
           '<td>' + miniKycBadge(co.d4sign, 'D4') + '</td>' +
@@ -895,10 +903,10 @@ function renderSplitDetail(user) {
         else if (p.situacaoComercial === 'SEM_RECENTE') scBadge = '<span class="sc-badge sc-sem-recente">Sem vendas recentes</span>';
         else scBadge = '<span class="sc-badge sc-sem-historico">Sem histórico</span>';
         return '<tr>' +
-          '<td><div class="cell-name">' + p.name + '</div><div class="cell-id">#' + p.id + '</div></td>' +
-          '<td>' + (p.sellerNome || '—') + '</td>' +
-          '<td>' + (p.origemNome || '—') + '</td>' +
-          '<td>' + (p.tipoPagamento || '—') + '</td>' +
+          '<td><div class="cell-name">' + esc(p.name) + '</div><div class="cell-id">#' + p.id + '</div></td>' +
+          '<td>' + esc(p.sellerNome || '—') + '</td>' +
+          '<td>' + esc(p.origemNome || '—') + '</td>' +
+          '<td>' + esc(p.tipoPagamento || '—') + '</td>' +
           '<td style="text-align:center">' + (p.qtdCoSellers || 0) + '</td>' +
           '<td style="text-align:center">' + (p.coSellersReg || 0) + '</td>' +
           '<td style="text-align:center">' + (p.sales60d || 0) + '</td>' +
@@ -911,10 +919,18 @@ function renderSplitDetail(user) {
       }).join('') + '</tbody></table></div>';
   }
   var splitBadge = user.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
+  var statStrip = '<div class="detail-stat-strip">' +
+    '<span class="detail-stat"><span class="detail-stat-label">Valor 60d</span><span class="detail-stat-val">' + fmtBRL(user.valor60d) + '</span></span>' +
+    '<span class="detail-stat"><span class="detail-stat-label">Última venda</span><span class="detail-stat-val">' + fmtDate(user.ultimaVenda) + '</span></span>' +
+    '<span class="detail-stat"><span class="detail-stat-label">Produtos ≠ Pós</span><span class="detail-stat-val">' + (user.produtosProprios || 0) + '</span></span>' +
+    '<span class="detail-stat"><span class="detail-stat-label">Co-sellers</span><span class="detail-stat-val">' + (user.coSellersQtd || 0) + '</span></span>' +
+    '<span class="detail-stat"><span class="detail-stat-label">Outras contas</span><span class="detail-stat-val">' + (user.outrasContas || 0) + '</span></span>' +
+    '</div>';
   panel.innerHTML = bc +
     '<div class="detail-top">' +
-      '<div><div class="detail-user-name">' + user.name + ' ' + splitBadge + '</div>' +
-      '<div class="detail-user-meta">' + (user.email || '') + ' · #' + user.id + ' · ' + (user.papel || '') + '</div></div>' +
+      '<div><div class="detail-user-name">' + esc(user.name) + ' ' + splitBadge + '</div>' +
+      '<div class="detail-user-meta">' + esc(user.email || '') + ' · #' + user.id + ' · ' + esc(user.papel || '') + '</div>' +
+      statStrip + '</div>' +
       '<button class="btn-close-detail" onclick="closeSplitDetail()">×</button>' +
     '</div>' +
     '<div class="detail-section-title">📋 Documentação</div>' + kycRow +
@@ -966,8 +982,8 @@ function toggleProductParticipants(btn, productId) {
       '</tr></thead><tbody>' +
       participants.map(function(p) {
         return '<tr>' +
-          '<td style="padding:4px 8px">' + p.name + '</td>' +
-          '<td style="padding:4px 8px;color:var(--neutral-40)">' + p.email + '</td>' +
+          '<td style="padding:4px 8px">' + esc(p.name) + '</td>' +
+          '<td style="padding:4px 8px;color:var(--neutral-40)">' + esc(p.email) + '</td>' +
           '<td style="padding:4px 8px"><span class="mini-kyc">' + miniKycBadge(p.pagarme, 'PM') + miniKycBadge(p.d4sign, 'D4') + miniKycBadge(p.bdr, 'BDR') + '</span></td>' +
           '<td style="padding:4px 8px">' + situacaoBadge(p.situacao) + '</td>' +
           '</tr>';
