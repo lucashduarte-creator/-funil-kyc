@@ -648,7 +648,7 @@ function renderSplitDetail(user) {
   if (user.coSellersData && user.coSellersData.length > 0) {
     coSellersHtml = '<div class="detail-section-title">👥 Co-sellers (' + user.coSellersData.length + ')</div>' +
       '<div class="table-wrap"><table><thead><tr>' +
-      '<th>Nome</th><th>E-mail</th><th>User ID</th><th>Pagar.me</th><th>D4Sign</th><th>BDR</th><th>Celcoin</th><th>Split</th>' +
+      '<th>Nome</th><th>E-mail</th><th>User ID</th><th>Situação documental</th><th>Split</th>' +
       '<th>Qtd produtos com este Seller</th><th>Possui produtos próprios?</th><th>Qtd próprios ≠ Pós</th><th>Qtd co-sellers</th>' +
       '<th>Precisam regularizar</th><th>Produtos afetados</th><th>Valor 60 dias</th><th>Última venda</th><th>Situação</th><th>Ação</th>' +
       '</tr></thead><tbody>' +
@@ -658,10 +658,13 @@ function renderSplitDetail(user) {
           '<td class="cell-name">' + esc(co.name) + '</td>' +
           '<td class="cell-email">' + esc(co.email) + '</td>' +
           '<td class="cell-id">#' + co.id + '</td>' +
-          '<td>' + miniKycBadge(co.pagarme, 'PM') + '</td>' +
-          '<td>' + miniKycBadge(co.d4sign, 'D4') + '</td>' +
-          '<td>' + miniKycBadge(co.bdr, 'BDR') + '</td>' +
-          '<td>' + (co.celcoin ? miniKycBadge(co.celcoin, 'CEL') : '<span class="badge badge-default">—</span>') + '</td>' +
+          '<td>' + (function(co) {
+            var ok = co.pagarme === 'APPROVED' && co.d4sign === 'FINISHED' && co.bdr === 'processed';
+            if (ok) return '<span class="badge badge-success" style="font-size:11px">Documentação completa</span>';
+            if (co.pagarme !== 'APPROVED') return '<span class="badge badge-error" style="font-size:11px">Faltam Pagar.me</span>';
+            if (co.d4sign !== 'FINISHED') return '<span class="badge badge-warning" style="font-size:11px">Faltam D4Sign</span>';
+            return '<span class="badge badge-warning" style="font-size:11px">Faltam BDR</span>';
+          })(co) + '</td>' +
           '<td>' + coBadge + '</td>' +
           '<td style="text-align:center">' + (co.produtosComSeller || 0) + '</td>' +
           '<td style="text-align:center">' + (co.temProprios ? 'Sim' : 'Não') + '</td>' +
