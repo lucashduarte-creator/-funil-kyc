@@ -583,8 +583,8 @@ function synthesizeFromCoSeller(co, parentUser) {
 
 function openSplitDetail(userId) {
   var user = null;
-  for (var i = 0; i < splitCurrentUsers.length; i++) { if (splitCurrentUsers[i].id === userId) { user = splitCurrentUsers[i]; break; } }
-  if (!user) { for (var j = 0; j < SPLIT_MOCK.users.length; j++) { if (SPLIT_MOCK.users[j].id === userId) { user = SPLIT_MOCK.users[j]; break; } } }
+  for (var i = 0; i < splitCurrentUsers.length; i++) { if (String(splitCurrentUsers[i].id) === String(userId)) { user = splitCurrentUsers[i]; break; } }
+  if (!user) { for (var j = 0; j < SPLIT_MOCK.users.length; j++) { if (String(SPLIT_MOCK.users[j].id) === String(userId)) { user = SPLIT_MOCK.users[j]; break; } } }
   if (!user) {
     outer: for (var m = splitDetailStack.length - 1; m >= 0; m--) {
       var su = splitDetailStack[m];
