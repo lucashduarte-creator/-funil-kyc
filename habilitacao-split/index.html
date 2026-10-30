@@ -527,7 +527,16 @@ function renderSplitTable(users, total, totalPages) {
   } else {
     tbody.innerHTML = users.map(function(u) {
       var allDocOk = (u.pagarme === 'APPROVED') && (u.d4sign === 'FINISHED') && (u.bdr === 'processed');
-      var docBadges = (allDocOk ? '<div style="margin-bottom:3px"><span class="badge badge-success" style="font-size:10px">Documentação completa</span></div>' : '') + '<span class="mini-kyc">' + miniKycBadge(u.pagarme, 'PM') + miniKycBadge(u.d4sign, 'D4') + miniKycBadge(u.bdr, 'BDR') + '</span>';
+      var docBadges;
+      if (allDocOk) {
+        docBadges = '<span class="badge badge-success" style="font-size:11px">Documentação completa</span>';
+      } else if (u.pagarme !== 'APPROVED') {
+        docBadges = '<span class="badge badge-error" style="font-size:11px">Faltam Pagar.me</span>';
+      } else if (u.d4sign !== 'FINISHED') {
+        docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam D4Sign</span>';
+      } else {
+        docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam BDR</span>';
+      }
       var splitBadge = u.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
       return '<tr>' +
         '<td class="cell-name">' + esc(u.name || '—') + '</td>' +
