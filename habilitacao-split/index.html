@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central de Habilitação do Split</title>
+<style>
+:root {
+  --primary-60:#FE6100;--primary-50:#CB4E00;--primary-95:#FFDFCC;--primary-99:#FFEFE6;
+  --neutral-15:#262626;--neutral-30:#6E6E71;--neutral-40:#878787;--neutral-50:#909092;
+  --neutral-85:#CBCBCB;--neutral-90:#E2E2E2;--neutral-95:#ECECEC;--neutral-99:#F9F9F9;
+  --success-20:#14521F;--success-30:#1A6626;--success-40:#28A43D;--success-95:#EAFAED;
+  --danger-40:#A42B23;--danger-90:#F9DFDC;--warning-30:#5C4E0A;--warning-90:#FBF4D0;
+  --info-30:#2A2044;--info-95:#E4E1EA;
+  --surface-page:#F9F9F9;--surface-container:#FFFFFF;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--surface-page);color:var(--neutral-15);font-size:14px;line-height:1.5;}
+.header{background:var(--surface-container);border-bottom:1px solid var(--neutral-95);height:64px;display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:50;}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:18px;color:var(--primary-60);text-decoration:none;}
+.logo svg{width:28px;height:28px;}
+.vsep{width:1px;height:28px;background:var(--neutral-90);flex-shrink:0;}
+.nav{display:flex;gap:2px;}
+.nl{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:500;color:var(--neutral-40);text-decoration:none;transition:background .15s,color .15s;}
+.nl:hover{background:var(--neutral-95);color:var(--neutral-15);}
+.nl.on{background:var(--primary-95);color:var(--primary-60);}
+.header-right{margin-left:auto;}
+.btn-logout{padding:6px 12px;border:1px solid var(--neutral-90);border-radius:8px;font-size:12px;background:none;cursor:pointer;color:var(--neutral-40);transition:all .15s;}
+.btn-logout:hover{border-color:var(--danger-40);color:var(--danger-40);}
+.main{padding:32px;max-width:1400px;margin:0 auto;}
+.page-header{margin-bottom:24px;}
+.page-title{font-size:20px;font-weight:700;margin-bottom:4px;}
+.page-subtitle{font-size:13px;color:var(--neutral-30);}
+
+/* Shared table CSS */
+.section-card{background:var(--surface-container);border:1px solid var(--neutral-90);border-radius:12px;overflow:hidden;}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--neutral-90);gap:12px;flex-wrap:wrap;}
+.table-title-wrap{display:flex;align-items:center;gap:8px;}
+.table-title{font-size:15px;font-weight:600;color:var(--neutral-15);}
+.table-badge{background:var(--primary-95);color:var(--primary-60);font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;}
+.toolbar-right{display:flex;align-items:center;gap:8px;}
+.page-size-select{border:1px solid var(--neutral-90);border-radius:8px;padding:7px 10px;font-size:13px;outline:none;background:var(--surface-container);color:var(--neutral-15);cursor:pointer;}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--neutral-99);padding:10px 16px;text-align:left;font-size:11px;font-weight:600;color:var(--neutral-40);text-transform:uppercase;letter-spacing:0.4px;border-bottom:1px solid var(--neutral-90);white-space:nowrap;}
+tbody tr{border-bottom:1px solid #F5F5F5;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FFFBF9;}
+tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
+.cell-id{font-size:12px;color:var(--neutral-40);font-weight:500;}
+.cell-name{font-weight:500;color:var(--neutral-15);}
+.cell-email{color:var(--neutral-40);font-size:12px;}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;}
+.badge-success{background:var(--success-95);color:var(--success-20);}
+.badge-warning{background:var(--warning-90);color:var(--warning-30);}
+.badge-error{background:var(--danger-90);color:var(--danger-40);}
+.badge-default{background:var(--neutral-95);color:var(--neutral-40);}
+.badge-info{background:var(--info-95);color:var(--info-30);}
+.pagination-wrap{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--neutral-90);}
+.pagination-info{font-size:12px;color:var(--neutral-40);}
+.pages{display:flex;gap:4px;}
+.pages button{min-width:28px;height:28px;padding:0 6px;border:1px solid var(--neutral-90);background:var(--surface-container);border-radius:4px;font-size:12px;cursor:pointer;color:var(--neutral-15);transition:border-color 0.15s;}
+.pages button:hover{border-color:var(--primary-60);color:var(--primary-60);}
+.pages button.active{border-color:var(--primary-60);color:var(--primary-60);font-weight:600;}
+.pages button:disabled{opacity:0.3;cursor:not-allowed;}
+.empty-row td{text-align:center;padding:48px;color:var(--neutral-40);}
+
+/* Split indicator cards */
+.split-indicators{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+.split-ind{background:var(--surface-container);border:2px solid var(--neutral-90);border-left:4px solid var(--neutral-85);border-radius:12px;padding:16px 18px;cursor:pointer;transition:border-color .15s,box-shadow .15s;user-select:none;position:relative;}
+.split-ind:hover{box-shadow:0 2px 8px rgba(254,97,0,0.10);}
+.split-ind.si-active{border-right-color:var(--primary-60);border-top-color:var(--primary-60);border-bottom-color:var(--primary-60);box-shadow:0 2px 12px rgba(254,97,0,0.18);}
+.split-ind.si-active::after{content:'';position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);border-left:9px solid transparent;border-right:9px solid transparent;border-top:9px solid var(--neutral-90);}
+.si-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--neutral-40);margin-bottom:8px;}
+.si-value{font-size:26px;font-weight:700;color:var(--neutral-15);line-height:1;margin-bottom:4px;}
+.si-sub{font-size:12px;color:var(--neutral-50);}
+.split-ind.si-total{border-left-color:var(--primary-60);}
+.split-ind.si-split{border-left-color:var(--success-40);} .split-ind.si-split .si-value{color:var(--success-40);}
+.split-ind.si-prontos{border-left-color:#1A7ACC;} .split-ind.si-prontos .si-value{color:#1A7ACC;}
+.split-ind.si-verificar{border-left-color:#F5A623;} .split-ind.si-verificar .si-value{color:var(--warning-30);}
+.split-ind.si-regularizar{border-left-color:var(--danger-40);} .split-ind.si-regularizar .si-value{color:var(--danger-40);}
+
+/* Split search */
+.split-search-bar{margin-bottom:20px;}
+.split-search-wrap{position:relative;}
+.split-search-input{width:100%;border:1.5px solid var(--neutral-90);border-radius:10px;padding:10px 44px 10px 16px;font-size:14px;outline:none;color:var(--neutral-15);background:var(--surface-container);transition:border-color .15s;font-family:inherit;}
+.split-search-input:focus{border-color:var(--primary-60);}
+.split-search-input::placeholder{color:var(--neutral-50);}
+.split-search-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--neutral-40);pointer-events:none;}
+.split-out-of-base{background:#FFF3E0;border:1px solid #FFB74D;border-radius:8px;padding:10px 14px;font-size:13px;color:#E65100;margin-top:8px;display:none;}
+
+/* Extra badges */
+.badge-orange{background:#FFF3E0;color:#E65100;}
+.badge-blue{background:#E3F2FD;color:#1A7ACC;}
+
+/* Ver detalhes button */
+.btn-split-detail{padding:5px 12px;font-size:12px;font-weight:600;border:1.5px solid var(--primary-60);border-radius:7px;background:none;color:var(--primary-60);cursor:pointer;white-space:nowrap;transition:background .15s,color .15s;font-family:inherit;}
+.btn-split-detail:hover{background:var(--primary-60);color:#fff;}
+.btn-split-detail.active{background:var(--primary-95);}
+
+/* Detail panel */
+.split-detail-panel{background:#FFFBF9;border:1.5px solid var(--primary-95);border-radius:12px;margin:8px 0 0;padding:24px;display:none;}
+.split-detail-panel.open{display:block;}
+.detail-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;}
+.detail-user-name{font-size:18px;font-weight:700;color:var(--neutral-15);}
+.detail-user-meta{font-size:13px;color:var(--neutral-40);margin-top:3px;}
+.detail-breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--neutral-40);margin-bottom:12px;flex-wrap:wrap;}
+.detail-breadcrumb span{cursor:pointer;color:var(--primary-60);text-decoration:underline;}
+.detail-breadcrumb span:last-child{cursor:default;color:var(--neutral-40);text-decoration:none;}
+.btn-close-detail{background:none;border:none;cursor:pointer;color:var(--neutral-40);font-size:22px;line-height:1;padding:2px 6px;border-radius:6px;transition:background .15s;flex-shrink:0;}
+.btn-close-detail:hover{background:var(--neutral-95);}
+.kyc-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.kyc-cell{background:var(--neutral-99);border-radius:8px;padding:12px 14px;}
+.kyc-cell-label{font-size:11px;font-weight:600;text-transform:uppercase;color:var(--neutral-40);margin-bottom:6px;}
+.flags-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.flag-chip{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;}
+.flag-ok{background:var(--success-95);color:var(--success-20);}
+.flag-nok{background:var(--danger-90);color:var(--danger-40);}
+.explain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.explain-box{border-radius:10px;padding:16px;}
+.explain-found{background:var(--info-95);border:1px solid #C5BBE0;}
+.explain-risk{background:var(--warning-90);border:1px solid #E8D68A;}
+.explain-action{background:var(--success-95);border:1px solid #A8E6B1;}
+.explain-box h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:8px;color:var(--neutral-30);}
+.explain-box p{font-size:13px;line-height:1.6;color:var(--neutral-15);}
+.detail-section-title{font-size:14px;font-weight:700;color:var(--neutral-15);margin:20px 0 10px;padding-top:16px;border-top:1px solid var(--neutral-90);}
+.sc-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;}
+.sc-ativa{background:var(--success-95);color:var(--success-20);}
+.sc-futura{background:#E3F2FD;color:#1A7ACC;}
+.sc-sem-recente{background:var(--warning-90);color:var(--warning-30);}
+.sc-sem-historico{background:var(--neutral-95);color:var(--neutral-40);}
+.mini-kyc{display:inline-flex;gap:3px;flex-wrap:wrap;}
+.mini-kyc-dot{display:inline-flex;align-items:center;gap:2px;font-size:10px;font-weight:600;padding:1px 5px;border-radius:4px;}
+.mkd-ok{background:var(--success-95);color:var(--success-20);}
+.mkd-pend{background:var(--warning-90);color:var(--warning-30);}
+.mkd-rej{background:var(--danger-90);color:var(--danger-40);}
+.mkd-na{background:var(--neutral-95);color:var(--neutral-40);}
+.detail-stat-strip{display:flex;gap:20px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--neutral-90);}
+.detail-stat{display:inline-flex;flex-direction:column;gap:2px;min-width:80px;}
+.detail-stat-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.4px;color:var(--neutral-40);}
+.detail-stat-val{font-size:13px;font-weight:600;color:var(--neutral-15);}
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+</style>
+</head>
+<body>
+<header class="header">
+  <a class="logo" href="#">
+    <svg viewBox="0 0 40 40" fill="none"><path d="M8 12L20 28L32 12" stroke="#FE6100" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    voomp
+  </a>
+  <div class="vsep"></div>
+  <nav class="nav">
+    <a class="nl" href="../kyc-prioritario/">KYC Prioritário</a>
+    <a class="nl" href="../kyc-kam/">Carteira KAM</a>
+    <a class="nl" href="../kyc-sellers-cosellers/">Sellers &amp; Co-sellers</a>
+    <a class="nl on" href="../habilitacao-split/">Habilitação do Split</a>
+  </nav>
+  <div class="header-right">
+    <button class="btn-logout" onclick="logout()">Sair</button>
+  </div>
+</header>
+
+<main class="main">
+  <div class="page-header">
+    <h1 class="page-title">Central de Habilitação do Split</h1>
+    <p class="page-subtitle">Acompanhe quem já está no Split, quem pode migrar e quais contas precisam de atenção antes da habilitação.</p>
+  </div>
+
+  <div class="split-indicators">
+    <div class="split-ind si-total" id="si-total" onclick="splitSelectFilter('all')">
+      <div class="si-label">Total de usuários</div>
+      <div class="si-value" id="si-val-total">—</div>
+      <div class="si-sub">Base oficial</div>
+    </div>
+    <div class="split-ind si-split" id="si-split" onclick="splitSelectFilter('JA_NO_SPLIT')">
+      <div class="si-label">Já estão no Split</div>
+      <div class="si-value" id="si-val-split">—</div>
+      <div class="si-sub">KYC + 5 flags</div>
+    </div>
+    <div class="split-ind si-prontos" id="si-prontos" onclick="splitSelectFilter('PODE_MIGRAR')">
+      <div class="si-label">Prontos para migrar</div>
+      <div class="si-value" id="si-val-prontos">—</div>
+      <div class="si-sub">Sem bloqueios identificados</div>
+    </div>
+    <div class="split-ind si-verificar" id="si-verificar" onclick="splitSelectFilter('VERIFICAR')">
+      <div class="si-label">Outras contas podem ser afetadas</div>
+      <div class="si-value" id="si-val-verificar">—</div>
+      <div class="si-sub">Verificar dependências</div>
+    </div>
+    <div class="split-ind si-regularizar" id="si-regularizar" onclick="splitSelectFilter('PRECISA_REGULARIZAR')">
+      <div class="si-label">Precisam regularizar</div>
+      <div class="si-value" id="si-val-regularizar">—</div>
+      <div class="si-sub">Documentação incompleta</div>
+    </div>
+  </div>
+
+  <div class="split-search-bar">
+    <div class="split-search-wrap">
+      <input class="split-search-input" type="text" id="split-search-input" placeholder="Buscar por nome, e-mail, CPF/CNPJ ou User ID..." oninput="splitApplySearch()" />
+      <svg class="split-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="split-out-of-base" id="split-out-of-base">
+      ⚠️ Este usuário foi encontrado, mas não pertence à base oficial de acompanhamento. Os indicadores acima não o incluem.
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="table-toolbar">
+      <div class="table-title-wrap">
+        <span class="table-title" id="split-tbl-title">Usuários</span>
+        <span class="table-badge" id="split-tbl-count">—</span>
+      </div>
+      <div class="toolbar-right">
+        <select class="page-size-select" id="split-page-size" onchange="splitChangePageSize()">
+          <option value="10">10 por página</option>
+          <option value="20">20 por página</option>
+          <option value="50">50 por página</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th id="th-split-sort-name" onclick="splitSortBy('name')" style="cursor:pointer;user-select:none">Nome <span style="color:var(--neutral-50);font-size:10px">⇅</span></th>
+            <th>E-mail / ID</th>
+            <th>Papel</th>
+            <th>Situação documental</th>
+            <th>Situação no Split</th>
+            <th>Produtos ≠ Pós</th>
+            <th>Co-sellers</th>
+            <th>Outras contas</th>
+            <th id="th-split-sort-valor60d" onclick="splitSortBy('valor60d')" style="cursor:pointer;user-select:none">Valor 60 dias <span style="color:var(--neutral-50);font-size:10px">⇅</span></th>
+            <th id="th-split-sort-ultimaVenda" onclick="splitSortBy('ultimaVenda')" style="cursor:pointer;user-select:none">Última venda <span style="color:var(--neutral-50);font-size:10px">⇅</span></th>
+            <th id="th-split-sort-situacao" onclick="splitSortBy('situacao')" style="cursor:pointer;user-select:none">Situação habilitação <span style="color:var(--neutral-50);font-size:10px">⇅</span></th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody id="split-tbl-body"></tbody>
+      </table>
+    </div>
+    <div id="split-detail-panel" class="split-detail-panel"></div>
+    <div class="pagination-wrap">
+      <span class="pagination-info" id="split-pag-info">—</span>
+      <div class="pages" id="split-pag-pages"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+if (sessionStorage.getItem('kyc_auth') !== '1') { window.location.replace('../'); }
+function logout() { sessionStorage.removeItem('kyc_auth'); window.location.replace('../'); }
+
+function fmt(n) { return Number(n).toLocaleString('pt-BR'); }
+
+// ─── SPLIT TAB ───────────────────────────────────────────────────────────────
+
+const SPLIT_WEBHOOK = 'https://integration.voompcreators.net.br/webhook/kyc-habilitacao-split';
+let splitFilter = 'all', splitPage = 1, splitPageSize = 10, splitSearch = '';
+let splitSearchTimer = null, splitAbortCtrl = null, splitCurrentUsers = [];
+let splitDetailStack = [];
+let splitSortCol = null, splitSortDir = 'asc';
+
+const SPLIT_MOCK = {
+  indicators: { total: 284, split: 14, prontos: 37, verificar: 89, regularizar: 144 },
+  users: [
+    {
+      id: 1001, name: 'Ana Souza', email: 'ana@voomp.com.br', cpf_cnpj: '123.456.789-01', papel: 'Seller',
+      pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null,
+      splitStatus: 'LEGADO',
+      flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
+      produtosProprios: 3, coSellersQtd: 2, outrasContas: 0,
+      valor60d: 12500, ultimaVenda: '2025-01-10', situacao: 'PODE_MIGRAR',
+      oQueEncontramos: 'Documentação completa: Pagar.me aprovado, D4Sign assinado, BDR processado. Possui 3 produtos próprios de cursos livres com 2 co-sellers cadastrados, ambos com documentação completa.',
+      oquePodeAcontecer: 'Com a habilitação, as novas vendas dos produtos passarão pelo fluxo de Split. Os co-sellers já possuem documentação completa, então não há risco de bloqueio comercial.',
+      oQuePrecisa: 'Nenhuma pendência identificada. Esta conta pode ser habilitada imediatamente.',
+      coSellersData: [
+        { id: 2001, name: 'Lucas Fernandes', email: 'lucas@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'SPLIT', allFlags: true, produtosComSeller: 2, temProprios: true, proprios: 1, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 0, valor60d: 5200, ultimaVenda: '2025-01-10', situacao: 'JA_NO_SPLIT' },
+        { id: 2002, name: 'Pedro Costa', email: 'pedro@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 1, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 0, valor60d: 1800, ultimaVenda: '2025-01-08', situacao: 'PODE_MIGRAR' }
+      ],
+      produtosAfetados: [
+        { id: 501, name: 'Curso de Marketing Digital', sellerNome: 'Ana Souza', origemNome: 'Ana Souza', tipoPagamento: 'Único + Assinatura', qtdCoSellers: 2, coSellersReg: 0, sales60d: 5, valor60d: 8000, ultimaVenda: '2025-01-10', recorrencias: 12, situacaoComercial: 'ATIVA' },
+        { id: 502, name: 'Workshop de Copywriting', sellerNome: 'Ana Souza', origemNome: 'Ana Souza', tipoPagamento: 'Pagamento único', qtdCoSellers: 1, coSellersReg: 0, sales60d: 2, valor60d: 2400, ultimaVenda: '2025-01-06', recorrencias: 0, situacaoComercial: 'ATIVA' },
+        { id: 503, name: 'Mentoria de Vendas', sellerNome: 'Ana Souza', origemNome: 'Ana Souza', tipoPagamento: 'Assinatura', qtdCoSellers: 2, coSellersReg: 0, sales60d: 0, valor60d: 0, ultimaVenda: '2024-11-20', recorrencias: 8, situacaoComercial: 'FUTURA' }
+      ]
+    },
+    {
+      id: 1002, name: 'Carlos Lima', email: 'carlos@voomp.com.br', cpf_cnpj: '234.567.890-12', papel: 'Ambos',
+      pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: 'APPROVED',
+      splitStatus: 'SPLIT',
+      flags: { boleto_sub: true, boleto_tx: true, cc_sub: true, cc_tx: true, pix_tx: true },
+      produtosProprios: 2, coSellersQtd: 1, outrasContas: 0,
+      valor60d: 34200, ultimaVenda: '2025-01-14', situacao: 'JA_NO_SPLIT',
+      oQueEncontramos: 'Usuário já habilitado no Split com todas as 5 flags ativas. KYC completo. Possui 2 produtos próprios em operação normal.',
+      oquePodeAcontecer: 'Nenhuma ação necessária. As vendas já estão fluindo pelo novo fluxo de pagamento.',
+      oQuePrecisa: 'Nenhuma pendência. Conta em operação normal no Split.',
+      coSellersData: [
+        { id: 2003, name: 'Julia Martins', email: 'julia@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'SPLIT', allFlags: true, produtosComSeller: 2, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 0, valor60d: 8100, ultimaVenda: '2025-01-14', situacao: 'JA_NO_SPLIT' }
+      ],
+      produtosAfetados: [
+        { id: 504, name: 'Formação em Growth Hacking', sellerNome: 'Carlos Lima', origemNome: 'Carlos Lima', tipoPagamento: 'Assinatura', qtdCoSellers: 1, coSellersReg: 0, sales60d: 18, valor60d: 27000, ultimaVenda: '2025-01-14', recorrencias: 45, situacaoComercial: 'ATIVA' }
+      ]
+    },
+    {
+      id: 1003, name: 'Marina Torres', email: 'marina@voomp.com.br', cpf_cnpj: '345.678.901-23', papel: 'Seller',
+      pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null,
+      splitStatus: 'LEGADO',
+      flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
+      produtosProprios: 4, coSellersQtd: 3, outrasContas: 1,
+      valor60d: 8900, ultimaVenda: '2025-01-09', situacao: 'VERIFICAR',
+      oQueEncontramos: 'Documentação completa. Um dos co-sellers (Rafael Souza) possui 2 produtos próprios com outros co-sellers que ainda precisam de atenção.',
+      oquePodeAcontecer: 'Ao habilitar Marina, a situação dos produtos de Rafael Souza também será impactada. Rafael tem co-sellers com pendências nos produtos dele.',
+      oQuePrecisa: 'Verificar e regularizar a situação dos co-sellers de Rafael Souza antes de prosseguir com a habilitação de Marina.',
+      coSellersData: [
+        { id: 2004, name: 'Rafael Souza', email: 'rafael@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 3, temProprios: true, proprios: 2, coSellersNoProprio: 2, precisamReg: 1, produtosAfetados: 2, valor60d: 3200, ultimaVenda: '2025-01-09', situacao: 'VERIFICAR' },
+        { id: 2005, name: 'Camila Pires', email: 'camila@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 2, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 0, valor60d: 1100, ultimaVenda: '2025-01-07', situacao: 'PODE_MIGRAR' },
+        { id: 2006, name: 'Thiago Mendes', email: 'thiago@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 1, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 0, valor60d: 900, ultimaVenda: '2025-01-05', situacao: 'PODE_MIGRAR' }
+      ],
+      produtosAfetados: [
+        { id: 505, name: 'Tráfego Pago do Zero', sellerNome: 'Marina Torres', origemNome: 'Marina Torres', tipoPagamento: 'Único + Assinatura', qtdCoSellers: 3, coSellersReg: 0, sales60d: 4, valor60d: 5200, ultimaVenda: '2025-01-09', recorrencias: 22, situacaoComercial: 'ATIVA' },
+        { id: 506, name: 'Estratégias de Conteúdo', sellerNome: 'Marina Torres', origemNome: 'Marina Torres', tipoPagamento: 'Pagamento único', qtdCoSellers: 2, coSellersReg: 0, sales60d: 1, valor60d: 1800, ultimaVenda: '2025-01-03', recorrencias: 0, situacaoComercial: 'ATIVA' }
+      ]
+    },
+    {
+      id: 1004, name: 'Roberto Nunes', email: 'roberto@voomp.com.br', cpf_cnpj: '456.789.012-34', papel: 'Seller',
+      pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null,
+      splitStatus: 'LEGADO',
+      flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
+      produtosProprios: 2, coSellersQtd: 2, outrasContas: 1,
+      valor60d: 2100, ultimaVenda: '2025-01-05', situacao: 'COSELLERS_PENDENTES',
+      oQueEncontramos: 'Documentação completa. Possui 2 produtos próprios com 2 co-sellers cadastrados. Um deles (Beatriz Alves) ainda tem D4Sign pendente.',
+      oquePodeAcontecer: 'Se Roberto for habilitado antes de Beatriz concluir o D4Sign, as vendas nos produtos compartilhados podem ser bloqueadas.',
+      oQuePrecisa: 'Aguardar Beatriz Alves concluir a assinatura do D4Sign antes de prosseguir com a habilitação de Roberto.',
+      coSellersData: [
+        { id: 2008, name: 'Beatriz Alves', email: 'beatriz@email.com', pagarme: 'APPROVED', d4sign: 'PENDING', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 2, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 1, valor60d: 1800, ultimaVenda: '2025-01-05', situacao: 'PRECISA_REGULARIZAR' },
+        { id: 2009, name: 'Diego Santos', email: 'diego@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 1, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 0, valor60d: 900, ultimaVenda: '2025-01-04', situacao: 'PODE_MIGRAR' }
+      ],
+      produtosAfetados: [
+        { id: 507, name: 'Gestão de Redes Sociais', sellerNome: 'Roberto Nunes', origemNome: 'Roberto Nunes', tipoPagamento: 'Assinatura', qtdCoSellers: 2, coSellersReg: 1, sales60d: 3, valor60d: 1800, ultimaVenda: '2025-01-05', recorrencias: 14, situacaoComercial: 'ATIVA' }
+      ]
+    },
+    {
+      id: 1005, name: 'Fernanda Alves', email: 'fernanda@voomp.com.br', cpf_cnpj: '567.890.123-45', papel: 'Seller',
+      pagarme: 'PENDING', d4sign: 'PENDING', bdr: 'not_processed', celcoin: null,
+      splitStatus: 'LEGADO',
+      flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
+      produtosProprios: 2, coSellersQtd: 1, outrasContas: 0,
+      valor60d: 0, ultimaVenda: null, situacao: 'PRECISA_REGULARIZAR',
+      oQueEncontramos: 'Documentação incompleta: Pagar.me pendente, D4Sign pendente, BDR não processado. Sem movimentação nos últimos 60 dias.',
+      oquePodeAcontecer: 'Não é possível habilitar esta conta no Split enquanto as etapas de documentação não estiverem completas.',
+      oQuePrecisa: 'Completar as três etapas obrigatórias: (1) Aprovação da subconta no Pagar.me, (2) Assinatura dos documentos no D4Sign, (3) Processamento do BDR.',
+      coSellersData: [
+        { id: 2007, name: 'Anderson Rocha', email: 'anderson@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 1, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 0, valor60d: 0, ultimaVenda: null, situacao: 'PODE_MIGRAR' }
+      ],
+      produtosAfetados: [
+        { id: 508, name: 'Introdução ao E-commerce', sellerNome: 'Fernanda Alves', origemNome: 'Fernanda Alves', tipoPagamento: 'Pagamento único', qtdCoSellers: 1, coSellersReg: 0, sales60d: 0, valor60d: 0, ultimaVenda: null, recorrencias: 0, situacaoComercial: 'SEM_HISTORICO' },
+        { id: 509, name: 'Dropshipping Avançado', sellerNome: 'Fernanda Alves', origemNome: 'Fernanda Alves', tipoPagamento: 'Pagamento único', qtdCoSellers: 1, coSellersReg: 0, sales60d: 0, valor60d: 0, ultimaVenda: null, recorrencias: 0, situacaoComercial: 'SEM_HISTORICO' }
+      ]
+    }
+  ],
+  total: 5, totalPages: 1
+};
+
+function esc(s) { if (!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function loadSplitData() {
+  await fetchSplitUsers();
+}
+
+async function fetchSplitUsers() {
+  if (splitAbortCtrl) splitAbortCtrl.abort();
+  splitAbortCtrl = new AbortController();
+  setSplitTableLoading();
+  setSplitOutOfBase(false);
+  const params = new URLSearchParams({ page: splitPage, pageSize: splitPageSize, filter: splitFilter, search: splitSearch, sortCol: splitSortCol || '', sortDir: splitSortDir });
+  try {
+    const res = await fetch(SPLIT_WEBHOOK + '?' + params.toString(), { signal: splitAbortCtrl.signal });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const raw = await res.json();
+    const d = Array.isArray(raw) ? raw[0] : raw;
+
+    // Normaliza indicadores (webhook retorna 'indicadores', mock espera 'indicators')
+    const wInd = d.indicadores || d.indicators || null;
+    const mappedIndicators = wInd ? {
+      total:       wInd.total                  || 0,
+      split:       wInd.ja_no_split  || wInd.split      || 0,
+      prontos:     wInd.pode_migrar  || wInd.prontos     || 0,
+      verificar:   (wInd.verificar_outras || 0) + (wInd.cosellers_regularizar || 0) || wInd.verificar || 0,
+      regularizar: wInd.precisam_regularizar || wInd.regularizar || 0
+    } : null;
+    renderSplitIndicators(mappedIndicators || SPLIT_MOCK.indicators);
+
+    // Normaliza usuarios (webhook retorna 'usuarios' com campos PT, mock espera EN)
+    const SITU_MAP = { ja_no_split:'JA_NO_SPLIT', pode_migrar:'PODE_MIGRAR', verificar_outras:'VERIFICAR', cosellers_regularizar:'COSELLERS_PENDENTES', precisa_regularizar:'PRECISA_REGULARIZAR' };
+    function normCS(cs) {
+      return { id: cs.user_id, name: cs.nome||'', email: cs.email||'', pagarme: cs.pagarme?'APPROVED':'PENDING', d4sign: cs.d4sign?'FINISHED':'PENDING', bdr: cs.bdr?'processed':'not_processed', celcoin: cs.celcoin?'APPROVED':null, splitStatus: cs.no_split?'SPLIT':'LEGADO', allFlags: !!cs.todas_flags, produtosComSeller: cs.n_produtos_como_coseller||0, temProprios: !!cs.tem_produtos_proprios, proprios: cs.n_produtos_nao_pos||0, coSellersNoProprio: cs.n_cosellers_proprios||0, precisamReg: cs.n_pendentes_proprios||0, produtosAfetados: cs.n_produtos_afetados||0, valor60d: cs.valor_60d||0, ultimaVenda: cs.ultima_venda||null, situacao: SITU_MAP[cs.situacao]||cs.situacao||'—' };
+    }
+    function normUser(u) {
+      var situ = SITU_MAP[u.situacao] || (u.situacao||'').toUpperCase() || 'PRECISA_REGULARIZAR';
+      return { id: u.user_id, name: u.nome||'', email: u.email||'', cpf_cnpj: u.cpf_cnpj||null, papel: u.papel||'', pagarme: u.pagarme?'APPROVED':'PENDING', d4sign: u.d4sign?'FINISHED':'PENDING', bdr: u.bdr?'processed':'not_processed', celcoin: u.celcoin?'APPROVED':null, splitStatus: u.no_split?'SPLIT':'LEGADO', flags: { boleto_sub:!!u.boleto_sub, boleto_tx:!!u.boleto_tx, cc_sub:!!u.cc_sub, cc_tx:!!u.cc_tx, pix_tx:!!u.pix_tx }, produtosProprios: u.n_produtos_nao_pos||0, coSellersQtd: u.n_cosellers||0, outrasContas: u.n_outras_afetadas||0, valor60d: u.valor_60d||0, ultimaVenda: u.ultima_venda||null, situacao: situ, oQueEncontramos: '', oquePodeAcontecer: '', oQuePrecisa: '', coSellersData: (u.cosellers||[]).map(normCS), produtosAfetados: (u.produtos_afetados||[]).map(function(p){ return { id:p.produto_id, name:p.nome||'', sellerNome:u.nome||'', origemNome:u.nome||'', tipoPagamento:p.tipo_pagamento||'—', qtdCoSellers:p.n_cosellers||0, coSellersReg:p.cosellers_pendentes||0, sales60d:0, valor60d:p.valor_60d||0, ultimaVenda:p.ultima_venda||null, recorrencias:0, situacaoComercial:p.situacao||'—' }; }) };
+    }
+    var allUsers = (d.usuarios || d.users || []).map(normUser);
+
+    // Filtro client-side
+    var filtered = allUsers;
+    if (splitFilter !== 'all') filtered = allUsers.filter(function(u){ return u.situacao === splitFilter; });
+    if (splitSearch) {
+      var q = splitSearch.toLowerCase(), qc = q.replace(/[\.\-\/]/g,'');
+      filtered = filtered.filter(function(u){ return String(u.name).toLowerCase().includes(q)||String(u.email).toLowerCase().includes(q)||String(u.id).includes(q)||(u.cpf_cnpj||'').toLowerCase().includes(q)||(u.cpf_cnpj||'').replace(/[\.\-\/]/g,'').includes(qc); });
+    }
+    if (splitSortCol) {
+      var col=splitSortCol, dir=splitSortDir;
+      var SP = { PODE_MIGRAR:1, JA_NO_SPLIT:2, VERIFICAR:3, COSELLERS_PENDENTES:4, PRECISA_REGULARIZAR:5 };
+      filtered = filtered.slice().sort(function(a,b){ var va,vb; if(col==='situacao'){va=SP[a.situacao]||99;vb=SP[b.situacao]||99;}else{va=a[col];vb=b[col];if(va==null&&vb==null)return 0;if(va==null)return dir==='asc'?1:-1;if(vb==null)return dir==='asc'?-1:1;if(typeof va==='string')va=va.toLowerCase();if(typeof vb==='string')vb=vb.toLowerCase();}return va<vb?(dir==='asc'?-1:1):va>vb?(dir==='asc'?1:-1):0;});
+    }
+    var total = filtered.length, totalPages = Math.max(1, Math.ceil(total/splitPageSize));
+    var start = (splitPage-1)*splitPageSize;
+    splitCurrentUsers = filtered.slice(start, start+splitPageSize);
+    setSplitOutOfBase(d.outOfBase === true || (splitSearch && splitCurrentUsers.length === 0));
+    renderSplitTable(splitCurrentUsers, total, totalPages);
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    let users = SPLIT_MOCK.users.slice();
+    if (splitFilter !== 'all') {
+      users = users.filter(function(u) {
+        if (splitFilter === 'PRECISA_REGULARIZAR') return u.situacao === 'PRECISA_REGULARIZAR' || u.situacao === 'COSELLERS_PENDENTES';
+        return u.situacao === splitFilter;
+      });
+    }
+    if (splitSearch) {
+      const q = splitSearch.toLowerCase();
+      const qClean = q.replace(/[\.\-\/]/g, '');
+      users = users.filter(function(u) {
+        return String(u.name).toLowerCase().includes(q) ||
+          String(u.email).toLowerCase().includes(q) ||
+          String(u.id).includes(q) ||
+          String(u.cpf_cnpj || '').toLowerCase().includes(q) ||
+          String(u.cpf_cnpj || '').replace(/[\.\-\/]/g, '').includes(qClean);
+      });
+    }
+    if (splitSearch && users.length === 0) { setSplitOutOfBase(true); }
+    if (splitSortCol) {
+      const col = splitSortCol, dir = splitSortDir;
+      const SITUACAO_PRIORITY = { PODE_MIGRAR: 1, JA_NO_SPLIT: 2, VERIFICAR: 3, COSELLERS_PENDENTES: 4, PRECISA_REGULARIZAR: 5 };
+      users = users.slice().sort(function(a, b) {
+        var va, vb;
+        if (col === 'situacao') {
+          va = SITUACAO_PRIORITY[a.situacao] != null ? SITUACAO_PRIORITY[a.situacao] : 99;
+          vb = SITUACAO_PRIORITY[b.situacao] != null ? SITUACAO_PRIORITY[b.situacao] : 99;
+        } else {
+          va = a[col]; vb = b[col];
+          if (va == null && vb == null) return 0;
+          if (va == null) return dir === 'asc' ? 1 : -1;
+          if (vb == null) return dir === 'asc' ? -1 : 1;
+          if (typeof va === 'string') va = va.toLowerCase();
+          if (typeof vb === 'string') vb = vb.toLowerCase();
+        }
+        return va < vb ? (dir === 'asc' ? -1 : 1) : va > vb ? (dir === 'asc' ? 1 : -1) : 0;
+      });
+    }
+    splitCurrentUsers = users;
+    const start = (splitPage - 1) * splitPageSize;
+    const paged = users.slice(start, start + splitPageSize);
+    renderSplitIndicators(SPLIT_MOCK.indicators);
+    renderSplitTable(paged, users.length, Math.ceil(users.length / splitPageSize) || 1);
+  }
+}
+
+function renderSplitIndicators(ind) {
+  document.getElementById('si-val-total').textContent = fmt(ind.total || 0);
+  document.getElementById('si-val-split').textContent = fmt(ind.split || 0);
+  document.getElementById('si-val-prontos').textContent = fmt(ind.prontos || 0);
+  document.getElementById('si-val-verificar').textContent = fmt(ind.verificar || 0);
+  document.getElementById('si-val-regularizar').textContent = fmt(ind.regularizar || 0);
+}
+
+function splitSelectFilter(f) {
+  splitFilter = f; splitPage = 1;
+  document.querySelectorAll('.split-ind').forEach(function(el) { el.classList.remove('si-active'); });
+  const idMap = { all: 'si-total', JA_NO_SPLIT: 'si-split', PODE_MIGRAR: 'si-prontos', VERIFICAR: 'si-verificar', PRECISA_REGULARIZAR: 'si-regularizar' };
+  if (idMap[f]) document.getElementById(idMap[f]).classList.add('si-active');
+  fetchSplitUsers();
+}
+
+function miniKycBadge(val, label) {
+  var cls = 'mkd-na';
+  if (val === 'APPROVED' || val === 'FINISHED' || val === 'processed') cls = 'mkd-ok';
+  else if (val === 'PENDING' || val === 'CREATED' || val === 'IN_ANALISYS' || val === 'not_processed') cls = 'mkd-pend';
+  else if (val === 'REJECTED') cls = 'mkd-rej';
+  return '<span class="mini-kyc-dot ' + cls + '">' + label + '</span>';
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  var parts = d.split('-');
+  return parts.length === 3 ? parts[2] + '/' + parts[1] + '/' + parts[0] : d;
+}
+
+function fmtBRL(v) {
+  if (!v || v === 0) return '—';
+  return 'R$\u00A0' + Number(v).toLocaleString('pt-BR');
+}
+
+function situacaoBadge(s) {
+  if (s === 'JA_NO_SPLIT') return '<span class="badge badge-success">Já está no Split</span>';
+  if (s === 'PODE_MIGRAR') return '<span class="badge badge-blue">Pode migrar</span>';
+  if (s === 'VERIFICAR') return '<span class="badge badge-warning">Verificar outras contas</span>';
+  if (s === 'COSELLERS_PENDENTES') return '<span class="badge badge-orange">Co-sellers pendentes</span>';
+  if (s === 'PRECISA_REGULARIZAR') return '<span class="badge badge-error">Precisa regularizar</span>';
+  return '<span class="badge badge-default">' + (s || '—') + '</span>';
+}
+
+function setSplitTableLoading() {
+  document.getElementById('split-tbl-body').innerHTML = '<tr><td colspan="12" style="text-align:center;padding:40px;color:var(--neutral-40)"><div style="display:inline-block;width:20px;height:20px;border:2px solid var(--neutral-85);border-top-color:var(--primary-60);border-radius:50%;animation:spin 0.7s linear infinite"></div><div style="margin-top:8px;font-size:12px">Carregando...</div></td></tr>';
+}
+
+function renderSplitTable(users, total, totalPages) {
+  document.getElementById('split-tbl-title').textContent = 'Usuários para Habilitação';
+  document.getElementById('split-tbl-count').textContent = fmt(total) + ' usuários';
+  document.getElementById('split-pag-info').textContent = 'Exibindo ' + users.length + ' de ' + fmt(total);
+  const tbody = document.getElementById('split-tbl-body');
+  if (!users.length) {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="12">Nenhum usuário encontrado.</td></tr>';
+  } else {
+    tbody.innerHTML = users.map(function(u) {
+      var allDocOk = (u.pagarme === 'APPROVED') && (u.d4sign === 'FINISHED') && (u.bdr === 'processed');
+      var docBadges = (allDocOk ? '<div style="margin-bottom:3px"><span class="badge badge-success" style="font-size:10px">Documentação completa</span></div>' : '') + '<span class="mini-kyc">' + miniKycBadge(u.pagarme, 'PM') + miniKycBadge(u.d4sign, 'D4') + miniKycBadge(u.bdr, 'BDR') + '</span>';
+      var splitBadge = u.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
+      return '<tr>' +
+        '<td class="cell-name">' + esc(u.name || '—') + '</td>' +
+        '<td><div class="cell-email">' + esc(u.email || '—') + '</div><div class="cell-id">#' + u.id + '</div></td>' +
+        '<td>' + esc(u.papel || '—') + '</td>' +
+        '<td>' + docBadges + '</td>' +
+        '<td>' + splitBadge + '</td>' +
+        '<td style="text-align:center">' + (u.produtosProprios || 0) + '</td>' +
+        '<td style="text-align:center">' + (u.coSellersQtd || 0) + '</td>' +
+        '<td style="text-align:center">' + (u.outrasContas || 0) + '</td>' +
+        '<td>' + fmtBRL(u.valor60d) + '</td>' +
+        '<td>' + fmtDate(u.ultimaVenda) + '</td>' +
+        '<td>' + situacaoBadge(u.situacao) + '</td>' +
+        '<td><button class="btn-split-detail" onclick="openSplitDetail(' + u.id + ')">Ver detalhes</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+  const pages = document.getElementById('split-pag-pages');
+  const max = Math.min(totalPages, 999);
+  let html = '<button onclick="splitGotoPage(' + (splitPage - 1) + ')" ' + (splitPage === 1 ? 'disabled' : '') + '>‹</button>';
+  for (let i = 1; i <= max; i++) {
+    if (max > 7 && i > 3 && i < max - 1 && Math.abs(i - splitPage) > 1) {
+      if (i === 4 || i === max - 2) html += '<span style="padding:0 4px;color:var(--neutral-40)">…</span>';
+      continue;
+    }
+    html += '<button class="' + (i === splitPage ? 'active' : '') + '" onclick="splitGotoPage(' + i + ')">' + i + '</button>';
+  }
+  html += '<button onclick="splitGotoPage(' + (splitPage + 1) + ')" ' + (splitPage === totalPages ? 'disabled' : '') + '>›</button>';
+  pages.innerHTML = html;
+  var sortHeaderLabels = { name: 'Nome', valor60d: 'Valor 60 dias', ultimaVenda: 'Última venda', situacao: 'Situação habilitação' };
+  Object.keys(sortHeaderLabels).forEach(function(col) {
+    var th = document.getElementById('th-split-sort-' + col);
+    if (!th) return;
+    var icon = splitSortCol === col ? (splitSortDir === 'asc' ? ' ↑' : ' ↓') : ' ⇅';
+    th.innerHTML = sortHeaderLabels[col] + '<span style="color:var(--neutral-50);font-size:10px">' + icon + '</span>';
+  });
+}
+
+function synthesizeFromCoSeller(co, parentUser) {
+  return {
+    id: co.id, name: co.name, email: co.email, papel: 'Co-Seller',
+    pagarme: co.pagarme, d4sign: co.d4sign, bdr: co.bdr, celcoin: co.celcoin,
+    splitStatus: co.splitStatus,
+    flags: { boleto_sub: co.allFlags, boleto_tx: co.allFlags, cc_sub: co.allFlags, cc_tx: co.allFlags, pix_tx: co.allFlags },
+    produtosProprios: co.proprios || 0, coSellersQtd: co.coSellersNoProprio || 0,
+    outrasContas: co.precisamReg || 0, valor60d: co.valor60d || 0,
+    ultimaVenda: co.ultimaVenda || null, situacao: co.situacao,
+    oQueEncontramos: 'Dados consultados a partir do relacionamento com ' + parentUser.name + '. Para análise completa, consulte os dados do servidor.',
+    oquePodeAcontecer: 'Verifique a situação de habilitação deste co-seller para avaliar o impacto nos produtos compartilhados.',
+    oQuePrecisa: 'Acesse os dados completos deste usuário para avaliação detalhada da situação de habilitação.',
+    coSellersData: [], produtosAfetados: []
+  };
+}
+
+function openSplitDetail(userId) {
+  var user = null;
+  for (var i = 0; i < splitCurrentUsers.length; i++) { if (splitCurrentUsers[i].id === userId) { user = splitCurrentUsers[i]; break; } }
+  if (!user) { for (var j = 0; j < SPLIT_MOCK.users.length; j++) { if (SPLIT_MOCK.users[j].id === userId) { user = SPLIT_MOCK.users[j]; break; } } }
+  if (!user) {
+    outer: for (var m = splitDetailStack.length - 1; m >= 0; m--) {
+      var su = splitDetailStack[m];
+      if (su.coSellersData) {
+        for (var n = 0; n < su.coSellersData.length; n++) {
+          if (su.coSellersData[n].id === userId) { user = synthesizeFromCoSeller(su.coSellersData[n], su); break outer; }
+        }
+      }
+    }
+  }
+  if (!user) return;
+  splitDetailStack.push(user);
+  renderSplitDetail(user);
+}
+
+function kycCellHtml(label, val, isD4, isInformativo) {
+  var badge;
+  if (isInformativo && !val) { badge = '<span class="badge badge-default">Informativo</span>'; }
+  else if (!val) { badge = '<span class="badge badge-default">—</span>'; }
+  else if (val === 'APPROVED' || val === 'FINISHED') { badge = '<span class="badge badge-success">' + (isD4 ? 'Assinado' : 'Aprovado') + '</span>'; }
+  else if (val === 'processed') { badge = '<span class="badge badge-success">Processado</span>'; }
+  else if (val === 'not_processed' || val === 'PENDING' || val === 'CREATED' || val === 'IN_ANALISYS') { badge = '<span class="badge badge-warning">Pendente</span>'; }
+  else if (val === 'REJECTED') { badge = '<span class="badge badge-error">Rejeitado</span>'; }
+  else { badge = '<span class="badge badge-default">' + val + '</span>'; }
+  return '<div class="kyc-cell"><div class="kyc-cell-label">' + label + '</div>' + badge + '</div>';
+}
+
+function renderSplitDetail(user) {
+  var panel = document.getElementById('split-detail-panel');
+  var bc = '';
+  if (splitDetailStack.length > 1) {
+    bc = '<div class="detail-breadcrumb"><span onclick="closeSplitDetail()">Início</span>';
+    for (var k = 0; k < splitDetailStack.length - 1; k++) {
+      bc += ' › <span onclick="navigateSplitDetail(' + k + ')">' + splitDetailStack[k].name + '</span>';
+    }
+    bc += ' › <span>' + user.name + '</span></div>';
+  }
+  var kycRow = '<div class="kyc-row">' +
+    kycCellHtml('Pagar.me', user.pagarme, false, false) +
+    kycCellHtml('D4Sign', user.d4sign, true, false) +
+    kycCellHtml('BDR', user.bdr, false, false) +
+    kycCellHtml('Celcoin (informativo)', user.celcoin, false, true) +
+    '</div>';
+  var flagDefs = [
+    { key: 'boleto_sub', label: 'Boleto Assin.' },
+    { key: 'boleto_tx', label: 'Boleto Transação' },
+    { key: 'cc_sub', label: 'Cartão Assin.' },
+    { key: 'cc_tx', label: 'Cartão Transação' },
+    { key: 'pix_tx', label: 'Pix Transação' }
+  ];
+  var flagsHtml = '<div class="flags-row">' + flagDefs.map(function(f) {
+    var ok = user.flags && user.flags[f.key];
+    return '<span class="flag-chip ' + (ok ? 'flag-ok' : 'flag-nok') + '">' + (ok ? '✓' : '✗') + ' ' + f.label + '</span>';
+  }).join('') + '</div>';
+  var explainHtml = '<div class="explain-grid">' +
+    '<div class="explain-box explain-found"><h4>O que encontramos</h4><p>' + esc(user.oQueEncontramos || '—') + '</p></div>' +
+    '<div class="explain-box explain-risk"><h4>O que pode acontecer se habilitarmos esta conta</h4><p>' + esc(user.oquePodeAcontecer || '—') + '</p></div>' +
+    '<div class="explain-box explain-action"><h4>O que precisa ser resolvido antes da habilitação</h4><p>' + esc(user.oQuePrecisa || '—') + '</p></div>' +
+    '</div>';
+  var coSellersHtml = '';
+  if (user.coSellersData && user.coSellersData.length > 0) {
+    coSellersHtml = '<div class="detail-section-title">👥 Co-sellers (' + user.coSellersData.length + ')</div>' +
+      '<div class="table-wrap"><table><thead><tr>' +
+      '<th>Nome</th><th>E-mail</th><th>User ID</th><th>Pagar.me</th><th>D4Sign</th><th>BDR</th><th>Celcoin</th><th>Split</th>' +
+      '<th>Qtd produtos com este Seller</th><th>Possui produtos próprios?</th><th>Qtd próprios ≠ Pós</th><th>Qtd co-sellers</th>' +
+      '<th>Precisam regularizar</th><th>Produtos afetados</th><th>Valor 60 dias</th><th>Última venda</th><th>Situação</th><th>Ação</th>' +
+      '</tr></thead><tbody>' +
+      user.coSellersData.map(function(co) {
+        var coBadge = co.splitStatus === 'SPLIT' ? '<span class="badge badge-success">No Split</span>' : '<span class="badge badge-default">Legado</span>';
+        return '<tr>' +
+          '<td class="cell-name">' + esc(co.name) + '</td>' +
+          '<td class="cell-email">' + esc(co.email) + '</td>' +
+          '<td class="cell-id">#' + co.id + '</td>' +
+          '<td>' + miniKycBadge(co.pagarme, 'PM') + '</td>' +
+          '<td>' + miniKycBadge(co.d4sign, 'D4') + '</td>' +
+          '<td>' + miniKycBadge(co.bdr, 'BDR') + '</td>' +
+          '<td>' + (co.celcoin ? miniKycBadge(co.celcoin, 'CEL') : '<span class="badge badge-default">—</span>') + '</td>' +
+          '<td>' + coBadge + '</td>' +
+          '<td style="text-align:center">' + (co.produtosComSeller || 0) + '</td>' +
+          '<td style="text-align:center">' + (co.temProprios ? 'Sim' : 'Não') + '</td>' +
+          '<td style="text-align:center">' + (co.proprios || 0) + '</td>' +
+          '<td style="text-align:center">' + (co.coSellersNoProprio || 0) + '</td>' +
+          '<td style="text-align:center">' + (co.precisamReg || 0) + '</td>' +
+          '<td style="text-align:center">' + (co.produtosAfetados || 0) + '</td>' +
+          '<td>' + fmtBRL(co.valor60d) + '</td>' +
+          '<td>' + fmtDate(co.ultimaVenda) + '</td>' +
+          '<td>' + situacaoBadge(co.situacao) + '</td>' +
+          '<td><button class="btn-split-detail" onclick="openSplitDetail(' + co.id + ')">Ver detalhes</button></td>' +
+          '</tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+  var produtosHtml = '';
+  if (user.produtosAfetados && user.produtosAfetados.length > 0) {
+    produtosHtml = '<div class="detail-section-title">📦 Produtos que podem ter vendas afetadas (' + user.produtosAfetados.length + ')</div>' +
+      '<div class="table-wrap"><table><thead><tr>' +
+      '<th>Produto</th><th>Seller proprietário</th><th>Usuário de origem</th><th>Tipo pagamento</th>' +
+      '<th>Co-sellers</th><th>Co-sellers pendentes</th><th>Sales 60 dias</th><th>Valor 60 dias</th>' +
+      '<th>Última venda</th><th>Recorrências ativas</th><th>Situação comercial</th><th>Participantes</th>' +
+      '</tr></thead><tbody>' +
+      user.produtosAfetados.map(function(p) {
+        var scBadge;
+        if (p.situacaoComercial === 'ATIVA') scBadge = '<span class="sc-badge sc-ativa">Vendas acontecendo</span>';
+        else if (p.situacaoComercial === 'FUTURA') scBadge = '<span class="sc-badge sc-futura">Possui cobranças futuras</span>';
+        else if (p.situacaoComercial === 'SEM_RECENTE') scBadge = '<span class="sc-badge sc-sem-recente">Sem vendas recentes</span>';
+        else scBadge = '<span class="sc-badge sc-sem-historico">Sem histórico</span>';
+        return '<tr>' +
+          '<td><div class="cell-name">' + esc(p.name) + '</div><div class="cell-id">#' + p.id + '</div></td>' +
+          '<td>' + esc(p.sellerNome || '—') + '</td>' +
+          '<td>' + esc(p.origemNome || '—') + '</td>' +
+          '<td>' + esc(p.tipoPagamento || '—') + '</td>' +
+          '<td style="text-align:center">' + (p.qtdCoSellers || 0) + '</td>' +
+          '<td style="text-align:center">' + (p.coSellersReg || 0) + '</td>' +
+          '<td style="text-align:center">' + (p.sales60d || 0) + '</td>' +
+          '<td>' + fmtBRL(p.valor60d) + '</td>' +
+          '<td>' + fmtDate(p.ultimaVenda) + '</td>' +
+          '<td style="text-align:center">' + (p.recorrencias || 0) + '</td>' +
+          '<td>' + scBadge + '</td>' +
+          '<td><button class="btn-split-detail" onclick="toggleProductParticipants(this,' + p.id + ')">Ver participantes</button></td>' +
+          '</tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+  var splitBadge = user.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
+  var statStrip = '<div class="detail-stat-strip">' +
+    '<span class="detail-stat"><span class="detail-stat-label">Valor 60d</span><span class="detail-stat-val">' + fmtBRL(user.valor60d) + '</span></span>' +
+    '<span class="detail-stat"><span class="detail-stat-label">Última venda</span><span class="detail-stat-val">' + fmtDate(user.ultimaVenda) + '</span></span>' +
+    '<span class="detail-stat"><span class="detail-stat-label">Produtos ≠ Pós</span><span class="detail-stat-val">' + (user.produtosProprios || 0) + '</span></span>' +
+    '<span class="detail-stat"><span class="detail-stat-label">Co-sellers</span><span class="detail-stat-val">' + (user.coSellersQtd || 0) + '</span></span>' +
+    '<span class="detail-stat"><span class="detail-stat-label">Outras contas</span><span class="detail-stat-val">' + (user.outrasContas || 0) + '</span></span>' +
+    '</div>';
+  panel.innerHTML = bc +
+    '<div class="detail-top">' +
+      '<div><div class="detail-user-name">' + esc(user.name) + ' ' + splitBadge + '</div>' +
+      '<div class="detail-user-meta">' + esc(user.email || '') + ' · #' + user.id + ' · ' + esc(user.papel || '') + '</div>' +
+      statStrip + '</div>' +
+      '<button class="btn-close-detail" onclick="closeSplitDetail()">×</button>' +
+    '</div>' +
+    '<div class="detail-section-title">📋 Documentação</div>' + kycRow +
+    '<div class="detail-section-title">🔑 Status no Split</div>' + flagsHtml +
+    explainHtml + coSellersHtml + produtosHtml;
+  panel.classList.add('open');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  document.querySelectorAll('#split-tbl-body .btn-split-detail').forEach(function(btn) {
+    btn.classList.remove('active');
+    if (btn.getAttribute('onclick') === 'openSplitDetail(' + user.id + ')') btn.classList.add('active');
+  });
+}
+
+function navigateSplitDetail(index) {
+  splitDetailStack = splitDetailStack.slice(0, index + 1);
+  renderSplitDetail(splitDetailStack[index]);
+}
+
+function closeSplitDetail() {
+  splitDetailStack = [];
+  var panel = document.getElementById('split-detail-panel');
+  panel.classList.remove('open');
+  panel.innerHTML = '';
+  document.querySelectorAll('#split-tbl-body .btn-split-detail').forEach(function(btn) { btn.classList.remove('active'); });
+}
+
+function toggleProductParticipants(btn, productId) {
+  var row = btn.closest('tr');
+  var nextRow = row.nextElementSibling;
+  if (nextRow && nextRow.classList.contains('participant-row')) {
+    nextRow.remove();
+    btn.textContent = 'Ver participantes';
+    return;
+  }
+  var user = splitDetailStack.length > 0 ? splitDetailStack[splitDetailStack.length - 1] : null;
+  var participants = user && user.coSellersData ? user.coSellersData : [];
+  var tr = document.createElement('tr');
+  tr.className = 'participant-row';
+  var content;
+  if (participants.length === 0) {
+    content = '<em style="color:var(--neutral-40)">Dados completos de participantes disponíveis com dados do servidor.</em>';
+  } else {
+    content = '<strong style="font-size:12px;color:var(--neutral-30)">Participantes cadastrados neste grupo:</strong>' +
+      '<table style="width:100%;font-size:12px;margin-top:8px"><thead><tr>' +
+      '<th style="text-align:left;padding:4px 8px;font-weight:600;color:var(--neutral-40)">Nome</th>' +
+      '<th style="text-align:left;padding:4px 8px;font-weight:600;color:var(--neutral-40)">E-mail</th>' +
+      '<th style="text-align:left;padding:4px 8px;font-weight:600;color:var(--neutral-40)">Documentação</th>' +
+      '<th style="text-align:left;padding:4px 8px;font-weight:600;color:var(--neutral-40)">Situação</th>' +
+      '</tr></thead><tbody>' +
+      participants.map(function(p) {
+        return '<tr>' +
+          '<td style="padding:4px 8px">' + esc(p.name) + '</td>' +
+          '<td style="padding:4px 8px;color:var(--neutral-40)">' + esc(p.email) + '</td>' +
+          '<td style="padding:4px 8px"><span class="mini-kyc">' + miniKycBadge(p.pagarme, 'PM') + miniKycBadge(p.d4sign, 'D4') + miniKycBadge(p.bdr, 'BDR') + '</span></td>' +
+          '<td style="padding:4px 8px">' + situacaoBadge(p.situacao) + '</td>' +
+          '</tr>';
+      }).join('') + '</tbody></table>';
+  }
+  tr.innerHTML = '<td colspan="12" style="padding:12px 16px;background:var(--neutral-99);border-top:1px solid var(--neutral-90)">' + content + '</td>';
+  row.after(tr);
+  btn.textContent = 'Fechar';
+}
+
+function splitApplySearch() {
+  clearTimeout(splitSearchTimer);
+  splitSearchTimer = setTimeout(function() {
+    splitSearch = document.getElementById('split-search-input').value;
+    splitPage = 1;
+    fetchSplitUsers();
+  }, 400);
+}
+
+function splitChangePageSize() {
+  splitPageSize = parseInt(document.getElementById('split-page-size').value);
+  splitPage = 1;
+  fetchSplitUsers();
+}
+
+function splitGotoPage(p) { splitPage = p; fetchSplitUsers(); }
+
+function setSplitOutOfBase(show) {
+  document.getElementById('split-out-of-base').style.display = show ? 'block' : 'none';
+}
+
+function splitSortBy(col) {
+  if (splitSortCol === col) { splitSortDir = splitSortDir === 'asc' ? 'desc' : 'asc'; }
+  else { splitSortCol = col; splitSortDir = 'asc'; }
+  splitPage = 1;
+  fetchSplitUsers();
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadSplitData();
+});
+</script>
+</body>
+</html>
