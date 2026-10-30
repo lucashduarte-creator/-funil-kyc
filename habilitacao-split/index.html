@@ -529,15 +529,7 @@ function renderSplitTable(users, total, totalPages) {
       } else {
         docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam BDR</span>';
       }
-      if (allDocOk) {
-        docBadges = '<span class="badge badge-success" style="font-size:11px">Documentação completa</span>';
-      } else if (u.pagarme !== 'APPROVED') {
-        docBadges = '<span class="badge badge-error" style="font-size:11px">Faltam Pagar.me</span>';
-      } else if (u.d4sign !== 'FINISHED') {
-        docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam D4Sign</span>';
-      } else {
-        docBadges = '<span class="badge badge-warning" style="font-size:11px">Faltam BDR</span>';
-      }      var splitBadge = u.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
+      var splitBadge = u.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
       return '<tr>' +
         '<td class="cell-name">' + esc(u.name || '—') + '</td>' +
         '<td><div class="cell-email">' + esc(u.email || '—') + '</div><div class="cell-id">#' + u.id + '</div></td>' +
