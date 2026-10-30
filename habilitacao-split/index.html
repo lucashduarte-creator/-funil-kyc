@@ -403,22 +403,12 @@ async function fetchSplitUsers() {
     }
     var allUsers = (d.usuarios || d.users || []).map(normUser);
 
-    // Filtro client-side
-    var filtered = allUsers;
-    if (splitFilter !== 'all') filtered = allUsers.filter(function(u){ return u.situacao === splitFilter; });
-    if (splitSearch) {
-      var q = splitSearch.toLowerCase(), qc = q.replace(/[\.\-\/]/g,'');
-      filtered = filtered.filter(function(u){ return String(u.name).toLowerCase().includes(q)||String(u.email).toLowerCase().includes(q)||String(u.id).includes(q)||(u.cpf_cnpj||'').toLowerCase().includes(q)||(u.cpf_cnpj||'').replace(/[\.\-\/]/g,'').includes(qc); });
-    }
-    if (splitSortCol) {
-      var col=splitSortCol, dir=splitSortDir;
-      var SP = { PODE_MIGRAR:1, JA_NO_SPLIT:2, VERIFICAR:3, COSELLERS_PENDENTES:4, PRECISA_REGULARIZAR:5 };
-      filtered = filtered.slice().sort(function(a,b){ var va,vb; if(col==='situacao'){va=SP[a.situacao]||99;vb=SP[b.situacao]||99;}else{va=a[col];vb=b[col];if(va==null&&vb==null)return 0;if(va==null)return dir==='asc'?1:-1;if(vb==null)return dir==='asc'?-1:1;if(typeof va==='string')va=va.toLowerCase();if(typeof vb==='string')vb=vb.toLowerCase();}return va<vb?(dir==='asc'?-1:1):va>vb?(dir==='asc'?1:-1):0;});
-    }
-    var total = filtered.length, totalPages = Math.max(1, Math.ceil(total/splitPageSize));
-    var start = (splitPage-1)*splitPageSize;
-    splitCurrentUsers = filtered.slice(start, start+splitPageSize);
-    setSplitOutOfBase(d.outOfBase === true || (splitSearch && splitCurrentUsers.length === 0));
+    // Webhook já faz filtro, sort e paginação server-side
+    // Usa d.total e d.totalPages para mostrar contagem correta
+    var total      = d.total      || allUsers.length;
+    var totalPages = d.totalPages || Math.max(1, Math.ceil(total / splitPageSize));
+    splitCurrentUsers = allUsers;
+    setSplitOutOfBase(d.outOfBase === true || (splitSearch && allUsers.length === 0));
     renderSplitTable(splitCurrentUsers, total, totalPages);
   } catch (e) {
     if (e.name === 'AbortError') return;
