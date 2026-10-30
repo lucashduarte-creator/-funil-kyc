@@ -282,7 +282,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         <div class="si-sub">Sem bloqueios identificados</div>
       </div>
       <div class="split-ind si-verificar" id="si-verificar" onclick="splitSelectFilter('VERIFICAR')">
-        <div class="si-label">Outras contas afetadas</div>
+        <div class="si-label">Outras contas podem ser afetadas</div>
         <div class="si-value" id="si-val-verificar">—</div>
         <div class="si-sub">Verificar dependências</div>
       </div>
@@ -557,18 +557,21 @@ const SPLIT_MOCK = {
       ]
     },
     {
-      id: 1004, name: 'Roberto Nunes', email: 'roberto@voomp.com.br', cpf_cnpj: '456.789.012-34', papel: 'Co-Seller',
-      pagarme: 'APPROVED', d4sign: 'PENDING', bdr: 'processed', celcoin: null,
+      id: 1004, name: 'Roberto Nunes', email: 'roberto@voomp.com.br', cpf_cnpj: '456.789.012-34', papel: 'Seller',
+      pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null,
       splitStatus: 'LEGADO',
       flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
-      produtosProprios: 1, coSellersQtd: 0, outrasContas: 0,
+      produtosProprios: 2, coSellersQtd: 2, outrasContas: 1,
       valor60d: 2100, ultimaVenda: '2025-01-05', situacao: 'COSELLERS_PENDENTES',
-      oQueEncontramos: 'D4Sign pendente. Roberto participa como co-seller em produtos de sellers que estão prontos para migrar para o Split.',
-      oquePodeAcontecer: 'Se os sellers com quem Roberto trabalha forem habilitados antes de ele completar o D4Sign, as vendas conjuntas nesses produtos podem ser bloqueadas.',
-      oQuePrecisa: 'Concluir a assinatura do D4Sign para que a documentação fique completa e a habilitação do grupo possa prosseguir.',
-      coSellersData: [],
+      oQueEncontramos: 'Documentação completa. Possui 2 produtos próprios com 2 co-sellers cadastrados. Um deles (Beatriz Alves) ainda tem D4Sign pendente.',
+      oquePodeAcontecer: 'Se Roberto for habilitado antes de Beatriz concluir o D4Sign, as vendas nos produtos compartilhados podem ser bloqueadas.',
+      oQuePrecisa: 'Aguardar Beatriz Alves concluir a assinatura do D4Sign antes de prosseguir com a habilitação de Roberto.',
+      coSellersData: [
+        { id: 2008, name: 'Beatriz Alves', email: 'beatriz@email.com', pagarme: 'APPROVED', d4sign: 'PENDING', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 2, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 1, valor60d: 1800, ultimaVenda: '2025-01-05', situacao: 'PRECISA_REGULARIZAR' },
+        { id: 2009, name: 'Diego Santos', email: 'diego@email.com', pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null, splitStatus: 'LEGADO', allFlags: false, produtosComSeller: 1, temProprios: false, proprios: 0, coSellersNoProprio: 0, precisamReg: 0, produtosAfetados: 0, valor60d: 900, ultimaVenda: '2025-01-04', situacao: 'PODE_MIGRAR' }
+      ],
       produtosAfetados: [
-        { id: 507, name: 'Gestão de Redes Sociais', sellerNome: 'Beatriz Alves (#1010)', origemNome: 'Roberto Nunes', tipoPagamento: 'Assinatura', qtdCoSellers: 2, coSellersReg: 1, sales60d: 3, valor60d: 1800, ultimaVenda: '2025-01-05', recorrencias: 14, situacaoComercial: 'ATIVA' }
+        { id: 507, name: 'Gestão de Redes Sociais', sellerNome: 'Roberto Nunes', origemNome: 'Roberto Nunes', tipoPagamento: 'Assinatura', qtdCoSellers: 2, coSellersReg: 1, sales60d: 3, valor60d: 1800, ultimaVenda: '2025-01-05', recorrencias: 14, situacaoComercial: 'ATIVA' }
       ]
     },
     {
@@ -645,13 +648,20 @@ async function fetchSplitUsers() {
     if (splitSearch && users.length === 0) { setSplitOutOfBase(true); }
     if (splitSortCol) {
       const col = splitSortCol, dir = splitSortDir;
+      const SITUACAO_PRIORITY = { PODE_MIGRAR: 1, JA_NO_SPLIT: 2, VERIFICAR: 3, COSELLERS_PENDENTES: 4, PRECISA_REGULARIZAR: 5 };
       users = users.slice().sort(function(a, b) {
-        var va = a[col], vb = b[col];
-        if (va == null && vb == null) return 0;
-        if (va == null) return dir === 'asc' ? 1 : -1;
-        if (vb == null) return dir === 'asc' ? -1 : 1;
-        if (typeof va === 'string') va = va.toLowerCase();
-        if (typeof vb === 'string') vb = vb.toLowerCase();
+        var va, vb;
+        if (col === 'situacao') {
+          va = SITUACAO_PRIORITY[a.situacao] != null ? SITUACAO_PRIORITY[a.situacao] : 99;
+          vb = SITUACAO_PRIORITY[b.situacao] != null ? SITUACAO_PRIORITY[b.situacao] : 99;
+        } else {
+          va = a[col]; vb = b[col];
+          if (va == null && vb == null) return 0;
+          if (va == null) return dir === 'asc' ? 1 : -1;
+          if (vb == null) return dir === 'asc' ? -1 : 1;
+          if (typeof va === 'string') va = va.toLowerCase();
+          if (typeof vb === 'string') vb = vb.toLowerCase();
+        }
         return va < vb ? (dir === 'asc' ? -1 : 1) : va > vb ? (dir === 'asc' ? 1 : -1) : 0;
       });
     }
@@ -719,7 +729,8 @@ function renderSplitTable(users, total, totalPages) {
     tbody.innerHTML = '<tr class="empty-row"><td colspan="12">Nenhum usuário encontrado.</td></tr>';
   } else {
     tbody.innerHTML = users.map(function(u) {
-      var docBadges = '<span class="mini-kyc">' + miniKycBadge(u.pagarme, 'PM') + miniKycBadge(u.d4sign, 'D4') + miniKycBadge(u.bdr, 'BDR') + '</span>';
+      var allDocOk = (u.pagarme === 'APPROVED') && (u.d4sign === 'FINISHED') && (u.bdr === 'processed');
+      var docBadges = (allDocOk ? '<div style="margin-bottom:3px"><span class="badge badge-success" style="font-size:10px">Documentação completa</span></div>' : '') + '<span class="mini-kyc">' + miniKycBadge(u.pagarme, 'PM') + miniKycBadge(u.d4sign, 'D4') + miniKycBadge(u.bdr, 'BDR') + '</span>';
       var splitBadge = u.splitStatus === 'SPLIT' ? '<span class="badge badge-success">Já no Split</span>' : '<span class="badge badge-default">Legado</span>';
       return '<tr>' +
         '<td class="cell-name">' + (u.name || '—') + '</td>' +
@@ -895,7 +906,7 @@ function renderSplitDetail(user) {
           '<td>' + fmtDate(p.ultimaVenda) + '</td>' +
           '<td style="text-align:center">' + (p.recorrencias || 0) + '</td>' +
           '<td>' + scBadge + '</td>' +
-          '<td><button class="btn-split-detail" onclick="alert(\'Funcionalidade disponível com dados do servidor.\')">Ver participantes</button></td>' +
+          '<td><button class="btn-split-detail" onclick="toggleProductParticipants(this,' + p.id + ')">Ver participantes</button></td>' +
           '</tr>';
       }).join('') + '</tbody></table></div>';
   }
@@ -928,6 +939,43 @@ function closeSplitDetail() {
   panel.classList.remove('open');
   panel.innerHTML = '';
   document.querySelectorAll('#split-tbl-body .btn-split-detail').forEach(function(btn) { btn.classList.remove('active'); });
+}
+
+function toggleProductParticipants(btn, productId) {
+  var row = btn.closest('tr');
+  var nextRow = row.nextElementSibling;
+  if (nextRow && nextRow.classList.contains('participant-row')) {
+    nextRow.remove();
+    btn.textContent = 'Ver participantes';
+    return;
+  }
+  var user = splitDetailStack.length > 0 ? splitDetailStack[splitDetailStack.length - 1] : null;
+  var participants = user && user.coSellersData ? user.coSellersData : [];
+  var tr = document.createElement('tr');
+  tr.className = 'participant-row';
+  var content;
+  if (participants.length === 0) {
+    content = '<em style="color:var(--neutral-40)">Dados completos de participantes disponíveis com dados do servidor.</em>';
+  } else {
+    content = '<strong style="font-size:12px;color:var(--neutral-30)">Participantes cadastrados neste grupo:</strong>' +
+      '<table style="width:100%;font-size:12px;margin-top:8px"><thead><tr>' +
+      '<th style="text-align:left;padding:4px 8px;font-weight:600;color:var(--neutral-40)">Nome</th>' +
+      '<th style="text-align:left;padding:4px 8px;font-weight:600;color:var(--neutral-40)">E-mail</th>' +
+      '<th style="text-align:left;padding:4px 8px;font-weight:600;color:var(--neutral-40)">Documentação</th>' +
+      '<th style="text-align:left;padding:4px 8px;font-weight:600;color:var(--neutral-40)">Situação</th>' +
+      '</tr></thead><tbody>' +
+      participants.map(function(p) {
+        return '<tr>' +
+          '<td style="padding:4px 8px">' + p.name + '</td>' +
+          '<td style="padding:4px 8px;color:var(--neutral-40)">' + p.email + '</td>' +
+          '<td style="padding:4px 8px"><span class="mini-kyc">' + miniKycBadge(p.pagarme, 'PM') + miniKycBadge(p.d4sign, 'D4') + miniKycBadge(p.bdr, 'BDR') + '</span></td>' +
+          '<td style="padding:4px 8px">' + situacaoBadge(p.situacao) + '</td>' +
+          '</tr>';
+      }).join('') + '</tbody></table>';
+  }
+  tr.innerHTML = '<td colspan="12" style="padding:12px 16px;background:var(--neutral-99);border-top:1px solid var(--neutral-90)">' + content + '</td>';
+  row.after(tr);
+  btn.textContent = 'Fechar';
 }
 
 function splitApplySearch() {
