@@ -321,7 +321,7 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
         <table>
           <thead>
             <tr>
-              <th>Nome</th>
+              <th id="th-split-sort-name" onclick="splitSortBy('name')" style="cursor:pointer;user-select:none">Nome <span style="color:var(--neutral-50);font-size:10px">⇅</span></th>
               <th>E-mail / ID</th>
               <th>Papel</th>
               <th>Situação documental</th>
@@ -329,9 +329,9 @@ tbody td{padding:12px 16px;font-size:13px;vertical-align:middle;}
               <th>Produtos ≠ Pós</th>
               <th>Co-sellers</th>
               <th>Outras contas</th>
-              <th>Valor 60 dias</th>
-              <th>Última venda</th>
-              <th>Situação habilitação</th>
+              <th id="th-split-sort-valor60d" onclick="splitSortBy('valor60d')" style="cursor:pointer;user-select:none">Valor 60 dias <span style="color:var(--neutral-50);font-size:10px">⇅</span></th>
+              <th id="th-split-sort-ultimaVenda" onclick="splitSortBy('ultimaVenda')" style="cursor:pointer;user-select:none">Última venda <span style="color:var(--neutral-50);font-size:10px">⇅</span></th>
+              <th id="th-split-sort-situacao" onclick="splitSortBy('situacao')" style="cursor:pointer;user-select:none">Situação habilitação <span style="color:var(--neutral-50);font-size:10px">⇅</span></th>
               <th>Ação</th>
             </tr>
           </thead>
@@ -494,12 +494,13 @@ const SPLIT_WEBHOOK = 'https://integration.voompcreators.net.br/webhook/kyc-habi
 let splitLoaded = false, splitFilter = 'all', splitPage = 1, splitPageSize = 10, splitSearch = '';
 let splitSearchTimer = null, splitAbortCtrl = null, splitCurrentUsers = [];
 let splitDetailStack = [];
+let splitSortCol = null, splitSortDir = 'asc';
 
 const SPLIT_MOCK = {
   indicators: { total: 284, split: 14, prontos: 37, verificar: 89, regularizar: 144 },
   users: [
     {
-      id: 1001, name: 'Ana Souza', email: 'ana@voomp.com.br', papel: 'Seller',
+      id: 1001, name: 'Ana Souza', email: 'ana@voomp.com.br', cpf_cnpj: '123.456.789-01', papel: 'Seller',
       pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null,
       splitStatus: 'LEGADO',
       flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
@@ -519,7 +520,7 @@ const SPLIT_MOCK = {
       ]
     },
     {
-      id: 1002, name: 'Carlos Lima', email: 'carlos@voomp.com.br', papel: 'Ambos',
+      id: 1002, name: 'Carlos Lima', email: 'carlos@voomp.com.br', cpf_cnpj: '234.567.890-12', papel: 'Ambos',
       pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: 'APPROVED',
       splitStatus: 'SPLIT',
       flags: { boleto_sub: true, boleto_tx: true, cc_sub: true, cc_tx: true, pix_tx: true },
@@ -536,7 +537,7 @@ const SPLIT_MOCK = {
       ]
     },
     {
-      id: 1003, name: 'Marina Torres', email: 'marina@voomp.com.br', papel: 'Seller',
+      id: 1003, name: 'Marina Torres', email: 'marina@voomp.com.br', cpf_cnpj: '345.678.901-23', papel: 'Seller',
       pagarme: 'APPROVED', d4sign: 'FINISHED', bdr: 'processed', celcoin: null,
       splitStatus: 'LEGADO',
       flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
@@ -556,7 +557,7 @@ const SPLIT_MOCK = {
       ]
     },
     {
-      id: 1004, name: 'Roberto Nunes', email: 'roberto@voomp.com.br', papel: 'Co-Seller',
+      id: 1004, name: 'Roberto Nunes', email: 'roberto@voomp.com.br', cpf_cnpj: '456.789.012-34', papel: 'Co-Seller',
       pagarme: 'APPROVED', d4sign: 'PENDING', bdr: 'processed', celcoin: null,
       splitStatus: 'LEGADO',
       flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
@@ -571,7 +572,7 @@ const SPLIT_MOCK = {
       ]
     },
     {
-      id: 1005, name: 'Fernanda Alves', email: 'fernanda@voomp.com.br', papel: 'Seller',
+      id: 1005, name: 'Fernanda Alves', email: 'fernanda@voomp.com.br', cpf_cnpj: '567.890.123-45', papel: 'Seller',
       pagarme: 'PENDING', d4sign: 'PENDING', bdr: 'not_processed', celcoin: null,
       splitStatus: 'LEGADO',
       flags: { boleto_sub: false, boleto_tx: false, cc_sub: false, cc_tx: false, pix_tx: false },
@@ -610,7 +611,8 @@ async function fetchSplitUsers() {
   if (splitAbortCtrl) splitAbortCtrl.abort();
   splitAbortCtrl = new AbortController();
   setSplitTableLoading();
-  const params = new URLSearchParams({ page: splitPage, pageSize: splitPageSize, filter: splitFilter, search: splitSearch });
+  setSplitOutOfBase(false);
+  const params = new URLSearchParams({ page: splitPage, pageSize: splitPageSize, filter: splitFilter, search: splitSearch, sortCol: splitSortCol || '', sortDir: splitSortDir });
   try {
     const res = await fetch(SPLIT_WEBHOOK + '?' + params.toString(), { signal: splitAbortCtrl.signal });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -618,6 +620,7 @@ async function fetchSplitUsers() {
     const d = Array.isArray(raw) ? raw[0] : raw;
     renderSplitIndicators(d.indicators || SPLIT_MOCK.indicators);
     splitCurrentUsers = d.users || [];
+    setSplitOutOfBase(d.outOfBase === true);
     renderSplitTable(splitCurrentUsers, d.total || 0, d.totalPages || 1);
   } catch (e) {
     if (e.name === 'AbortError') return;
@@ -630,8 +633,26 @@ async function fetchSplitUsers() {
     }
     if (splitSearch) {
       const q = splitSearch.toLowerCase();
+      const qClean = q.replace(/[\.\-\/]/g, '');
       users = users.filter(function(u) {
-        return String(u.name).toLowerCase().includes(q) || String(u.email).toLowerCase().includes(q) || String(u.id).includes(q);
+        return String(u.name).toLowerCase().includes(q) ||
+          String(u.email).toLowerCase().includes(q) ||
+          String(u.id).includes(q) ||
+          String(u.cpf_cnpj || '').toLowerCase().includes(q) ||
+          String(u.cpf_cnpj || '').replace(/[\.\-\/]/g, '').includes(qClean);
+      });
+    }
+    if (splitSearch && users.length === 0) { setSplitOutOfBase(true); }
+    if (splitSortCol) {
+      const col = splitSortCol, dir = splitSortDir;
+      users = users.slice().sort(function(a, b) {
+        var va = a[col], vb = b[col];
+        if (va == null && vb == null) return 0;
+        if (va == null) return dir === 'asc' ? 1 : -1;
+        if (vb == null) return dir === 'asc' ? -1 : 1;
+        if (typeof va === 'string') va = va.toLowerCase();
+        if (typeof vb === 'string') vb = vb.toLowerCase();
+        return va < vb ? (dir === 'asc' ? -1 : 1) : va > vb ? (dir === 'asc' ? 1 : -1) : 0;
       });
     }
     splitCurrentUsers = users;
@@ -677,7 +698,7 @@ function fmtBRL(v) {
 }
 
 function situacaoBadge(s) {
-  if (s === 'JA_NO_SPLIT') return '<span class="badge badge-success">Já no Split</span>';
+  if (s === 'JA_NO_SPLIT') return '<span class="badge badge-success">Já está no Split</span>';
   if (s === 'PODE_MIGRAR') return '<span class="badge badge-blue">Pode migrar</span>';
   if (s === 'VERIFICAR') return '<span class="badge badge-warning">Verificar outras contas</span>';
   if (s === 'COSELLERS_PENDENTES') return '<span class="badge badge-orange">Co-sellers pendentes</span>';
@@ -728,6 +749,13 @@ function renderSplitTable(users, total, totalPages) {
   }
   html += '<button onclick="splitGotoPage(' + (splitPage + 1) + ')" ' + (splitPage === totalPages ? 'disabled' : '') + '>›</button>';
   pages.innerHTML = html;
+  var sortHeaderLabels = { name: 'Nome', valor60d: 'Valor 60 dias', ultimaVenda: 'Última venda', situacao: 'Situação habilitação' };
+  Object.keys(sortHeaderLabels).forEach(function(col) {
+    var th = document.getElementById('th-split-sort-' + col);
+    if (!th) return;
+    var icon = splitSortCol === col ? (splitSortDir === 'asc' ? ' ↑' : ' ↓') : ' ⇅';
+    th.innerHTML = sortHeaderLabels[col] + '<span style="color:var(--neutral-50);font-size:10px">' + icon + '</span>';
+  });
 }
 
 function synthesizeFromCoSeller(co, parentUser) {
@@ -918,6 +946,17 @@ function splitChangePageSize() {
 }
 
 function splitGotoPage(p) { splitPage = p; fetchSplitUsers(); }
+
+function setSplitOutOfBase(show) {
+  document.getElementById('split-out-of-base').style.display = show ? 'block' : 'none';
+}
+
+function splitSortBy(col) {
+  if (splitSortCol === col) { splitSortDir = splitSortDir === 'asc' ? 'desc' : 'asc'; }
+  else { splitSortCol = col; splitSortDir = 'asc'; }
+  splitPage = 1;
+  fetchSplitUsers();
+}
 
 document.addEventListener('DOMContentLoaded',()=>{loadTotals();loadSellers();});
 </script>
