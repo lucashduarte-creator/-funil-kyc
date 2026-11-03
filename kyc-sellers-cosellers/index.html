@@ -249,7 +249,7 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
   <div class="tab-pills">
     <button class="tab-pill" id="tp-impacto" onclick="switchTab('impacto')">Impacto no TPV</button>
     <button class="tab-pill" id="tp-sellers" onclick="switchTab('sellers')">Sellers &amp; Co-sellers · KYC</button>
-    <button class="tab-pill" id="tp-outubro" onclick="switchTab('outubro')">Impacto Outubro Parcial</button>
+    <button class="tab-pill" id="tp-outubro" onclick="switchTab('outubro')">Impacto Outubro</button>
   </div>
 
   <!-- TAB: IMPACTO -->
@@ -334,7 +334,7 @@ tbody td{padding:10px 14px;font-size:13px;vertical-align:middle;}
     <div class="card">
       <div class="sec-hdr">
         <h3>Resumo Executivo</h3>
-        <p>Análise de impacto no TPV — KYC Sellers &amp; Co-sellers · Outubro Parcial</p>
+        <p>Análise de impacto no TPV — KYC Sellers &amp; Co-sellers · Outubro</p>
       </div>
       <div class="kpi-grid" id="out-kpis"></div>
     </div>
@@ -585,7 +585,7 @@ async function loadOutubroData() {
     impRender('out');
   } catch(e) {
     console.warn('Webhook Outubro indisponível:', e.message);
-    impRenderEmpty('Execute o workflow <b>KYC Impacto TPV Outubro Parcial Scheduler</b> no n8n para gerar os dados desta visão.', 'out');
+    impRenderEmpty('Execute o workflow <b>KYC Impacto TPV Outubro Scheduler</b> no n8n para gerar os dados desta visão.', 'out');
   }
 }
 
