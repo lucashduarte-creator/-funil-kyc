@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Busca — Voomp</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5F5F5;display:flex;height:100vh;overflow:hidden;font-size:13px;color:#262626;}
+
+/* ── Sidebar icons ── */
+.sidebar{width:52px;background:#fff;border-right:1px solid #EBEBEB;display:flex;flex-direction:column;align-items:center;flex-shrink:0;z-index:10;}
+.s-logo{padding:14px 0 12px;border-bottom:1px solid #EBEBEB;width:100%;display:flex;justify-content:center;}
+.s-logo svg{width:26px;height:26px;}
+.s-nav{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0;flex:1;}
+.s-btn{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;color:#9E9E9E;transition:all .15s;position:relative;}
+.s-btn:hover{background:#FFF3EC;color:#FE6100;}
+.s-btn.active{background:#FFF3EC;color:#FE6100;}
+.s-btn svg{width:17px;height:17px;}
+.s-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:#FE6100;}
+
+/* ── Left search panel ── */
+.search-panel{width:220px;background:#fff;border-right:1px solid #EBEBEB;display:flex;flex-direction:column;flex-shrink:0;}
+.sp-header{padding:14px 16px 10px;border-bottom:1px solid #F5F5F5;}
+.sp-title{font-size:14px;font-weight:600;color:#262626;margin-bottom:12px;}
+
+/* Entity dropdown */
+.sp-select{width:100%;height:32px;border:1px solid #E0E0E0;border-radius:6px;padding:0 10px;font-size:12px;color:#262626;background:#fff;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239E9E9E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;margin-bottom:6px;}
+.sp-select:focus{border-color:#FE6100;}
+
+/* Sub-filter dropdown */
+.sp-subfilter{width:100%;height:32px;border:1px solid #E0E0E0;border-radius:6px;padding:0 10px;font-size:12px;color:#262626;background:#fff;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239E9E9E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;margin-bottom:6px;}
+.sp-subfilter:focus{border-color:#FE6100;}
+
+/* Search input */
+.sp-input-wrap{position:relative;margin-bottom:10px;}
+.sp-input{width:100%;height:34px;border:1px solid #E0E0E0;border-radius:6px;padding:0 30px 0 10px;font-size:12px;color:#262626;outline:none;transition:border .15s;}
+.sp-input:focus{border-color:#FE6100;}
+.sp-input::placeholder{color:#BDBDBD;}
+.sp-input-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;cursor:pointer;color:#BDBDBD;font-size:14px;display:none;line-height:1;}
+.sp-input-clear.vis{display:block;}
+
+/* Buscar button */
+.sp-btn{width:100%;height:36px;background:#FE6100;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.sp-btn:hover{background:#E05500;}
+.sp-btn:active{background:#CC4D00;}
+
+/* Results section */
+.sp-results{flex:1;overflow-y:auto;padding:12px 0 0;}
+.sp-results::-webkit-scrollbar{width:3px;}
+.sp-results::-webkit-scrollbar-thumb{background:#E0E0E0;border-radius:2px;}
+.sp-results-label{font-size:10px;color:#9E9E9E;padding:0 16px 6px;font-weight:500;}
+.sp-empty{padding:24px 16px;text-align:center;color:#BDBDBD;font-size:12px;line-height:1.6;}
+
+/* Result card */
+.r-card{margin:0 10px 6px;padding:10px 12px;border-radius:8px;cursor:pointer;border:1px solid transparent;background:#F9F9F9;transition:all .15s;}
+.r-card:hover{background:#FFF7F3;border-color:#FFD5B8;}
+.r-card.active{background:#FFF3EC;border-color:#FE6100;}
+.r-card.active .r-card-name{color:#FE6100;}
+.r-card-name{font-size:13px;font-weight:600;color:#262626;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.r-card-id{font-size:11px;color:#9E9E9E;margin-bottom:1px;}
+.r-card-sub{font-size:11px;color:#9E9E9E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.r-card-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:2px 7px;border-radius:999px;margin-top:4px;}
+.badge-green{background:#ECFDF5;color:#059669;}
+.badge-red{background:#FEF2F2;color:#DC2626;}
+.badge-blue{background:#EFF6FF;color:#2563EB;}
+.badge-gray{background:#F5F5F5;color:#9E9E9E;}
+.badge-orange{background:#FFF3EC;color:#FE6100;}
+
+/* ── Detail panel ── */
+.detail{flex:1;overflow-y:auto;background:#F5F5F5;padding:20px 20px 20px;}
+.detail::-webkit-scrollbar{width:4px;}
+.detail::-webkit-scrollbar-thumb{background:#E0E0E0;border-radius:2px;}
+
+/* No selection */
+.no-sel{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#BDBDBD;}
+.no-sel svg{width:40px;height:40px;opacity:.3;}
+.no-sel p{font-size:13px;}
+
+/* Detail card */
+.d-card{background:#fff;border-radius:10px;border:1px solid #EBEBEB;margin-bottom:14px;overflow:hidden;}
+.d-head{padding:14px 20px;display:flex;align-items:flex-start;gap:12px;border-bottom:1px solid #F5F5F5;}
+.d-av{width:40px;height:40px;border-radius:8px;background:#FFF3EC;color:#FE6100;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.d-av.av-blue{background:#EEF2FF;color:#4F46E5;}
+.d-av.av-green{background:#ECFDF5;color:#059669;}
+.d-av.av-orange{background:#FFF7ED;color:#EA580C;}
+.d-av.av-sky{background:#F0F9FF;color:#0284C7;}
+.d-info{flex:1;}
+.d-name{font-size:16px;font-weight:700;color:#262626;line-height:1.2;}
+.d-meta{font-size:12px;color:#9E9E9E;margin-top:3px;}
+.d-chips{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+.chip{padding:3px 9px;border-radius:999px;font-size:11px;font-weight:500;}
+.chip-orange{background:#FFF3EC;color:#FE6100;}
+.chip-blue{background:#EFF6FF;color:#2563EB;}
+.chip-green{background:#ECFDF5;color:#059669;}
+.chip-gray{background:#F5F5F5;color:#757575;}
+.chip-red{background:#FEF2F2;color:#DC2626;}
+.d-acts{margin-left:auto;display:flex;gap:6px;flex-shrink:0;}
+.btn{height:30px;padding:0 12px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid #E0E0E0;background:#fff;color:#757575;transition:all .15s;}
+.btn:hover{border-color:#FE6100;color:#FE6100;}
+.btn-primary{background:#FE6100;color:#fff;border-color:#FE6100;}
+.btn-primary:hover{background:#E05500;border-color:#E05500;color:#fff;}
+
+/* KPI row */
+.kpi-row{display:flex;border-bottom:1px solid #F5F5F5;}
+.kpi{flex:1;padding:12px 20px;border-right:1px solid #F5F5F5;}
+.kpi:last-child{border-right:none;}
+.kpi-label{font-size:11px;color:#9E9E9E;margin-bottom:4px;}
+.kpi-val{font-size:15px;font-weight:700;color:#262626;}
+.kpi-val.red{color:#DC2626;}
+.kpi-val.green{color:#059669;}
+.kpi-val.orange{color:#FE6100;}
+
+/* Tabs */
+.d-tabs{display:flex;padding:0 20px;border-bottom:1px solid #F5F5F5;}
+.d-tab{padding:11px 14px;font-size:13px;font-weight:500;color:#9E9E9E;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.d-tab:hover{color:#262626;}
+.d-tab.on{color:#FE6100;border-bottom-color:#FE6100;}
+.d-body{padding:18px 20px;}
+
+/* Fields */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.fi{display:flex;flex-direction:column;gap:3px;}
+.fl{font-size:11px;color:#9E9E9E;font-weight:500;}
+.fv{font-size:13px;color:#262626;font-weight:500;}
+.fv.muted{color:#9E9E9E;}
+
+/* ── Status badges — espelho exato do Admin ── */
+/* Contratos */
+.st-paid{background:#ECFDF5;color:#059669;}           /* paid → verde */
+.st-created{background:#EFF6FF;color:#2563EB;}        /* created → azul */
+.st-waiting{background:#FFF7ED;color:#EA580C;}        /* waiting_payment / pending_payment → laranja */
+.st-trialing{background:#F5F3FF;color:#7C3AED;}       /* trialing → roxo */
+.st-unpaid{background:#FEF2F2;color:#DC2626;}         /* unpaid → vermelho */
+.st-failed{background:#FEF2F2;color:#DC2626;}         /* failed → vermelho */
+.st-refused{background:#FEF2F2;color:#DC2626;}        /* refused → vermelho */
+.st-canceled{background:#F5F5F5;color:#9E9E9E;}       /* canceled → cinza */
+.st-ended{background:#F5F5F5;color:#9E9E9E;}          /* ended → cinza */
+.st-refunded{background:#EFF6FF;color:#0284C7;}       /* refunded → azul claro */
+.st-chargedback{background:#FFF1F2;color:#9F1239;}    /* chargedback → vermelho escuro */
+/* Vendas */
+.st-processing{background:#FFF7ED;color:#EA580C;}     /* processing → laranja */
+.st-completed{background:#ECFDF5;color:#059669;}      /* completed → verde */
+.st-refund_pending{background:#FEFCE8;color:#CA8A04;} /* refund_pending → amarelo */
+.st-future{background:#F5F3FF;color:#7C3AED;}         /* future → roxo */
+.ca-header{padding:10px 20px 14px;border-bottom:1px solid #F0F0F0;}
+.ca-query{font-size:11px;color:#9E9E9E;margin-bottom:2px;}
+.ca-query-val{font-size:14px;font-weight:700;color:#FE6100;}
+.ca-list{display:flex;flex-direction:column;gap:0;}
+.ca-row{border-bottom:1px solid #F0F0F0;cursor:pointer;transition:background .12s;}
+.ca-row:last-child{border-bottom:none;}
+.ca-row:hover{background:#FFFBF9;}
+.ca-row.open{background:#FFFBF9;}
+.ca-row-top{padding:14px 20px;display:flex;align-items:flex-start;gap:16px;}
+.ca-row-id{min-width:160px;flex-shrink:0;}
+.ca-row-id-label{font-size:14px;font-weight:700;color:#262626;}
+.ca-row-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 8px;border-radius:999px;margin-top:4px;}
+.ca-row-badge.pago{background:#ECFDF5;color:#059669;}
+.ca-row-badge.nao-pago{background:#FFF3EC;color:#FE6100;}
+.ca-row-badge.recusado{background:#FEF2F2;color:#DC2626;}
+.ca-row-badge.ativo{background:#ECFDF5;color:#059669;}
+.ca-row-badge.encerrado{background:#F5F5F5;color:#9E9E9E;}
+.ca-row-badge.pendente{background:#EFF6FF;color:#2563EB;}
+.ca-row-cols{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;flex:1;}
+.ca-col-label{font-size:10px;color:#9E9E9E;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.ca-col-val{font-size:13px;font-weight:600;color:#262626;}
+.ca-row-arrow{margin-left:auto;color:#BDBDBD;font-size:16px;padding-left:12px;transition:transform .2s;flex-shrink:0;align-self:center;}
+.ca-row.open .ca-row-arrow{transform:rotate(180deg);}
+.ca-expand{display:none;padding:0 20px 16px;border-top:1px solid #F8F8F8;}
+.ca-row.open .ca-expand{display:block;}
+.ca-expand-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;background:#FAFAFA;border-radius:8px;padding:14px 16px;}
+.ca-expand-fi{display:flex;flex-direction:column;gap:2px;}
+.ca-expand-label{font-size:10px;color:#9E9E9E;font-weight:500;}
+.ca-expand-val{font-size:12px;font-weight:500;color:#262626;}
+.ca-expand-actions{display:flex;gap:8px;margin-top:12px;}
+.ca-expand-btn{height:32px;padding:0 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
+.ca-expand-btn-primary{background:#FE6100;color:#fff;border:none;}
+.ca-expand-btn-primary:hover{background:#E05500;}
+.ca-expand-btn-sec{background:#fff;color:#DC2626;border:1.5px solid #DC2626;}
+.ca-expand-btn-sec:hover{background:#FEF2F2;}
+.ca-expand-btn-ghost{background:#fff;color:#757575;border:1px solid #E0E0E0;}
+.ca-expand-btn-ghost:hover{border-color:#FE6100;color:#FE6100;}
+.ca-tx-mini{margin-top:10px;}
+.ca-tx-mini-title{font-size:11px;font-weight:600;color:#9E9E9E;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+.ca-tx-mini table{width:100%;border-collapse:collapse;}
+.ca-tx-mini th{font-size:10px;color:#9E9E9E;text-align:left;padding:4px 8px;border-bottom:1px solid #F0F0F0;}
+.ca-tx-mini td{font-size:12px;padding:5px 8px;border-bottom:1px solid #F8F8F8;color:#262626;}
+.ca-tx-mini td:last-child{border-bottom:none;}
+.ca-tx-link{color:#2563EB;cursor:pointer;font-weight:500;}
+.ca-tx-link:hover{text-decoration:underline;}
+.ca-wrap{background:#fff;border-radius:10px;border:1px solid #EBEBEB;overflow:hidden;}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="s-logo">
+    <svg viewBox="0 0 32 32" fill="none">
+      <path d="M6 9L16 23L26 9" stroke="#FE6100" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <nav class="s-nav">
+    <button class="s-btn active" title="Busca Universal">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </button>
+    <button class="s-btn" title="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </button>
+    <button class="s-btn" title="Histórico">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </button>
+    <button class="s-btn" title="Financeiro">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+    </button>
+    <button class="s-btn" title="Segurança">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </button>
+    <button class="s-btn" title="Empresa">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+    </button>
+  </nav>
+</aside>
+
+<!-- Search panel -->
+<div class="search-panel">
+  <div class="sp-header">
+    <div class="sp-title" id="spTitle">Clientes</div>
+
+    <!-- Entity selector -->
+    <select class="sp-select" id="entitySelect" onchange="onEntityChange()">
+      <option value="cliente">Cliente</option>
+      <option value="venda">Venda</option>
+      <option value="contrato">Contrato</option>
+      <option value="produto">Produto</option>
+    </select>
+
+    <!-- Sub-filter -->
+    <select class="sp-subfilter" id="subfilterSelect"></select>
+
+    <!-- Input -->
+    <div class="sp-input-wrap">
+      <input class="sp-input" id="searchInput" type="text" placeholder="Digite para buscar..." onkeydown="if(event.key==='Enter')doSearch()" oninput="toggleClear(this)">
+      <button class="sp-input-clear" id="clearBtn" onclick="clearInput()">×</button>
+    </div>
+
+    <button class="sp-btn" onclick="doSearch()">Buscar</button>
+  </div>
+
+  <!-- Results -->
+  <div class="sp-results" id="resultsList">
+    <div class="sp-empty">Selecione o tipo e<br>realize uma busca</div>
+  </div>
+</div>
+
+<!-- Detail -->
+<div class="detail" id="detail">
+  <div class="no-sel">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <p>Selecione um resultado para ver os detalhes</p>
+  </div>
+</div>
+
+<script>
+// ── Config por entidade ──
+const ENTITIES = {
+  cliente: {
+    label: 'Clientes',
+    filters: ['ID','Nome','E-mail','CPF/CNPJ','Telefone'],
+    avClass: '', avLabel: s => s.title.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(),
+    badgeField: 'status'
+  },
+  venda: {
+    label: 'Vendas',
+    filters: ['ID da Venda','E-mail Comprador','CPF/CNPJ Comprador','Nome Comprador'],
+    avClass: 'av-green', avLabel: () => '#',
+    badgeField: 'status'
+  },
+  contrato: {
+    label: 'Contratos',
+    filters: ['ID do Contrato','E-mail do Comprador','CPF/CNPJ do Comprador','Nome do Comprador'],
+    avClass: 'av-orange', avLabel: () => 'C',
+    badgeField: 'status'
+  },
+  produto: {
+    label: 'Produtos',
+    filters: ['ID do Produto','Nome','ID Seller','E-mail Seller'],
+    avClass: 'av-sky', avLabel: () => 'P',
+    badgeField: 'status'
+  }
+};
+
+// ── Mock data ──
+const MOCK = {
+  cliente: [
+    { id:'667209', title:'Lucas Henrique Duarte', sub2:'BP SAP CLB2376', sub:'lucas.he.duarte@gmail.com', status:'Ativo',
+      tags:['Pós-graduação','Curso livre'], kpis:[{l:'Faturamento Total',v:'R$ 0,00'},{l:'Disponível p/ Saque',v:'R$ 0,00'},{l:'Saldo a Liberar',v:'R$ 0,00'},{l:'Minha Carteira',v:'R$ 0,00'}],
+      tabs:['Dados','Taxas','Configurações','Partner','Saques','Antecipação'],
+      fields:[{l:'CPF',v:'416.****8-94'},{l:'E-mail',v:'lucas.he.duarte@gmail.com'},{l:'Telefone',v:'(11) 99999-0000'},{l:'Criação da Conta',v:'08/07/2026'},{l:'BP SAP',v:'CLB2376'},{l:'Status',v:'Ativo'}] },
+    { id:'205615', title:'Escola do Meio Ambiente', sub2:'CNPJ 12.345.678/0001-90', sub:'contato@escoladomeioambiente.com.br', status:'Ativo',
+      tags:['Curso livre'], kpis:[{l:'Faturamento Total',v:'R$ 142.890,00'},{l:'Disponível p/ Saque',v:'R$ 12.400,00'},{l:'Saldo a Liberar',v:'R$ 3.200,00'},{l:'Minha Carteira',v:'R$ 15.600,00'}],
+      tabs:['Dados','Taxas','Configurações','Partner','Saques','Antecipação'],
+      fields:[{l:'CNPJ',v:'12.345.678/0001-90'},{l:'E-mail',v:'contato@escoladomeioambiente.com.br'},{l:'Telefone',v:'(11) 3333-4444'},{l:'Criação da Conta',v:'01/03/2024'},{l:'Status',v:'Ativo'},{l:'Produtos',v:'4'}] },
+    { id:'419009', title:'Danilo Barbosa Cavalcanti', sub2:'ID 419009', sub:'danilo@cavalcanti.com.br', status:'Ativo',
+      tags:['Pós-graduação','Curso livre'], kpis:[{l:'Faturamento Total',v:'R$ 3.218.000,00'},{l:'Disponível p/ Saque',v:'R$ 180.400,00'},{l:'Saldo a Liberar',v:'R$ 42.000,00'},{l:'Minha Carteira',v:'R$ 222.400,00'}],
+      tabs:['Dados','Taxas','Configurações','Partner','Saques','Antecipação'],
+      fields:[{l:'CPF',v:'823.****1-55'},{l:'E-mail',v:'danilo@cavalcanti.com.br'},{l:'Telefone',v:'(21) 98888-1234'},{l:'Criação da Conta',v:'15/01/2025'},{l:'Status',v:'Ativo'},{l:'Co-sellers',v:'26'}] },
+  ],
+  aluno: [
+    { id:'A-10021', title:'Maria Clara Santos', sub2:'3 cursos ativos', sub:'maria.clara@gmail.com', status:'Ativo',
+      tags:['Ativo'], kpis:[{l:'Cursos Ativos',v:'3'},{l:'Concluídos',v:'1'},{l:'Próx. Vencimento',v:'01/01/2027'},{l:'Total Pago',v:'R$ 2.400,00'}],
+      tabs:['Matrículas','Histórico','Pagamentos'],
+      fields:[{l:'CPF',v:'552.****3-11'},{l:'E-mail',v:'maria.clara@gmail.com'},{l:'Telefone',v:'(31) 97777-5566'},{l:'Matrícula',v:'10/02/2026'},{l:'Curso Principal',v:'Pós em Marketing Digital'},{l:'Status',v:'Ativo'}] },
+    { id:'A-20045', title:'Pedro Henrique Lima', sub2:'Contrato ativo', sub:'pedro.lima@hotmail.com', status:'Ativo',
+      tags:['Ativo'], kpis:[{l:'Cursos Ativos',v:'1'},{l:'Concluídos',v:'2'},{l:'Próx. Vencimento',v:'15/12/2026'},{l:'Total Pago',v:'R$ 890,00'}],
+      tabs:['Matrículas','Histórico','Pagamentos'],
+      fields:[{l:'CPF',v:'771.****9-02'},{l:'E-mail',v:'pedro.lima@hotmail.com'},{l:'Telefone',v:'(85) 96666-3312'},{l:'Matrícula',v:'05/06/2025'},{l:'Curso Principal',v:'Curso Livre de Design'},{l:'Status',v:'Ativo'}] },
+  ],
+  venda: [
+    { id:'884231', title:'Venda #884231', sub2:'Antonio de Jesus Sousa Ferreira', sub:'tonicosfj@gmail.com · R$ 497,00', status:'Recusada',
+      tags:['Recusada','Cartão de Crédito'], kpis:[{l:'Valor',v:'R$ 497,00'},{l:'Status',v:'Recusada'},{l:'Tentativas',v:'10'},{l:'Código',v:'9200'}],
+      tabs:['Resumo','Tentativas','Dados do Comprador'],
+      fields:[{l:'Comprador',v:'Antonio de Jesus Sousa Ferreira'},{l:'E-mail',v:'tonicosfj@gmail.com'},{l:'Produto',v:'Curso Avançado de Ecologia'},{l:'Método',v:'Cartão de Crédito'},{l:'Data',v:'12/11/2026 00:12'},{l:'Motivo',v:'Código irreversível 9200'}] },
+    { id:'884190', title:'Venda #884190', sub2:'Fábio Henrique Jardim', sub:'fabiohjardim74@gmail.com · R$ 497,00', status:'Paga',
+      tags:['Paga','Cartão de Crédito'], kpis:[{l:'Valor',v:'R$ 497,00'},{l:'Status',v:'Paga'},{l:'Tentativas',v:'4'},{l:'Pago em',v:'12/11/2026'}],
+      tabs:['Resumo','Tentativas','Dados do Comprador'],
+      fields:[{l:'Comprador',v:'Fábio Henrique Jardim'},{l:'E-mail',v:'fabiohjardim74@gmail.com'},{l:'Produto',v:'Curso Avançado de Ecologia'},{l:'Método',v:'Cartão de Crédito'},{l:'Data',v:'12/11/2026 00:56'},{l:'Valor Líquido',v:'R$ 455,24'}] },
+  ],
+  contrato: [
+    { id:'183198', title:'Contrato #183198', sub2:'Daniella Almeida Silva', sub:'daniella.jp@hotmail.com', status:'paid',
+      tags:['Ativo'], kpis:[{l:'Valor Pago',v:'R$ 117,76'},{l:'A Receber',v:'R$ 1.295,36'},{l:'Em Atraso',v:'R$ 0,00'},{l:'Valor Líquido',v:'R$ 117,76'}],
+      tabs:['Resumo','Cobranças','Histórico'],
+      cliente_nome:'Daniella Almeida Silva', cliente_email:'daniella.jp@hotmail.com', cliente_tel:'+5587996352489', cliente_doc:'029.908.994-05',
+      produto_id:'11754', produto_nome:'Extensão na Recorrência', oferta_cod:'4QiJqc',
+      data_aquisicao:'16/09/2026', prox_vencimento:'16/12/2026', metodo:'Cartão de crédito',
+      parcela:'3/12', valor_pago:'R$ 353,28', valor_receber:'R$ 1.059,84', valor_atraso:'R$ 0,00', valor_liquido:'R$ 353,28',
+      data_assinatura:'16/09/2026', valor_bruto:'R$ 125,00', adesao:'Não',
+      transacoes:[
+        {id:'1911697',status:'paid',    criacao:'16/11/2026',vencimento:'-',pagamento:'16/11/2026',valor:'R$ 117,76'},
+        {id:'1876540',status:'paid',    criacao:'08/11/2026',vencimento:'-',pagamento:'08/11/2026',valor:'R$ 117,76'},
+        {id:'1849391',status:'paid',    criacao:'08/10/2026',vencimento:'-',pagamento:'08/10/2026',valor:'R$ 117,76'},
+      ],
+      vendas:[
+        {id:'1911697',status:'Pago',comprador:'Daniella Almeida Silva',doc:'029.908.994-05',produto:'Extensão na Recorrência',criacao:'16/11/2026',valor:'R$ 117,76',metodo:'Cartão de crédito'},
+        {id:'1876540',status:'Recusado',comprador:'Daniella Almeida Silva',doc:'029.908.994-05',produto:'Extensão na Recorrência',criacao:'08/11/2026',valor:'R$ 117,76',metodo:'Cartão de crédito'},
+        {id:'1849391',status:'Pago',comprador:'Daniella Almeida Silva',doc:'029.908.994-05',produto:'Extensão na Recorrência',criacao:'08/10/2026',valor:'R$ 117,76',metodo:'Cartão de crédito'},
+      ],
+      fields:[{l:'Aluno',v:'Daniella Almeida Silva'},{l:'E-mail',v:'daniella.jp@hotmail.com'},{l:'Produto',v:'Extensão na Recorrência'},{l:'Valor Mensal',v:'R$ 125,00'},{l:'Início',v:'16/11/2026'},{l:'Próx. Cobrança',v:'16/12/2026'}] },
+    { id:'183248', title:'Contrato #183248', sub2:'Daniella Almeida Silva', sub:'daniella.jp@hotmail.com', status:'unpaid',
+      tags:['Ativo'], kpis:[{l:'Valor Pago',v:'R$ 234,50'},{l:'A Receber',v:'R$ 2.345,00'},{l:'Em Atraso',v:'R$ 0,00'},{l:'Valor Líquido',v:'R$ 234,50'}],
+      tabs:['Resumo','Cobranças','Histórico'],
+      cliente_nome:'Daniella Almeida Silva', cliente_email:'daniella.jp@hotmail.com', cliente_tel:'+5587996352489', cliente_doc:'029.908.994-05',
+      produto_id:'11800', produto_nome:'Pós-Graduação em Gestão', oferta_cod:'8XkMnp',
+      data_aquisicao:'10/10/2026', prox_vencimento:'10/12/2026', metodo:'Cartão de crédito',
+      parcela:'2/12', valor_pago:'R$ 234,50', valor_receber:'R$ 2.345,00', valor_atraso:'R$ 0,00', valor_liquido:'R$ 234,50',
+      data_assinatura:'10/10/2026', valor_bruto:'R$ 250,00', adesao:'Não',
+      transacoes:[
+        {id:'1900001',status:'paid',      criacao:'10/10/2026',vencimento:'-',pagamento:'10/10/2026',valor:'R$ 234,50'},
+        {id:'1900002',status:'paid',      criacao:'10/11/2026',vencimento:'-',pagamento:'10/11/2026',valor:'R$ 234,50'},
+        {id:'1900003',status:'refused',   criacao:'10/12/2026',vencimento:'-',pagamento:'-',         valor:'R$ 0,00'},
+        {id:'1900004',status:'waiting_payment',criacao:'10/12/2026',vencimento:'15/12/2026',pagamento:'-',valor:'R$ 234,50'},
+      ],
+      fields:[{l:'Aluno',v:'Daniella Almeida Silva'},{l:'E-mail',v:'daniella.jp@hotmail.com'},{l:'Produto',v:'Pós-Graduação em Gestão'},{l:'Valor Mensal',v:'R$ 250,00'},{l:'Início',v:'10/10/2026'},{l:'Próx. Cobrança',v:'10/12/2026'}] },
+    { id:'C-55210', title:'Contrato #C-55210', sub2:'Maria Clara Santos', sub:'maria.clara@gmail.com', status:'paid',
+      tags:['Ativo'], kpis:[{l:'Valor Pago',v:'R$ 7.200,00'},{l:'A Receber',v:'R$ 2.400,00'},{l:'Em Atraso',v:'R$ 0,00'},{l:'Valor Líquido',v:'R$ 7.200,00'}],
+      tabs:['Resumo','Cobranças','Histórico'],
+      cliente_nome:'Maria Clara Santos', cliente_email:'maria.clara@gmail.com', cliente_tel:'+5531977775566', cliente_doc:'552.****3-11',
+      produto_id:'14929', produto_nome:'Pós em Marketing Digital', oferta_cod:'2ZpQrt',
+      data_aquisicao:'01/02/2026', prox_vencimento:'01/01/2027', metodo:'Cartão de crédito',
+      parcela:'9/12', valor_pago:'R$ 7.200,00', valor_receber:'R$ 2.400,00', valor_atraso:'R$ 0,00', valor_liquido:'R$ 7.200,00',
+      data_assinatura:'01/02/2026', valor_bruto:'R$ 850,00', adesao:'Não',
+      transacoes:[{id:'1800001',criacao:'01/02/2026',vencimento:'-',pagamento:'01/02/2026',valor:'R$ 800,00'},{id:'1800002',criacao:'01/03/2026',vencimento:'-',pagamento:'01/03/2026',valor:'R$ 800,00'}],
+      fields:[{l:'Aluno',v:'Maria Clara Santos'},{l:'E-mail',v:'maria.clara@gmail.com'},{l:'Produto',v:'Pós em Marketing Digital'},{l:'Valor Mensal',v:'R$ 800,00'},{l:'Início',v:'01/02/2026'},{l:'Fim',v:'01/02/2027'}] },
+    { id:'C-48902', title:'Contrato #C-48902', sub2:'Lucas Henrique Duarte', sub:'lucas.he.duarte@gmail.com', status:'canceled',
+      tags:['Encerrado'], kpis:[{l:'Valor Pago',v:'R$ 1.194,00'},{l:'A Receber',v:'R$ 0,00'},{l:'Em Atraso',v:'R$ 0,00'},{l:'Valor Líquido',v:'R$ 1.194,00'}],
+      tabs:['Resumo','Cobranças','Histórico'],
+      cliente_nome:'Lucas Henrique Duarte', cliente_email:'lucas.he.duarte@gmail.com', cliente_tel:'+5511999990000', cliente_doc:'416.****8-94',
+      produto_id:'12001', produto_nome:'Curso Livre de Fotografia', oferta_cod:'9WxLmk',
+      data_aquisicao:'01/01/2026', prox_vencimento:'-', metodo:'Cartão de crédito',
+      parcela:'6/6', valor_pago:'R$ 1.194,00', valor_receber:'R$ 0,00', valor_atraso:'R$ 0,00', valor_liquido:'R$ 1.194,00',
+      data_assinatura:'01/01/2026', valor_bruto:'R$ 210,00', adesao:'Não',
+      transacoes:[{id:'1700001',criacao:'01/01/2026',vencimento:'-',pagamento:'01/01/2026',valor:'R$ 199,00'}],
+      fields:[{l:'Aluno',v:'Lucas Henrique Duarte'},{l:'E-mail',v:'lucas.he.duarte@gmail.com'},{l:'Produto',v:'Curso Livre de Fotografia'},{l:'Valor Mensal',v:'R$ 199,00'},{l:'Início',v:'01/01/2026'},{l:'Fim',v:'01/07/2026'}] },
+  ],
+  produto: [
+    { id:'P-16877', title:'Curso Avançado de Ecologia', sub2:'Escola do Meio Ambiente', sub:'Curso Livre · R$ 497,00', status:'Publicado',
+      tags:['Publicado','Curso Livre'], kpis:[{l:'Total Vendas',v:'342'},{l:'Faturamento',v:'R$ 169.974,00'},{l:'Conversão',v:'4,2%'},{l:'Ticket Médio',v:'R$ 497,00'}],
+      tabs:['Dados','Vendas','Afiliados'],
+      fields:[{l:'Seller',v:'Escola do Meio Ambiente'},{l:'Tipo',v:'Curso Livre'},{l:'Preço',v:'R$ 497,00'},{l:'Total de Vendas',v:'342'},{l:'Criado em',v:'10/01/2025'},{l:'Status',v:'Publicado'}] },
+    { id:'P-11971', title:'Gestão e Liderança', sub2:'Instituto Leadership', sub:'Pós-Graduação · R$ 9.600,00', status:'Publicado',
+      tags:['Publicado','Pós-Graduação'], kpis:[{l:'Total Vendas',v:'128'},{l:'Faturamento',v:'R$ 1.228.800,00'},{l:'Conversão',v:'6,8%'},{l:'Ticket Médio',v:'R$ 9.600,00'}],
+      tabs:['Dados','Vendas','Afiliados'],
+      fields:[{l:'Seller',v:'Instituto Leadership'},{l:'Tipo',v:'Pós-Graduação'},{l:'Preço',v:'R$ 9.600,00'},{l:'Total de Vendas',v:'128'},{l:'Criado em',v:'03/08/2024'},{l:'Status',v:'Publicado'}] },
+  ]
+};
+
+const STATUS_BADGE = {
+  'Ativo':'badge-green','Paga':'badge-green','Publicado':'badge-green',
+  'Recusada':'badge-red','Encerrado':'badge-gray','Inativo':'badge-gray',
+  'Pendente':'badge-blue'
+};
+const STATUS_CHIP = {
+  'Ativo':'chip-green','Paga':'chip-green','Publicado':'chip-green',
+  'Recusada':'chip-red','Encerrado':'chip-gray','Inativo':'chip-gray',
+  'Pendente':'chip-blue','Pós-graduação':'chip-orange','Curso livre':'chip-blue','Cartão de Crédito':'chip-gray','Pós-Graduação':'chip-orange'
+};
+
+let currentEntity = 'cliente';
+let selectedId = null;
+
+function onEntityChange() {
+  currentEntity = document.getElementById('entitySelect').value;
+  document.getElementById('spTitle').textContent = ENTITIES[currentEntity].label;
+  updateSubfilter();
+  document.getElementById('searchInput').value = '';
+  document.getElementById('clearBtn').classList.remove('vis');
+  document.getElementById('resultsList').innerHTML = '<div class="sp-empty">Selecione o tipo e<br>realize uma busca</div>';
+  selectedId = null;
+  document.getElementById('detail').innerHTML = `<div class="no-sel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Selecione um resultado para ver os detalhes</p></div>`;
+}
+
+function updateSubfilter() {
+  const filters = ENTITIES[currentEntity].filters;
+  const sel = document.getElementById('subfilterSelect');
+  sel.innerHTML = filters.map(f => `<option>${f}</option>`).join('');
+}
+
+function toggleClear(input) {
+  document.getElementById('clearBtn').classList.toggle('vis', input.value.length > 0);
+}
+
+function clearInput() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('clearBtn').classList.remove('vis');
+  document.getElementById('searchInput').focus();
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const subfilter = document.getElementById('subfilterSelect').value;
+  const items = MOCK[currentEntity] || [];
+
+  let filtered;
+  if (currentEntity === 'contrato') {
+    if (!q) { filtered = items; }
+    else if (subfilter === 'ID do Contrato') {
+      filtered = items.filter(i => i.id.toLowerCase() === q || i.id.toLowerCase().includes(q));
+    } else if (subfilter === 'E-mail do Comprador') {
+      filtered = items.filter(i => i.cliente_email && i.cliente_email.toLowerCase().includes(q));
+    } else if (subfilter === 'Nome do Comprador') {
+      filtered = items.filter(i => i.cliente_nome && i.cliente_nome.toLowerCase().includes(q));
+    } else {
+      // CPF/CNPJ do Comprador
+      const qClean = q.replace(/\D/g,'');
+      filtered = items.filter(i => {
+        const docClean = (i.cliente_doc||'').replace(/\D/g,'');
+        return docClean.includes(qClean);
+      });
+    }
+  } else {
+    filtered = q ? items.filter(i => {
+      const sf = subfilter;
+      if (sf === 'ID') return i.id.toLowerCase().includes(q);
+      if (sf === 'Nome') return i.title.toLowerCase().includes(q);
+      if (sf === 'E-mail') return i.sub.toLowerCase().includes(q);
+      if (sf === 'CPF/CNPJ') {
+        const qc = q.replace(/\D/g,'');
+        return (i.sub2||'').replace(/\D/g,'').includes(qc) || i.sub.toLowerCase().includes(q);
+      }
+      if (sf === 'Telefone') return (i.sub||'').replace(/\D/g,'').includes(q.replace(/\D/g,''));
+      // fallback
+      return `${i.id} ${i.title} ${i.sub} ${i.sub2||''}`.toLowerCase().includes(q);
+    }) : items;
+  }
+
+  const list = document.getElementById('resultsList');
+
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="sp-empty">Nenhum resultado</div>`;
+    document.getElementById('detail').innerHTML = `<div class="no-sel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Nenhum resultado encontrado</p></div>`;
+    return;
+  }
+
+  if (currentEntity === 'contrato') {
+    list.innerHTML = `<div class="sp-results-label">Resultados (${filtered.length})</div>` +
+      filtered.map(item => {
+        const st = item.status === 'Ativo' ? 'badge-green' : item.status === 'Encerrado' ? 'badge-gray' : 'badge-red';
+        return `<div class="r-card${item.id===selectedId?' active':''}" onclick="selectItem('${item.id}')">
+          <div class="r-card-name">#${item.id}</div>
+          <div class="r-card-id">${item.cliente_nome}</div>
+          <div class="r-card-sub">${item.cliente_email}</div>
+          <span class="r-card-badge ${st}">${item.status}</span>
+        </div>`;
+      }).join('');
+    renderContratoTable(filtered, q, subfilter);
+    selectedId = filtered[0].id;
+  } else {
+    list.innerHTML = `<div class="sp-results-label">Resultados (${filtered.length})</div>` +
+      filtered.map(item => {
+        const badgeClass = STATUS_BADGE[item.status] || 'badge-gray';
+        const isActive = item.id === selectedId;
+        return `<div class="r-card${isActive?' active':''}" onclick="selectItem('${item.id}')">
+          <div class="r-card-name">${item.title}</div>
+          <div class="r-card-id">${item.sub2}</div>
+          <div class="r-card-sub">${item.sub}</div>
+          <span class="r-card-badge ${badgeClass}">${item.status}</span>
+        </div>`;
+      }).join('');
+    if (!selectedId || !filtered.find(i=>i.id===selectedId)) selectItem(filtered[0].id);
+  }
+}
+
+function selectItem(id) {
+  selectedId = id;
+  const items = MOCK[currentEntity] || [];
+  const item = items.find(i=>i.id===id);
+  if (!item) return;
+
+  // Re-render cards to update active state
+  const cards = document.querySelectorAll('.r-card');
+  cards.forEach(c => {
+    const onclick = c.getAttribute('onclick');
+    c.classList.toggle('active', onclick && onclick.includes(`'${id}'`));
+    if (c.classList.contains('active')) c.querySelector('.r-card-name').style.color = '#FE6100';
+    else c.querySelector('.r-card-name').style.color = '';
+  });
+
+  renderDetail(item);
+}
+
+function renderDetail(item) {
+  const cfg = ENTITIES[currentEntity];
+  const initials = cfg.avLabel(item);
+
+  const kpiHtml = `<div class="kpi-row">${item.kpis.map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-val">${k.v}</div></div>`).join('')}</div>`;
+  const tabsHtml = `<div class="d-tabs">${item.tabs.map((t,i)=>`<div class="d-tab${i===0?' on':''}" onclick="switchTab(this)">${t}</div>`).join('')}</div>`;
+  const fieldsHtml = `<div class="fg">${item.fields.map(f=>`<div class="fi"><div class="fl">${f.l}</div><div class="fv">${f.v}</div></div>`).join('')}</div>`;
+  const chips = item.tags.map(t=>`<span class="chip ${STATUS_CHIP[t]||'chip-gray'}">${t}</span>`).join('');
+
+  document.getElementById('detail').innerHTML = `
+    <div class="d-card">
+      <div class="d-head">
+        <div class="d-av ${cfg.avClass}">${initials}</div>
+        <div class="d-info">
+          <div class="d-name">${item.title}</div>
+          <div class="d-meta">ID ${item.id} · ${cfg.label.slice(0,-1)} · Criação 08/07/2026</div>
+          <div class="d-chips">${chips}<span class="chip ${STATUS_CHIP[item.status]||'chip-gray'}">${item.status}</span></div>
+        </div>
+        <div class="d-acts">
+          <button class="btn">Editar ✏</button>
+          <button class="btn btn-primary">↗ Abrir</button>
+        </div>
+      </div>
+      ${kpiHtml}
+      ${tabsHtml}
+      <div class="d-body">${fieldsHtml}</div>
+    </div>`;
+}
+
+function switchTab(el) {
+  document.querySelectorAll('.d-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function renderContratoTable(items, q, subfilter) {
+  const badgeClass = c => {
+    const m = {
+      // Contrato
+      'paid':            'st-paid',
+      'created':         'st-created',
+      'waiting_payment': 'st-waiting',
+      'pending_payment': 'st-waiting',
+      'trialing':        'st-trialing',
+      'unpaid':          'st-unpaid',
+      'failed':          'st-failed',
+      'refused':         'st-refused',
+      'canceled':        'st-canceled',
+      'ended':           'st-ended',
+      'refunded':        'st-refunded',
+      'chargedback':     'st-chargedback',
+      // Labels PT
+      'Ativo':'st-paid','Encerrado':'st-ended','Pago':'st-paid',
+      'Não Pago':'st-unpaid','Nao Pago':'st-unpaid','Recusado':'st-refused',
+      'Pendente':'st-waiting','Cancelado':'st-canceled',
+    };
+    return m[c] || 'st-created';
+  };
+
+const STATUS_CONTRATO_LABEL = {
+  'paid':            'Pago',
+  'created':         'Criado',
+  'waiting_payment': 'Aguard. Pagamento',
+  'pending_payment': 'Pag. Pendente',
+  'trialing':        'Trial',
+  'unpaid':          'Não Pago',
+  'failed':          'Falha',
+  'refused':         'Recusado',
+  'canceled':        'Cancelado',
+  'ended':           'Encerrado',
+  'refunded':        'Reembolsado',
+  'chargedback':     'Chargeback',
+};
+const STATUS_CONTRATO_CLASS = {
+  'paid':'st-paid','created':'st-created','waiting_payment':'st-waiting',
+  'pending_payment':'st-waiting','trialing':'st-trialing','unpaid':'st-unpaid',
+  'failed':'st-failed','refused':'st-refused','canceled':'st-canceled',
+  'ended':'st-ended','refunded':'st-refunded','chargedback':'st-chargedback',
+};
+
+  const rows = items.map((c, ci) => {
+    const txRows = (c.transacoes||[]).map((t, ti) => {
+      // Status real da venda — espelho do Admin
+      const STATUS_VENDA = {
+        'paid':           {cls:'st-paid',          label:'Pago'},
+        'completed':      {cls:'st-completed',     label:'Concluído'},
+        'created':        {cls:'st-created',       label:'Criado'},
+        'waiting_payment':{cls:'st-waiting',       label:'Aguard. Pagamento'},
+        'processing':     {cls:'st-processing',    label:'Processando'},
+        'refused':        {cls:'st-refused',       label:'Recusado'},
+        'canceled':       {cls:'st-canceled',      label:'Cancelado'},
+        'refunded':       {cls:'st-refunded',      label:'Reembolsado'},
+        'refund_pending': {cls:'st-refund_pending',label:'Reembolso Pendente'},
+        'chargedback':    {cls:'st-chargedback',   label:'Chargeback'},
+        'future':         {cls:'st-future',        label:'Agendada'},
+        'ended':          {cls:'st-ended',         label:'Encerrada'},
+      };
+      // Derivar status pelo pagamento quando não explícito
+      const rawStatus = t.status || (
+        t.pagamento && t.pagamento !== '-' ? 'paid' :
+        t.valor === 'R$ 0,00' ? 'refused' : 'waiting_payment'
+      );
+      const sv = STATUS_VENDA[rawStatus] || {cls:'st-created', label: rawStatus};
+      return `<tr style="border-bottom:${ti < (c.transacoes.length-1) ? '1px solid #F5F5F5' : 'none'};">
+        <td style="padding:9px 12px;"><span class="ca-row-badge ${sv.cls}" style="display:inline-flex;">${sv.label}</span></td>
+        <td style="padding:9px 12px;font-size:12px;color:#2563EB;font-weight:500;cursor:pointer;">${t.id}</td>
+        <td style="padding:9px 12px;font-size:12px;color:#9E9E9E;">${c.metodo}</td>
+        <td style="padding:9px 12px;font-size:12px;color:#262626;">${t.criacao}</td>
+        <td style="padding:9px 12px;font-size:12px;color:#262626;text-align:center;">${t.vencimento}</td>
+        <td style="padding:9px 12px;font-size:12px;color:#262626;text-align:center;">${t.pagamento}</td>
+        <td style="padding:9px 12px;font-size:12px;font-weight:600;text-align:right;color:${rawStatus === 'paid' || rawStatus === 'completed' ? '#059669' : rawStatus === 'refused' || rawStatus === 'canceled' ? '#DC2626' : '#262626'};">${t.valor}</td>
+      </tr>`;
+    }).join('');
+
+    return `
+      <!-- Linha do contrato -->
+      <tr class="ca-trow" id="ctr-${ci}" onclick="toggleTRow(${ci})" style="cursor:pointer;border-bottom:1px solid #F0F0F0;transition:background .12s;">
+        <td style="padding:12px 14px;white-space:nowrap;">
+          <span class="ca-row-badge ${STATUS_CONTRATO_CLASS[c.status]||'st-created'}">${STATUS_CONTRATO_LABEL[c.status]||c.status}</span>
+        </td>
+        <td style="padding:12px 14px;font-weight:700;font-size:13px;color:#262626;white-space:nowrap;">${c.id}</td>
+        <td style="padding:12px 14px;font-size:13px;font-weight:600;color:#262626;">${c.cliente_nome}</td>
+        <td style="padding:12px 14px;font-size:12px;color:#9E9E9E;">${c.cliente_email}</td>
+        <td style="padding:12px 14px;font-size:13px;color:#262626;">${c.cliente_doc}</td>
+        <td style="padding:12px 14px;">
+          <div style="font-size:13px;font-weight:500;color:#FE6100;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;" onclick="event.stopPropagation();alert('Produto #${c.produto_id}: ${c.produto_nome}')">${c.produto_nome} ↗</div>
+        </td>
+        <td style="padding:12px 14px;font-size:13px;color:#262626;text-align:center;">${c.parcela}</td>
+        <td style="padding:12px 14px;font-size:13px;color:#262626;">${c.data_assinatura}</td>
+        <td style="padding:12px 14px;text-align:center;color:#BDBDBD;font-size:16px;" id="ctr-arr-${ci}">⌄</td>
+      </tr>
+      <!-- Sub-linha de transações (oculta por padrão) -->
+      <tr id="ctr-exp-${ci}" style="display:none;background:#FAFAFA;">
+        <td colspan="9" style="padding:0;">
+          <!-- Seção intermediária: Produto + Dados da assinatura -->
+          <div style="padding:16px 20px;display:flex;gap:32px;border-top:1px solid #F0F0F0;background:#FAFAFA;">
+            <!-- Produto -->
+            <div style="display:flex;align-items:flex-start;gap:12px;min-width:200px;">
+              <div style="width:40px;height:40px;border-radius:10px;background:#F5F5F5;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9E9E9E" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              </div>
+              <div>
+                <div style="font-size:11px;color:#9E9E9E;">Produto: #${c.produto_id}</div>
+                <div style="font-size:14px;font-weight:700;color:#262626;margin:2px 0;">${c.produto_nome}</div>
+                <div style="font-size:11px;color:#9E9E9E;">Código da Oferta: ${c.oferta_cod}</div>
+              </div>
+            </div>
+            <!-- Divisor -->
+            <div style="width:1px;background:#EBEBEB;flex-shrink:0;"></div>
+            <!-- Dados da assinatura -->
+            <div style="flex:1;">
+              <div style="font-size:12px;font-weight:700;color:#262626;margin-bottom:10px;">Dados da assinatura</div>
+              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px 20px;">
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">ID</div><div style="font-size:12px;font-weight:600;color:#262626;">${c.id}</div></div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Status</div>
+                  <span class="ca-row-badge ${STATUS_CONTRATO_CLASS[c.status]||'st-created'}" style="display:inline-flex;margin-top:2px;">${STATUS_CONTRATO_LABEL[c.status]||c.status}</span>
+                </div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Data da assinatura</div><div style="font-size:12px;font-weight:600;color:#262626;">${c.data_assinatura}</div></div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Data de vencimento</div><div style="font-size:12px;font-weight:600;color:#262626;">${c.prox_vencimento}</div></div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Método de pagamento</div><div style="font-size:12px;font-weight:600;color:#262626;">${c.metodo}</div></div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Parcela da Assinatura</div><div style="font-size:12px;font-weight:600;color:#262626;">${c.parcela}</div></div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Valor Bruto</div><div style="font-size:12px;font-weight:600;color:#262626;">${c.valor_bruto}</div></div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Adesão</div><div style="font-size:12px;font-weight:600;color:#262626;">${c.adesao}</div></div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Data de cancelamento</div><div style="font-size:12px;font-weight:600;color:${c.data_cancelamento ? '#DC2626' : '#BDBDBD'};">${c.data_cancelamento || '—'}</div></div>
+                <div><div style="font-size:10px;color:#9E9E9E;font-weight:500;margin-bottom:2px;">Data de encerramento</div><div style="font-size:12px;font-weight:600;color:${c.data_encerramento ? '#262626' : '#BDBDBD'};">${c.data_encerramento || '—'}</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- Tabela de transações -->
+          <div>
+            <table style="width:100%;border-collapse:collapse;border-top:1px solid #F0F0F0;">
+              <thead>
+                <tr style="background:#F5F5F5;">
+                  <th style="font-size:10px;color:#BDBDBD;font-weight:600;text-align:left;padding:7px 12px;letter-spacing:.4px;">STATUS</th>
+                  <th style="font-size:10px;color:#BDBDBD;font-weight:600;text-align:left;padding:7px 12px;letter-spacing:.4px;">ID DA VENDA</th>
+                  <th style="font-size:10px;color:#BDBDBD;font-weight:600;text-align:left;padding:7px 12px;letter-spacing:.4px;">MÉTODO</th>
+                  <th style="font-size:10px;color:#BDBDBD;font-weight:600;text-align:left;padding:7px 12px;letter-spacing:.4px;">CRIAÇÃO</th>
+                  <th style="font-size:10px;color:#BDBDBD;font-weight:600;text-align:center;padding:7px 12px;letter-spacing:.4px;">VENCIMENTO</th>
+                  <th style="font-size:10px;color:#BDBDBD;font-weight:600;text-align:center;padding:7px 12px;letter-spacing:.4px;">PAGAMENTO</th>
+                  <th style="font-size:10px;color:#BDBDBD;font-weight:600;text-align:right;padding:7px 12px;letter-spacing:.4px;">VALOR</th>
+                </tr>
+              </thead>
+              <tbody>${txRows}</tbody>
+            </table>
+          </div>
+          <div style="padding:10px 14px;display:flex;gap:8px;border-top:1px solid #F0F0F0;">
+              <button class="ca-expand-btn ca-expand-btn-sec">Encerrar Contrato</button>
+            </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('detail').innerHTML = `
+    <div class="ca-wrap">
+      <div class="ca-header">
+        <div class="ca-query">Resultados para:</div>
+        <div class="ca-query-val">${subfilter}: ${q || 'todos'}</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;min-width:900px;">
+          <thead>
+            <tr style="background:#FAFAFA;border-bottom:2px solid #F0F0F0;">
+              <th style="font-size:11px;color:#9E9E9E;font-weight:600;text-align:left;padding:10px 14px;letter-spacing:.4px;">STATUS</th>
+              <th style="font-size:11px;color:#9E9E9E;font-weight:600;text-align:left;padding:10px 14px;letter-spacing:.4px;">ID CONTRATO</th>
+              <th style="font-size:11px;color:#9E9E9E;font-weight:600;text-align:left;padding:10px 14px;letter-spacing:.4px;">NOME</th>
+              <th style="font-size:11px;color:#9E9E9E;font-weight:600;text-align:left;padding:10px 14px;letter-spacing:.4px;">E-MAIL</th>
+              <th style="font-size:11px;color:#9E9E9E;font-weight:600;text-align:left;padding:10px 14px;letter-spacing:.4px;">CPF/CNPJ</th>
+              <th style="font-size:11px;color:#9E9E9E;font-weight:600;text-align:left;padding:10px 14px;letter-spacing:.4px;">PRODUTO</th>
+              <th style="font-size:11px;color:#9E9E9E;font-weight:600;text-align:center;padding:10px 14px;letter-spacing:.4px;">PARCELAS</th>
+              <th style="font-size:11px;color:#9E9E9E;font-weight:600;text-align:left;padding:10px 14px;letter-spacing:.4px;">CRIAÇÃO</th>
+              <th style="width:32px;"></th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function toggleTRow(ci) {
+  const exp = document.getElementById(`ctr-exp-${ci}`);
+  const arr = document.getElementById(`ctr-arr-${ci}`);
+  const row = document.getElementById(`ctr-${ci}`);
+  const isOpen = exp.style.display !== 'none';
+  exp.style.display = isOpen ? 'none' : 'table-row';
+  arr.style.transform = isOpen ? '' : 'rotate(180deg)';
+  arr.style.transition = 'transform .2s';
+  row.style.background = isOpen ? '' : '#FFFBF9';
+}
+
+// Init — sem pré-carregamento
+updateSubfilter();
+</script>
+</body>
+</html>
